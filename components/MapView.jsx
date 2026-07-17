@@ -1,35 +1,54 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  useMap,
-} from '@vis.gl/react-google-maps';
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import MarkerClusterGroup from 'react-leaflet-cluster';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 
 // Tâm bản đồ: khu Hòa Lạc
-const HOA_LAC_CENTER = { lat: 21.008, lng: 105.526 };
-const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-const MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
+const HOA_LAC_CENTER = [21.008, 105.526];
 
-// Ghim màu theo trạng thái
-function Pin({ color }) {
-  return (
+// Marker hình pin theo màu trạng thái
+function createPinIcon(color) {
+  const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-      <path
-        d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z"
-        fill={color}
-        stroke="white"
-        strokeWidth="2"
-      />
-      <circle cx="14" cy="14" r="6" fill="white" opacity="0.9" />
-    </svg>
-  );
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z"
+        fill="${color}" stroke="white" stroke-width="2"/>
+      <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+    </svg>`;
+  return L.divIcon({
+    html: svg,
+    className: 'custom-marker-icon',
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -36],
+  });
+}
+
+// Icon cụm marker — màu moss green theo theme
+function createClusterIcon(cluster) {
+  const count = cluster.getChildCount();
+  const size = count < 10 ? 36 : count < 50 ? 42 : 48;
+  return L.divIcon({
+    html: `<div class="cluster-icon" style="width:${size}px;height:${size}px;">${count}</div>`,
+    className: 'custom-cluster-icon',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+// Tự zoom vừa khít tuyến đường khi có route mới
+function FitRoute({ route }) {
+  const map = useMap();
+  useEffect(() => {
+    if (route?.coords?.length) {
+      map.fitBounds(L.latLngBounds(route.coords), { padding: [50, 50] });
+    }
+  }, [route, map]);
+  return null;
 }
 
 function PopupCard({ p, onRoute, routing }) {
@@ -42,10 +61,7 @@ function PopupCard({ p, onRoute, routing }) {
         ) : (
           <div className="popup-thumb-fallback">{p.type ?? 'BĐS'}</div>
         )}
-        <span
-          className="popup-status"
-          style={{ color, borderColor: color, background: `${color}22` }}
-        >
+        <span className="popup-status" style={{ color, borderColor: color, background: `${color}22` }}>
           {STATUS_LABELS[p.status] ?? p.status}
         </span>
       </div>
@@ -75,97 +91,27 @@ function PopupCard({ p, onRoute, routing }) {
   );
 }
 
-// Marker + gom cụm (MarkerClusterer chính chủ Google)
-function Markers({ properties, onSelect }) {
-  const map = useMap();
-  const clustererRef = useRef(null);
-  const markersRef = useRef({});
-
-  useEffect(() => {
-    if (!map || clustererRef.current) return;
-    clustererRef.current = new MarkerClusterer({
-      map,
-      markers: [],
-      renderer: {
-        render: ({ count, position }) => {
-          const size = count < 10 ? 36 : count < 50 ? 42 : 48;
-          const div = document.createElement('div');
-          div.className = 'cluster-icon';
-          div.style.width = `${size}px`;
-          div.style.height = `${size}px`;
-          div.textContent = String(count);
-          return new google.maps.marker.AdvancedMarkerElement({
-            position,
-            content: div,
-            zIndex: 1000 + count,
-          });
-        },
-      },
-    });
-  }, [map]);
-
-  // Đồng bộ marker vào clusterer mỗi khi danh sách (lọc) thay đổi
-  useEffect(() => {
-    const c = clustererRef.current;
-    if (!c) return;
-    c.clearMarkers();
-    c.addMarkers(Object.values(markersRef.current));
-  }, [properties]);
-
-  const setMarkerRef = (marker, id) => {
-    if (marker) markersRef.current[id] = marker;
-    else delete markersRef.current[id];
-  };
-
-  return properties
-    .filter((p) => p.lat != null && p.lng != null)
-    .map((p) => (
-      <AdvancedMarker
-        key={p.id}
-        position={{ lat: p.lat, lng: p.lng }}
-        ref={(m) => setMarkerRef(m, p.id)}
-        onClick={() => onSelect(p)}
-        title={p.title}
-      >
-        <Pin color={STATUS_COLORS[p.status] ?? '#8b877c'} />
-      </AdvancedMarker>
-    ));
-}
-
-// Vẽ tuyến đường OSRM + chấm điểm xuất phát, tự zoom vừa khít
-function RouteOverlay({ route }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (!map || !route) return;
-    const line = new google.maps.Polyline({
-      path: route.coords.map(([lat, lng]) => ({ lat, lng })),
-      strokeColor: '#275838',
-      strokeWeight: 5,
-      strokeOpacity: 0.85,
-      map,
-    });
-    const bounds = new google.maps.LatLngBounds();
-    route.coords.forEach(([lat, lng]) => bounds.extend({ lat, lng }));
-    map.fitBounds(bounds, 60);
-    return () => line.setMap(null);
-  }, [map, route]);
-
-  if (!route) return null;
-  return (
-    <AdvancedMarker position={{ lat: route.origin[0], lng: route.origin[1] }}>
-      <div className="origin-dot" />
-    </AdvancedMarker>
-  );
-}
+// 2 lớp nền: đường phố (Carto Voyager — phong cách giống Google Maps) & vệ tinh (Esri)
+const BASE_LAYERS = {
+  streets: {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri — Maxar, Earthstar Geographics',
+  },
+};
 
 export default function MapView({ properties }) {
-  const [selected, setSelected] = useState(null);
+  const [baseLayer, setBaseLayer] = useState('streets');
   const [route, setRoute] = useState(null);
   const [routing, setRouting] = useState(false);
   const [routeError, setRouteError] = useState(null);
+  const layer = BASE_LAYERS[baseLayer];
 
-  // Tìm đường từ vị trí hiện tại đến BĐS bằng OSRM (miễn phí)
+  // Tìm đường từ vị trí hiện tại đến BĐS bằng OSRM (miễn phí, không cần key)
   function handleRoute(p) {
     setRouteError(null);
     if (!navigator.geolocation) {
@@ -183,7 +129,6 @@ export default function MapView({ properties }) {
           const json = await res.json();
           const r = json?.routes?.[0];
           if (!r) throw new Error('no route');
-          setSelected(null);
           setRoute({
             coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
             origin: [lat0, lng0],
@@ -204,42 +149,47 @@ export default function MapView({ properties }) {
     );
   }
 
-  if (!API_KEY) {
-    return (
-      <div className="map-loading">
-        Chưa cấu hình Google Maps — thêm biến NEXT_PUBLIC_GOOGLE_MAPS_API_KEY vào .env.local / Vercel.
-      </div>
-    );
-  }
-
   return (
-    <APIProvider apiKey={API_KEY} language="vi" region="VN">
-      <Map
-        mapId={MAP_ID}
-        defaultCenter={HOA_LAC_CENTER}
-        defaultZoom={14}
-        gestureHandling="greedy"
-        mapTypeControl
-        mapTypeControlOptions={{ position: 6 }} /* LEFT_BOTTOM */
-        streetViewControl={false}
-        fullscreenControl={false}
-        className="gmap-container"
+    <MapContainer center={HOA_LAC_CENTER} zoom={14} minZoom={11} maxZoom={19} scrollWheelZoom>
+      <TileLayer key={baseLayer} attribution={layer.attribution} url={layer.url} />
+      <MarkerClusterGroup
+        chunkedLoading
+        iconCreateFunction={createClusterIcon}
+        maxClusterRadius={60}
+        showCoverageOnHover={false}
+        zoomToBoundsOnClick
+        spiderfyOnMaxZoom
       >
-        <Markers properties={properties} onSelect={setSelected} />
+        {properties
+          .filter((p) => p.lat != null && p.lng != null)
+          .map((p) => (
+            <Marker
+              key={p.id}
+              position={[p.lat, p.lng]}
+              icon={createPinIcon(STATUS_COLORS[p.status] ?? '#8b877c')}
+            >
+              <Popup minWidth={250} maxWidth={260}>
+                <PopupCard p={p} onRoute={handleRoute} routing={routing} />
+              </Popup>
+            </Marker>
+          ))}
+      </MarkerClusterGroup>
 
-        {selected && (
-          <InfoWindow
-            position={{ lat: selected.lat, lng: selected.lng }}
-            pixelOffset={[0, -38]}
-            maxWidth={280}
-            onCloseClick={() => setSelected(null)}
-          >
-            <PopupCard p={selected} onRoute={handleRoute} routing={routing} />
-          </InfoWindow>
-        )}
-
-        <RouteOverlay route={route} />
-      </Map>
+      {/* Tuyến đường đang hiển thị */}
+      {route && (
+        <>
+          <Polyline
+            positions={route.coords}
+            pathOptions={{ color: '#275838', weight: 5, opacity: 0.85 }}
+          />
+          <CircleMarker
+            center={route.origin}
+            radius={7}
+            pathOptions={{ color: '#fff', weight: 2, fillColor: '#2b6cb0', fillOpacity: 1 }}
+          />
+          <FitRoute route={route} />
+        </>
+      )}
 
       {(route || routeError) && (
         <div className="route-banner">
@@ -262,6 +212,24 @@ export default function MapView({ properties }) {
           </button>
         </div>
       )}
-    </APIProvider>
+
+      {/* Nút chuyển lớp nền */}
+      <div className="layer-switch">
+        <button
+          type="button"
+          className={baseLayer === 'streets' ? 'active' : ''}
+          onClick={() => setBaseLayer('streets')}
+        >
+          Bản đồ
+        </button>
+        <button
+          type="button"
+          className={baseLayer === 'satellite' ? 'active' : ''}
+          onClick={() => setBaseLayer('satellite')}
+        >
+          Vệ tinh
+        </button>
+      </div>
+    </MapContainer>
   );
 }
