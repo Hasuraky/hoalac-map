@@ -60,6 +60,7 @@ export default function HomePage() {
             ))}
           </div>
           {isMock && <span className="badge">dữ liệu mẫu</span>}
+          <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
           <UserMenu />
         </div>
       </header>

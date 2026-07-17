@@ -49,6 +49,7 @@ export default function PropertyDetailPage() {
         <Link href="/" className="back">← Quay lại bản đồ</Link>
         <span className="sep">|</span>
         <span className="code">{property.code}</span>
+        <Link href={`/bds/${property.id}/sua`} className="btn-edit">✎ Sửa</Link>
       </header>
 
       <main className="detail-page">
