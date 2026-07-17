@@ -573,32 +573,29 @@ input[type='range'] {
   text-decoration: none;
 }
 
-/* Nút chuyển lớp nền bản đồ */
-.layer-switch {
-  position: absolute;
-  bottom: 24px;
-  right: 10px;
-  z-index: 1000;
-  display: flex;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--stone-dark);
-  box-shadow: var(--shadow);
+/* Google Map container */
+.gmap-container {
+  width: 100%;
+  height: 100%;
 }
 
-.layer-switch button {
-  border: none;
-  background: rgba(255, 255, 255, 0.92);
-  padding: 9px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--ink-soft);
-  cursor: pointer;
+.origin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2b6cb0;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
 }
 
-.layer-switch button.active {
-  background: var(--moss);
-  color: #fff;
+/* InfoWindow của Google: bỏ padding mặc định cho khớp popup-card */
+.gm-style-iw.gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: var(--radius) !important;
+}
+
+.gm-style-iw-d {
+  overflow: hidden !important;
 }
 
 /* Hàng nút trong popup */

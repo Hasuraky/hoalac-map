@@ -8,8 +8,10 @@
     "start": "next start"
   },
   "dependencies": {
+    "@googlemaps/markerclusterer": "^2.6.2",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.0",
+    "@vis.gl/react-google-maps": "^1.9.0",
     "leaflet": "^1.9.4",
     "next": "^14.2.5",
     "react": "^18.3.1",
