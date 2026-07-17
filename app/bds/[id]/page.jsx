@@ -49,6 +49,14 @@ export default function PropertyDetailPage() {
         <Link href="/" className="back">← Quay lại bản đồ</Link>
         <span className="sep">|</span>
         <span className="code">{property.code}</span>
+        <a
+          className="btn-edit btn-directions"
+          href={`https://www.google.com/maps/dir/?api=1&destination=${property.lat},${property.lng}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          🧭 Chỉ đường
+        </a>
         <Link href={`/bds/${property.id}/sua`} className="btn-edit">✎ Sửa</Link>
       </header>
 

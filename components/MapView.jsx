@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,7 +40,18 @@ function createClusterIcon(cluster) {
   });
 }
 
-function PopupCard({ p }) {
+// Tự zoom vừa khít tuyến đường khi có route mới
+function FitRoute({ route }) {
+  const map = useMap();
+  useEffect(() => {
+    if (route?.coords?.length) {
+      map.fitBounds(L.latLngBounds(route.coords), { padding: [50, 50] });
+    }
+  }, [route, map]);
+  return null;
+}
+
+function PopupCard({ p, onRoute, routing }) {
   const color = STATUS_COLORS[p.status] ?? '#8b877c';
   return (
     <div className="popup-card">
@@ -61,21 +73,85 @@ function PopupCard({ p }) {
           <span className="area">{p.area} m²</span>
         </div>
         <div className="meta">{p.address}</div>
-        <Link href={`/bds/${p.id}`} className="popup-btn">
-          Xem chi tiết →
-        </Link>
+        <div className="popup-actions">
+          <Link href={`/bds/${p.id}`} className="popup-btn">
+            Xem chi tiết →
+          </Link>
+          <button
+            type="button"
+            className="popup-btn popup-btn-outline"
+            onClick={() => onRoute(p)}
+            disabled={routing}
+          >
+            {routing ? 'Đang tìm…' : '🧭 Đường đi'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
+// 2 lớp nền: đường phố (Carto Voyager — phong cách giống Google Maps) & vệ tinh (Esri)
+const BASE_LAYERS = {
+  streets: {
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  },
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '&copy; Esri — Maxar, Earthstar Geographics',
+  },
+};
+
 export default function MapView({ properties }) {
+  const [baseLayer, setBaseLayer] = useState('streets');
+  const [route, setRoute] = useState(null); // { coords, origin, distanceKm, durationMin, dest }
+  const [routing, setRouting] = useState(false);
+  const [routeError, setRouteError] = useState(null);
+  const layer = BASE_LAYERS[baseLayer];
+
+  // Tìm đường từ vị trí hiện tại đến BĐS bằng OSRM (miễn phí, không cần key)
+  function handleRoute(p) {
+    setRouteError(null);
+    if (!navigator.geolocation) {
+      setRouteError('Trình duyệt không hỗ trợ định vị.');
+      return;
+    }
+    setRouting(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat0, longitude: lng0 } = pos.coords;
+        try {
+          const res = await fetch(
+            `https://router.project-osrm.org/route/v1/driving/${lng0},${lat0};${p.lng},${p.lat}?overview=full&geometries=geojson`
+          );
+          const json = await res.json();
+          const r = json?.routes?.[0];
+          if (!r) throw new Error('no route');
+          setRoute({
+            coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+            origin: [lat0, lng0],
+            distanceKm: (r.distance / 1000).toFixed(1),
+            durationMin: Math.round(r.duration / 60),
+            dest: p,
+          });
+        } catch {
+          setRouteError('Không tìm được đường đi — thử lại hoặc dùng nút Chỉ đường (Google Maps) ở trang chi tiết.');
+        }
+        setRouting(false);
+      },
+      () => {
+        setRouteError('Không lấy được vị trí của bạn — kiểm tra quyền truy cập vị trí của trình duyệt.');
+        setRouting(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
+
   return (
     <MapContainer center={HOA_LAC_CENTER} zoom={14} minZoom={11} maxZoom={19} scrollWheelZoom>
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer key={baseLayer} attribution={layer.attribution} url={layer.url} />
       <MarkerClusterGroup
         chunkedLoading
         iconCreateFunction={createClusterIcon}
@@ -93,11 +169,67 @@ export default function MapView({ properties }) {
               icon={createPinIcon(STATUS_COLORS[p.status] ?? '#8b877c')}
             >
               <Popup minWidth={250} maxWidth={260}>
-                <PopupCard p={p} />
+                <PopupCard p={p} onRoute={handleRoute} routing={routing} />
               </Popup>
             </Marker>
           ))}
       </MarkerClusterGroup>
+
+      {/* Tuyến đường đang hiển thị */}
+      {route && (
+        <>
+          <Polyline
+            positions={route.coords}
+            pathOptions={{ color: '#275838', weight: 5, opacity: 0.85 }}
+          />
+          <CircleMarker
+            center={route.origin}
+            radius={7}
+            pathOptions={{ color: '#fff', weight: 2, fillColor: '#2b6cb0', fillOpacity: 1 }}
+          />
+          <FitRoute route={route} />
+        </>
+      )}
+
+      {(route || routeError) && (
+        <div className="route-banner">
+          {route ? (
+            <>
+              <strong>{route.distanceKm} km</strong> · ~{route.durationMin} phút lái xe
+              <span className="route-dest"> → {route.dest.code}</span>
+            </>
+          ) : (
+            <span className="route-err">{routeError}</span>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setRoute(null);
+              setRouteError(null);
+            }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* Nút chuyển lớp nền */}
+      <div className="layer-switch">
+        <button
+          type="button"
+          className={baseLayer === 'streets' ? 'active' : ''}
+          onClick={() => setBaseLayer('streets')}
+        >
+          Bản đồ
+        </button>
+        <button
+          type="button"
+          className={baseLayer === 'satellite' ? 'active' : ''}
+          onClick={() => setBaseLayer('satellite')}
+        >
+          Vệ tinh
+        </button>
+      </div>
     </MapContainer>
   );
 }
