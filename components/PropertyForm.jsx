@@ -45,6 +45,58 @@ export default function PropertyForm({ property = null }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
+  const [gmapsInput, setGmapsInput] = useState('');
+  const [gmapsError, setGmapsError] = useState(null);
+  const [locating, setLocating] = useState(false);
+
+  // Đọc tọa độ từ link Google Maps hoặc chuỗi "lat, lng"
+  function parseGoogleMaps(text) {
+    const s = text.trim();
+    // Link đầy đủ: .../@21.008,105.526,17z hoặc ...?q=21.008,105.526
+    const at = s.match(/@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if (at) return [Number(at[1]), Number(at[2])];
+    const q = s.match(/[?&](?:q|query|ll|destination)=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/);
+    if (q) return [Number(q[1]), Number(q[2])];
+    // Chuỗi tọa độ thuần: "21.008, 105.526" (Google Maps: chuột phải > copy tọa độ)
+    const plain = s.match(/^(-?\d{1,3}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)$/);
+    if (plain) return [Number(plain[1]), Number(plain[2])];
+    return null;
+  }
+
+  function applyGmaps() {
+    setGmapsError(null);
+    const coords = parseGoogleMaps(gmapsInput);
+    if (!coords) {
+      setGmapsError(
+        'Không đọc được tọa độ. Trên Google Maps: nhấn giữ (mobile) hoặc chuột phải (máy tính) vào vị trí → bấm dòng tọa độ để copy → dán vào đây. Link rút gọn maps.app.goo.gl không dùng được — hãy copy tọa độ.'
+      );
+      return;
+    }
+    setForm((f) => ({ ...f, lat: coords[0], lng: coords[1] }));
+    setConfirmDuplicate(false);
+  }
+
+  // Lấy vị trí GPS hiện tại (đi thực địa, đứng tại lô đất)
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setGmapsError('Trình duyệt không hỗ trợ định vị.');
+      return;
+    }
+    setLocating(true);
+    setGmapsError(null);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setForm((f) => ({ ...f, lat: pos.coords.latitude, lng: pos.coords.longitude }));
+        setConfirmDuplicate(false);
+        setLocating(false);
+      },
+      () => {
+        setGmapsError('Không lấy được vị trí — kiểm tra quyền truy cập vị trí của trình duyệt.');
+        setLocating(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }
 
   // Tải danh sách để kiểm tra trùng lặp
   useEffect(() => {
@@ -121,9 +173,29 @@ export default function PropertyForm({ property = null }) {
       <section>
         <h2 className="section-title">Vị trí trên bản đồ *</h2>
         <p className="form-hint">
-          Bấm vào bản đồ để đặt ghim, kéo ghim để tinh chỉnh.
+          Bấm vào bản đồ để đặt ghim, kéo ghim để tinh chỉnh — hoặc dán tọa độ/link từ Google Maps.
           {form.lat != null && ` Đã chấm: ${form.lat.toFixed(5)}, ${form.lng.toFixed(5)}`}
         </p>
+
+        <div className="gmaps-row">
+          <input
+            value={gmapsInput}
+            onChange={(e) => setGmapsInput(e.target.value)}
+            placeholder="Dán tọa độ Google Maps: 21.00812, 105.52643 (hoặc link đầy đủ)"
+          />
+          <button type="button" className="btn-secondary btn-gmaps" onClick={applyGmaps}>
+            Định vị
+          </button>
+          <button
+            type="button"
+            className="btn-secondary btn-gmaps"
+            onClick={useMyLocation}
+            disabled={locating}
+          >
+            {locating ? 'Đang lấy…' : '📍 Vị trí của tôi'}
+          </button>
+        </div>
+        {gmapsError && <div className="gmaps-error">{gmapsError}</div>}
         <LocationPicker
           lat={form.lat}
           lng={form.lng}

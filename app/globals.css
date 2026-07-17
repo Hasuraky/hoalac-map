@@ -949,6 +949,45 @@ input[type='range'] {
   z-index: 0;
 }
 
+.gmaps-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.gmaps-row input {
+  flex: 1;
+  padding: 11px 13px;
+  font-size: 14px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 10px;
+  background: var(--stone-light);
+  color: var(--ink);
+}
+
+.gmaps-row input:focus {
+  outline: 2px solid var(--moss);
+  border-color: transparent;
+  background: #fff;
+}
+
+.btn-gmaps {
+  padding: 10px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.gmaps-error {
+  font-size: 13px;
+  color: var(--st-sold);
+  background: #f9edeb;
+  border: 1px solid #e4c3bd;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
 .dup-warning {
   margin-top: 12px;
   background: #fdf3e4;

@@ -1,6 +1,7 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -17,6 +18,17 @@ const pinIcon = L.divIcon({
   iconSize: [28, 36],
   iconAnchor: [14, 36],
 });
+
+// Bay tới ghim khi tọa độ đổi từ bên ngoài (dán Google Maps / GPS)
+function FlyToPoint({ lat, lng }) {
+  const map = useMap();
+  useEffect(() => {
+    if (lat != null && lng != null) {
+      map.flyTo([lat, lng], Math.max(map.getZoom(), 17), { duration: 0.6 });
+    }
+  }, [lat, lng, map]);
+  return null;
+}
 
 function ClickHandler({ onPick }) {
   useMapEvents({
@@ -39,6 +51,7 @@ export default function LocationPicker({ lat, lng, onPick }) {
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       <ClickHandler onPick={onPick} />
+      <FlyToPoint lat={lat} lng={lng} />
       {hasPoint && (
         <Marker
           position={[lat, lng]}
