@@ -11,30 +11,39 @@ drop policy if exists "public read property_images" on property_images;
 -- (MVP 1 công ty: mọi user đăng nhập thấy chung bảng hàng.
 --  Giai đoạn 4 multi-company sẽ thêm điều kiện company_id.)
 
+drop policy if exists "auth read companies" on companies;
 create policy "auth read companies" on companies
   for select to authenticated using (true);
 
+drop policy if exists "auth read profiles" on profiles;
 create policy "auth read profiles" on profiles
   for select to authenticated using (true);
 
+drop policy if exists "own update profile" on profiles;
 create policy "own update profile" on profiles
   for update to authenticated using (auth.uid() = id);
 
+drop policy if exists "auth read properties" on properties;
 create policy "auth read properties" on properties
   for select to authenticated using (true);
 
+drop policy if exists "auth insert properties" on properties;
 create policy "auth insert properties" on properties
   for insert to authenticated with check (true);
 
+drop policy if exists "auth update properties" on properties;
 create policy "auth update properties" on properties
   for update to authenticated using (true);
 
+drop policy if exists "auth read property_images" on property_images;
 create policy "auth read property_images" on property_images
   for select to authenticated using (true);
 
+drop policy if exists "auth insert property_images" on property_images;
 create policy "auth insert property_images" on property_images
   for insert to authenticated with check (true);
 
+drop policy if exists "auth delete property_images" on property_images;
 create policy "auth delete property_images" on property_images
   for delete to authenticated using (true);
 
