@@ -119,6 +119,20 @@ export default function PropertyForm({ property = null }) {
     [allProperties, form.lat, form.lng, property?.id]
   );
 
+  // Mã tự sinh: HL-{diện tích}-{số thứ tự 5 chữ số}, ví dụ HL-120-00002
+  const nextSeq = useMemo(() => {
+    let max = 0;
+    for (const p of allProperties) {
+      const m = /^HL-\d+-(\d+)$/.exec(p.code ?? '');
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    }
+    return max + 1;
+  }, [allProperties]);
+
+  const autoCode = isEdit
+    ? form.code
+    : `HL-${form.area ? Math.round(Number(form.area)) : '?'}-${String(nextSeq).padStart(5, '0')}`;
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
@@ -131,9 +145,15 @@ export default function PropertyForm({ property = null }) {
       setError('Có BĐS ngay gần vị trí này (xem cảnh báo bên dưới bản đồ). Tick xác nhận nếu chắc chắn không trùng.');
       return;
     }
+    if (!isEdit && (form.area === '' || Number(form.area) <= 0)) {
+      setError('Nhập diện tích trước — mã BĐS tự sinh theo diện tích.');
+      return;
+    }
 
     const values = {
-      code: form.code.trim(),
+      code: isEdit
+        ? form.code.trim()
+        : `HL-${Math.round(Number(form.area))}-${String(nextSeq).padStart(5, '0')}`,
       title: form.title.trim(),
       type: form.type || null,
       status: form.status,
@@ -250,8 +270,8 @@ export default function PropertyForm({ property = null }) {
         <h2 className="section-title">Thông tin chính</h2>
         <div className="form-grid">
           <label>
-            Mã BĐS *
-            <input value={form.code} onChange={set('code')} required placeholder="HL-007" />
+            Mã BĐS (tự sinh)
+            <input value={autoCode} disabled title="Mã tự tạo theo diện tích + số thứ tự" />
           </label>
           <label>
             Trạng thái *
