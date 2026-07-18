@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ImageManager from '@/components/ImageManager';
-import { STATUS_LABELS } from '@/lib/format';
+import { STATUS_LABELS, PROPERTY_TYPES } from '@/lib/format';
 import {
   fetchProperties,
   createProperty,
@@ -20,7 +20,7 @@ const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
   loading: () => <div className="location-picker-map map-loading">Đang tải bản đồ…</div>,
 });
 
-const TYPES = ['Đất nền', 'Nhà ở', 'Shophouse', 'Biệt thự', 'Khác'];
+const TYPES = PROPERTY_TYPES;
 const DIRECTIONS = ['Đông', 'Tây', 'Nam', 'Bắc', 'Đông Bắc', 'Đông Nam', 'Tây Bắc', 'Tây Nam'];
 
 // property = null -> thêm mới; có property -> sửa

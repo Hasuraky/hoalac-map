@@ -1,6 +1,6 @@
 'use client';
 
-import { STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
+import { STATUS_LABELS, STATUS_COLORS, PROPERTY_TYPES } from '@/lib/format';
 import { PRICE_RANGE, AREA_RANGE } from '@/lib/usePropertyFilter';
 
 const ALL_STATUSES = Object.keys(STATUS_LABELS);
@@ -13,16 +13,24 @@ export default function FilterPanel({ filters, onChange }) {
     onChange({ ...filters, statuses: next });
   };
 
+  const toggleType = (type) => {
+    const cur = filters.types ?? [];
+    const next = cur.includes(type) ? cur.filter((t) => t !== type) : [...cur, type];
+    onChange({ ...filters, types: next });
+  };
+
   const resetAll = () =>
     onChange({
       search: filters.search,
       statuses: [],
+      types: [],
       priceRange: PRICE_RANGE,
       areaRange: AREA_RANGE,
     });
 
   const hasActiveFilters =
     filters.statuses.length > 0 ||
+    (filters.types ?? []).length > 0 ||
     filters.priceRange[0] !== PRICE_RANGE[0] ||
     filters.priceRange[1] !== PRICE_RANGE[1] ||
     filters.areaRange[0] !== AREA_RANGE[0] ||
@@ -69,6 +77,26 @@ export default function FilterPanel({ filters, onChange }) {
             </label>
           );
         })}
+      </div>
+
+      {/* Loại hình */}
+      <div className="filter-group">
+        <p className="filter-label">Loại hình</p>
+        <div className="type-tags">
+          {PROPERTY_TYPES.map((type) => {
+            const active = (filters.types ?? []).includes(type);
+            return (
+              <button
+                type="button"
+                key={type}
+                className={`type-tag${active ? ' active' : ''}`}
+                onClick={() => toggleType(type)}
+              >
+                {type}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Giá */}

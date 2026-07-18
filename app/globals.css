@@ -427,6 +427,36 @@ button {
   border-radius: 50%;
 }
 
+/* Tag loại hình */
+.type-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.type-tag {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--stone-dark);
+  background: #fff;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.type-tag:hover {
+  border-color: var(--moss);
+  color: var(--moss);
+}
+
+.type-tag.active {
+  background: var(--moss);
+  border-color: var(--moss);
+  color: #fff;
+}
+
 /* Thanh kéo */
 input[type='range'] {
   width: 100%;
