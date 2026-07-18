@@ -97,6 +97,9 @@ button {
 .brand-logo {
   width: 35px;
   height: 35px;
+  padding: 5px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.3);
   object-fit: contain;
   display: block;
 }
