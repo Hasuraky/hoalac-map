@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMap } from 'react-leaflet';
 import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -115,12 +115,43 @@ const BASE_LAYERS = {
   },
 };
 
+// Nút bay về vị trí của tôi
+function FlyToMe({ pos }) {
+  const map = useMap();
+  if (!pos) return null;
+  return (
+    <button
+      type="button"
+      className="btn-locate"
+      title="Vị trí của tôi"
+      onClick={() => map.flyTo(pos, 16, { duration: 0.8 })}
+    >
+      ◎
+    </button>
+  );
+}
+
 export default function MapView({ properties }) {
   const [baseLayer, setBaseLayer] = useState('streets');
   const [route, setRoute] = useState(null);
   const [routing, setRouting] = useState(false);
   const [routeError, setRouteError] = useState(null);
+  const [userPos, setUserPos] = useState(null); // [lat, lng]
+  const [userAccuracy, setUserAccuracy] = useState(0);
   const layer = BASE_LAYERS[baseLayer];
+
+  // Tự động lấy vị trí người dùng khi mở bản đồ
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserPos([pos.coords.latitude, pos.coords.longitude]);
+        setUserAccuracy(pos.coords.accuracy ?? 0);
+      },
+      () => {}, // từ chối quyền -> thôi, không làm phiền
+      { enableHighAccuracy: true, timeout: 8000 }
+    );
+  }, []);
 
   // Tìm đường từ vị trí hiện tại đến BĐS bằng OSRM (miễn phí, không cần key)
   function handleRoute(p) {
@@ -192,6 +223,24 @@ export default function MapView({ properties }) {
           ))}
       </MarkerClusterGroup>
 
+      {/* Vị trí người dùng: chấm xanh + vòng độ chính xác */}
+      {userPos && (
+        <>
+          {userAccuracy > 0 && userAccuracy < 500 && (
+            <Circle
+              center={userPos}
+              radius={userAccuracy}
+              pathOptions={{ color: '#2b6cb0', weight: 1, fillOpacity: 0.08 }}
+            />
+          )}
+          <CircleMarker
+            center={userPos}
+            radius={7}
+            pathOptions={{ color: '#fff', weight: 2.5, fillColor: '#2b6cb0', fillOpacity: 1 }}
+          />
+        </>
+      )}
+
       {/* Tuyến đường đang hiển thị */}
       {route && (
         <>
@@ -229,6 +278,8 @@ export default function MapView({ properties }) {
           </button>
         </div>
       )}
+
+      <FlyToMe pos={userPos} />
 
       {/* Nút chuyển lớp nền */}
       <div className="layer-switch">

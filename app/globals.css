@@ -573,6 +573,31 @@ input[type='range'] {
   text-decoration: none;
 }
 
+/* Nút bay về vị trí của tôi */
+.btn-locate {
+  position: absolute;
+  bottom: 70px;
+  right: 10px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--stone-dark);
+  background: rgba(255, 255, 255, 0.92);
+  color: #2b6cb0;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-locate:hover {
+  background: #fff;
+}
+
 /* Nút chuyển lớp nền bản đồ */
 .layer-switch {
   position: absolute;
