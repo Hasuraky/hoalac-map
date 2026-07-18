@@ -10,6 +10,7 @@ import {
   fetchProperties,
   createProperty,
   updateProperty,
+  deleteProperty,
   findNearbyProperties,
   fetchRole,
 } from '@/lib/properties';
@@ -339,6 +340,34 @@ export default function PropertyForm({ property = null }) {
       {error && <div className="login-error">{error}</div>}
 
       <div className="form-actions">
+        {isEdit && (
+          <button
+            type="button"
+            className="btn-danger"
+            disabled={saving}
+            onClick={async () => {
+              const check = window.prompt(
+                `Xóa vĩnh viễn "${property.code}" cùng toàn bộ ảnh?\nGõ chính xác mã BĐS để xác nhận:`
+              );
+              if (check !== property.code) {
+                if (check !== null) window.alert('Mã không khớp — đã hủy xóa.');
+                return;
+              }
+              setSaving(true);
+              try {
+                await deleteProperty(property.id);
+                router.push('/');
+                router.refresh();
+              } catch (err) {
+                setError(err.message);
+                setSaving(false);
+              }
+            }}
+          >
+            Xóa BĐS
+          </button>
+        )}
+        <span className="form-actions-spacer" />
         <button type="button" className="btn-secondary" onClick={() => router.back()} disabled={saving}>
           Hủy
         </button>

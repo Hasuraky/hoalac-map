@@ -1355,6 +1355,26 @@ input[type='range'] {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
+  align-items: center;
+}
+
+.form-actions-spacer {
+  flex: 1;
+}
+
+.btn-danger {
+  background: #fff;
+  color: var(--st-sold);
+  border: 1.5px solid var(--st-sold);
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #f9edeb;
 }
 
 .btn-inline {
