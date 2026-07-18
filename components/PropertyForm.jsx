@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import ImageManager from '@/components/ImageManager';
 import { STATUS_LABELS } from '@/lib/format';
 import {
   fetchProperties,
@@ -154,7 +155,8 @@ export default function PropertyForm({ property = null }) {
         router.push(`/bds/${property.id}`);
       } else {
         const created = await createProperty(values);
-        router.push(`/bds/${created.id}`);
+        // Sang trang sửa để thêm ảnh ngay
+        router.push(`/bds/${created.id}/sua`);
       }
       router.refresh();
     } catch (err) {
@@ -326,6 +328,13 @@ export default function PropertyForm({ property = null }) {
           </label>
         </div>
       </section>
+
+      {/* Ảnh: chỉ sau khi BĐS đã tồn tại */}
+      {isEdit ? (
+        <ImageManager propertyId={property.id} />
+      ) : (
+        <p className="form-hint">💡 Lưu BĐS xong sẽ chuyển sang bước thêm ảnh.</p>
+      )}
 
       {error && <div className="login-error">{error}</div>}
 

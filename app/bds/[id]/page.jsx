@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchProperty } from '@/lib/properties';
+import { fetchImages } from '@/lib/images';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
 
@@ -11,6 +12,8 @@ export default function PropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState(undefined); // undefined = đang tải
   const [role, setRole] = useState('guest');
+  const [images, setImages] = useState([]);
+  const [heroIdx, setHeroIdx] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -20,6 +23,9 @@ export default function PropertyDetailPage() {
         setRole(role ?? 'guest');
       })
       .catch(() => setProperty(null));
+    fetchImages(id)
+      .then(setImages)
+      .catch(() => {});
   }, [id]);
 
   if (property === undefined) return <div className="detail-page">Đang tải…</div>;
@@ -72,7 +78,9 @@ export default function PropertyDetailPage() {
         <div className="detail-card">
           {/* Hero */}
           <div className="detail-hero">
-            {property.thumbnail ? (
+            {images.length > 0 ? (
+              <img src={images[heroIdx]?.url ?? images[0].url} alt={property.title} />
+            ) : property.thumbnail ? (
               <img src={property.thumbnail} alt={property.title} />
             ) : (
               <div className="detail-hero-fallback">{property.type ?? 'BĐS'}</div>
@@ -88,6 +96,22 @@ export default function PropertyDetailPage() {
               <h1>{property.title}</h1>
             </div>
           </div>
+
+          {/* Dải ảnh nhỏ */}
+          {images.length > 1 && (
+            <div className="gallery-strip">
+              {images.map((img, i) => (
+                <button
+                  type="button"
+                  key={img.id}
+                  className={i === heroIdx ? 'active' : ''}
+                  onClick={() => setHeroIdx(i)}
+                >
+                  <img src={img.url} alt="" />
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="detail-content">
             {role === 'guest' && (

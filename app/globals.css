@@ -1050,6 +1050,134 @@ input[type='range'] {
   padding: 24px;
 }
 
+/* ---- Ảnh BĐS ---- */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.image-cell {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--stone-dark);
+  aspect-ratio: 4 / 3;
+}
+
+.image-cell.cover {
+  border-color: var(--moss);
+}
+
+.image-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cover-tag {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--moss);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.image-actions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.55));
+}
+
+.image-actions button {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 0;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.image-actions button.danger {
+  color: var(--st-sold);
+}
+
+.image-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 4 / 3;
+  border: 2px dashed var(--stone-dark);
+  border-radius: 10px;
+  color: var(--moss);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: center;
+  padding: 8px;
+  background: var(--stone-light);
+}
+
+.image-add:hover {
+  border-color: var(--moss);
+  background: var(--moss-soft);
+}
+
+.image-add.disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.image-add input {
+  display: none;
+}
+
+/* Dải ảnh nhỏ trang chi tiết */
+.gallery-strip {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  overflow-x: auto;
+  background: var(--stone-light);
+  border-bottom: 1px solid var(--stone-dark);
+}
+
+.gallery-strip button {
+  flex-shrink: 0;
+  width: 76px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+}
+
+.gallery-strip button.active {
+  border-color: var(--moss);
+}
+
+.gallery-strip img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 /* Khóa thông tin cho khách */
 .price-locked {
   font-size: 13px;
