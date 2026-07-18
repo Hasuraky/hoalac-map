@@ -106,10 +106,12 @@ const BASE_LAYERS = {
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     attribution:
       '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxNativeZoom: 19, // trên mức này phóng to ảnh tile thay vì trắng
   },
   satellite: {
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     attribution: '&copy; Esri — Maxar, Earthstar Geographics',
+    maxNativeZoom: 17, // ảnh vệ tinh vùng ven chỉ có đến ~z17
   },
 };
 
@@ -159,8 +161,14 @@ export default function MapView({ properties }) {
   }
 
   return (
-    <MapContainer center={HOA_LAC_CENTER} zoom={14} minZoom={11} maxZoom={19} scrollWheelZoom>
-      <TileLayer key={baseLayer} attribution={layer.attribution} url={layer.url} />
+    <MapContainer center={HOA_LAC_CENTER} zoom={14} minZoom={5} maxZoom={19} scrollWheelZoom>
+      <TileLayer
+        key={baseLayer}
+        attribution={layer.attribution}
+        url={layer.url}
+        maxNativeZoom={layer.maxNativeZoom}
+        maxZoom={19}
+      />
       <MarkerClusterGroup
         chunkedLoading
         iconCreateFunction={createClusterIcon}

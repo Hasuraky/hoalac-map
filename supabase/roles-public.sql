@@ -5,11 +5,12 @@
 
 -- 1) Mở rộng cấp tài khoản
 alter table profiles drop constraint if exists profiles_role_check;
+
+-- Nhân viên cũ (staff) chuyển thành sale TRƯỚC khi thêm ràng buộc mới
+update profiles set role = 'sale' where role = 'staff';
+
 alter table profiles add constraint profiles_role_check
   check (role in ('owner', 'admin', 'sale', 'user'));
-
--- Nhân viên cũ (staff) chuyển thành sale
-update profiles set role = 'sale' where role = 'staff';
 
 -- Tài khoản mới mặc định là user thường
 alter table profiles alter column role set default 'user';
