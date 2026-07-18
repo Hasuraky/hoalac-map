@@ -200,6 +200,17 @@ export default function MapView({ properties }) {
         maxNativeZoom={layer.maxNativeZoom}
         maxZoom={19}
       />
+
+      {/* Vệ tinh + lớp nhãn (tên đường, địa danh) = chế độ hybrid như Guland/Google */}
+      {baseLayer === 'satellite' && (
+        <TileLayer
+          key="labels"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
+          maxNativeZoom={19}
+          maxZoom={19}
+          zIndex={5}
+        />
+      )}
       <MarkerClusterGroup
         chunkedLoading
         iconCreateFunction={createClusterIcon}
