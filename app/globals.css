@@ -94,19 +94,11 @@ button {
   gap: 10px;
 }
 
-.brand-mark {
+.brand-logo {
   width: 35px;
   height: 35px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.brand-mark svg {
-  width: 20px;
-  height: 20px;
+  object-fit: contain;
+  display: block;
 }
 
 .topbar h1 {
