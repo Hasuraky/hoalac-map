@@ -104,7 +104,9 @@ export default function FilterPanel({ filters, onChange }) {
         <div className="filter-row">
           <p className="filter-label">Giá (tỷ VND)</p>
           <p className="filter-value">
-            {filters.priceRange[0]} – {filters.priceRange[1]} tỷ
+            {filters.priceRange[1] >= PRICE_RANGE[1]
+              ? `từ ${filters.priceRange[0]} tỷ trở lên`
+              : `${filters.priceRange[0]} – ${filters.priceRange[1]} tỷ`}
           </p>
         </div>
         <input
@@ -134,7 +136,9 @@ export default function FilterPanel({ filters, onChange }) {
         <div className="filter-row">
           <p className="filter-label">Diện tích (m²)</p>
           <p className="filter-value">
-            {filters.areaRange[0]} – {filters.areaRange[1]} m²
+            {filters.areaRange[1] >= AREA_RANGE[1]
+              ? `từ ${filters.areaRange[0]} m² trở lên`
+              : `${filters.areaRange[0]} – ${filters.areaRange[1]} m²`}
           </p>
         </div>
         <input
