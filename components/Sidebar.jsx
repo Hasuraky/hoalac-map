@@ -15,6 +15,20 @@ export default function Sidebar({ filters, onFiltersChange, totalCount, filtered
 
       <div className="sidebar-body">
         <FilterPanel filters={filters} onChange={onFiltersChange} />
+
+        {/* Đơn vị phát triển — neo cuối khoảng trống */}
+        <a
+          className="dev-credit"
+          href="https://huongdm.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img src="/logo-dev.svg" alt="huongdm" />
+          <span>
+            <small>Phát triển bởi</small>
+            huongdm.com
+          </span>
+        </a>
       </div>
 
       <div className="sidebar-footer">
