@@ -7,6 +7,7 @@ import MarkerClusterGroup from 'react-leaflet-cluster';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
+import ShareButton from '@/components/ShareButton';
 
 // Tâm bản đồ: khu Hòa Lạc
 const HOA_LAC_CENTER = [21.008, 105.526];
@@ -73,6 +74,10 @@ function PopupCard({ p, onRoute, routing }) {
           <span className="area">{p.area} m²</span>
         </div>
         <div className="meta">{p.address}</div>
+        <ShareButton
+          title={`${p.code} — ${p.title}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : ''}/bds/${p.id}`}
+        />
         <div className="popup-actions">
           <Link href={`/bds/${p.id}`} className="popup-btn">
             Xem chi tiết →

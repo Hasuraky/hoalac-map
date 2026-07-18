@@ -1025,6 +1025,30 @@ input[type='range'] {
   padding: 24px;
 }
 
+/* Nút chia sẻ */
+.btn-share {
+  font-size: 13px;
+  padding: 7px 14px;
+  background: #fff;
+  color: var(--moss);
+  border: 1.5px solid var(--moss);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-share:hover {
+  background: var(--moss-soft);
+}
+
+/* Trong popup: full width, gọn */
+.popup-card .btn-share {
+  width: 100%;
+  padding: 7px 0;
+  font-size: 12px;
+}
+
 .property-form {
   display: flex;
   flex-direction: column;

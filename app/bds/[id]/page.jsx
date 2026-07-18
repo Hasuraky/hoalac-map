@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchProperty } from '@/lib/properties';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
+import ShareButton from '@/components/ShareButton';
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -57,6 +58,7 @@ export default function PropertyDetailPage() {
         >
           🧭 Chỉ đường
         </a>
+        <ShareButton title={`${property.code} — ${property.title}`} />
         <Link href={`/bds/${property.id}/sua`} className="btn-edit">✎ Sửa</Link>
       </header>
 
