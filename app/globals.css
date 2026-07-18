@@ -293,9 +293,9 @@ button {
 }
 
 .dev-credit img {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
   display: block;
 }
 
