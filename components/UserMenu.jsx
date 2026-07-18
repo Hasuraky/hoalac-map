@@ -13,7 +13,16 @@ export default function UserMenu() {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? null));
   }, []);
 
-  if (!supabase || !email) return null;
+  if (!supabase) return null;
+
+  // Khách -> nút đăng nhập
+  if (!email) {
+    return (
+      <a href="/login" className="btn-logout">
+        Đăng nhập
+      </a>
+    );
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut();

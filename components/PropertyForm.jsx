@@ -10,6 +10,7 @@ import {
   createProperty,
   updateProperty,
   findNearbyProperties,
+  fetchRole,
 } from '@/lib/properties';
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
@@ -98,11 +99,14 @@ export default function PropertyForm({ property = null }) {
     );
   }
 
-  // Tải danh sách để kiểm tra trùng lặp
+  const [role, setRole] = useState(null);
+
+  // Tải danh sách để kiểm tra trùng lặp + cấp tài khoản
   useEffect(() => {
     fetchProperties()
       .then(({ data }) => setAllProperties(data))
       .catch(() => {});
+    fetchRole().then(setRole);
   }, []);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -163,6 +167,14 @@ export default function PropertyForm({ property = null }) {
     return (
       <div className="form-notice">
         Đang chạy chế độ demo (chưa cấu hình Supabase) — không thể thêm/sửa BĐS.
+      </div>
+    );
+  }
+
+  if (role && role !== 'admin' && role !== 'owner') {
+    return (
+      <div className="form-notice">
+        Chỉ tài khoản admin mới được thêm/sửa bảng hàng. Liên hệ quản trị viên nếu cần quyền.
       </div>
     );
   }

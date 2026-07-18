@@ -17,15 +17,17 @@ const MapView = dynamic(() => import('@/components/MapView'), {
 export default function HomePage() {
   const [properties, setProperties] = useState([]);
   const [isMock, setIsMock] = useState(false);
+  const [role, setRole] = useState('guest');
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchProperties()
-      .then(({ data, isMock }) => {
+      .then(({ data, isMock, role }) => {
         setProperties(data);
         setIsMock(isMock);
+        setRole(role ?? 'guest');
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -60,7 +62,9 @@ export default function HomePage() {
             ))}
           </div>
           {isMock && <span className="badge">dữ liệu mẫu</span>}
-          <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
+          {(role === 'admin' || role === 'owner') && (
+            <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
+          )}
           <UserMenu />
         </div>
       </header>

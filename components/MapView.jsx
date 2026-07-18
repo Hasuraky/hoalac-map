@@ -70,10 +70,14 @@ function PopupCard({ p, onRoute, routing }) {
         <p className="popup-code">{p.code}</p>
         <h3>{p.title}</h3>
         <div className="popup-metrics">
-          <span className="price">{formatPrice(p.price)}</span>
+          {p.price === undefined ? (
+            <a href="/login" className="price-locked">🔒 Đăng nhập để xem giá</a>
+          ) : (
+            <span className="price">{formatPrice(p.price)}</span>
+          )}
           <span className="area">{p.area} m²</span>
         </div>
-        <div className="meta">{p.address}</div>
+        {p.address && <div className="meta">{p.address}</div>}
         <ShareButton
           title={`${p.code} — ${p.title}`}
           url={`${typeof window !== 'undefined' ? window.location.origin : ''}/bds/${p.id}`}

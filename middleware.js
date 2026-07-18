@@ -30,9 +30,14 @@ export async function middleware(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname.startsWith('/login');
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname.startsWith('/login');
 
-  if (!user && !isLoginPage) {
+  // Khách được xem bản đồ + trang chi tiết.
+  // Chỉ bắt đăng nhập ở trang thêm/sửa BĐS.
+  const needsAuth = pathname === '/bds/moi' || pathname.endsWith('/sua');
+
+  if (!user && needsAuth) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = '/login';
     return NextResponse.redirect(redirectUrl);

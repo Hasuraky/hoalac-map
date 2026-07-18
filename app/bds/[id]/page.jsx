@@ -10,11 +10,15 @@ import ShareButton from '@/components/ShareButton';
 export default function PropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState(undefined); // undefined = đang tải
+  const [role, setRole] = useState('guest');
 
   useEffect(() => {
     if (!id) return;
     fetchProperty(id)
-      .then(({ data }) => setProperty(data))
+      .then(({ data, role }) => {
+        setProperty(data);
+        setRole(role ?? 'guest');
+      })
       .catch(() => setProperty(null));
   }, [id]);
 
@@ -59,7 +63,9 @@ export default function PropertyDetailPage() {
           🧭 Chỉ đường
         </a>
         <ShareButton title={`${property.code} — ${property.title}`} />
-        <Link href={`/bds/${property.id}/sua`} className="btn-edit">✎ Sửa</Link>
+        {(role === 'admin' || role === 'owner') && (
+          <Link href={`/bds/${property.id}/sua`} className="btn-edit">✎ Sửa</Link>
+        )}
       </header>
 
       <main className="detail-page">
@@ -84,11 +90,20 @@ export default function PropertyDetailPage() {
           </div>
 
           <div className="detail-content">
+            {role === 'guest' && (
+              <div className="guest-banner">
+                🔒 Bạn đang xem với tư cách khách.{' '}
+                <a href="/login">Đăng nhập</a> để xem giá và thông tin đầy đủ.
+              </div>
+            )}
+
             {/* 3 thẻ chỉ số */}
             <div className="metric-grid">
               <div className="metric primary">
                 <p className="metric-label">Giá bán</p>
-                <p className="metric-value">{formatPrice(property.price)}</p>
+                <p className="metric-value">
+                  {property.price === undefined ? '🔒' : formatPrice(property.price)}
+                </p>
               </div>
               <div className="metric">
                 <p className="metric-label">Diện tích</p>
