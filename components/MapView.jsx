@@ -139,6 +139,25 @@ function Markers({ properties, onSelect }) {
   return null;
 }
 
+// Bản đồ được tạo trước khi khung có kích thước -> ép vẽ lại sau khi mount
+function ResizeFix() {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || typeof google === 'undefined') return;
+    const kick = () => {
+      google.maps.event.trigger(map, 'resize');
+      map.setCenter(HOA_LAC_CENTER);
+    };
+    const t1 = setTimeout(kick, 100);
+    const t2 = setTimeout(kick, 600);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [map]);
+  return null;
+}
+
 // Chấm vị trí người dùng
 function UserDot({ pos }) {
   const map = useMap();
@@ -266,7 +285,9 @@ function MapInner({ properties }) {
         streetViewControl={false}
         fullscreenControl={false}
         className="gmap-container"
+        style={{ width: '100%', height: '100%' }}
       >
+        <ResizeFix />
         <Markers properties={properties} onSelect={setSelected} />
 
         {/* Vị trí người dùng */}

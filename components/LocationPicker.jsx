@@ -15,6 +15,21 @@ const PIN_URL =
     </svg>`
   );
 
+// Ép vẽ lại sau khi mount (khung chưa có kích thước lúc khởi tạo)
+function ResizeFix() {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || typeof google === 'undefined') return;
+    const t = setTimeout(() => {
+      const c = map.getCenter();
+      google.maps.event.trigger(map, 'resize');
+      if (c) map.setCenter(c);
+    }, 150);
+    return () => clearTimeout(t);
+  }, [map]);
+  return null;
+}
+
 // Ghim kéo được + tự bay tới khi tọa độ đổi từ bên ngoài
 function PickMarker({ lat, lng, onPick }) {
   const map = useMap();
@@ -79,6 +94,7 @@ export default function LocationPicker({ lat, lng, onPick }) {
             if (ll) onPick(ll.lat, ll.lng);
           }}
         >
+          <ResizeFix />
           <PickMarker lat={lat} lng={lng} onPick={onPick} />
         </Map>
       </APIProvider>
