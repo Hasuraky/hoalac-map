@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { APIProvider, Map, AdvancedMarker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  InfoWindow,
+  useMap,
+  useMapsLibrary,
+} from '@vis.gl/react-google-maps';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
@@ -78,11 +85,12 @@ function PopupCard({ p, onRoute, routing }) {
 // Marker + gom cụm (MarkerClusterer chính chủ Google)
 function Markers({ properties, onSelect }) {
   const map = useMap();
+  const markerLib = useMapsLibrary('marker'); // đảm bảo AdvancedMarkerElement sẵn sàng
   const clustererRef = useRef(null);
   const markersRef = useRef({});
 
   useEffect(() => {
-    if (!map || clustererRef.current) return;
+    if (!map || !markerLib || clustererRef.current) return;
     clustererRef.current = new MarkerClusterer({
       map,
       markers: [],
@@ -94,7 +102,7 @@ function Markers({ properties, onSelect }) {
           div.style.width = `${size}px`;
           div.style.height = `${size}px`;
           div.textContent = String(count);
-          return new google.maps.marker.AdvancedMarkerElement({
+          return new markerLib.AdvancedMarkerElement({
             position,
             content: div,
             zIndex: 1000 + count,
@@ -102,7 +110,7 @@ function Markers({ properties, onSelect }) {
         },
       },
     });
-  }, [map]);
+  }, [map, markerLib]);
 
   // Đồng bộ marker vào clusterer mỗi khi danh sách (lọc) thay đổi
   useEffect(() => {
@@ -110,7 +118,9 @@ function Markers({ properties, onSelect }) {
     if (!c) return;
     c.clearMarkers();
     c.addMarkers(Object.values(markersRef.current));
-  }, [properties]);
+  }, [properties, markerLib]);
+
+  if (!markerLib) return null;
 
   const setMarkerRef = (marker, id) => {
     if (marker) markersRef.current[id] = marker;
@@ -298,7 +308,7 @@ export default function MapView({ properties }) {
     );
   }
   return (
-    <APIProvider apiKey={API_KEY} language="vi" region="VN">
+    <APIProvider apiKey={API_KEY} language="vi" region="VN" libraries={['marker']}>
       <MapInner properties={properties} />
     </APIProvider>
   );
