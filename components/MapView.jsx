@@ -2,14 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import {
-  APIProvider,
-  Map,
-  AdvancedMarker,
-  InfoWindow,
-  useMap,
-  useMapsLibrary,
-} from '@vis.gl/react-google-maps';
+import { APIProvider, Map, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
@@ -19,20 +12,22 @@ const HOA_LAC_CENTER = { lat: 21.008, lng: 105.526 };
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const MAP_ID = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID || 'DEMO_MAP_ID';
 
-// Ghim màu theo trạng thái
-function Pin({ color }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
-      <path
-        d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z"
-        fill={color}
-        stroke="white"
-        strokeWidth="2"
-      />
-      <circle cx="14" cy="14" r="6" fill="white" opacity="0.9" />
-    </svg>
-  );
+// Ghim màu theo trạng thái -> data URI cho google.maps.Marker (không cần Map ID)
+function pinIconUrl(color) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
+    <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z" fill="${color}" stroke="white" stroke-width="2"/>
+    <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
+  </svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
+
+const USER_DOT_URL =
+  'data:image/svg+xml;charset=UTF-8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="7" fill="#2b6cb0" stroke="white" stroke-width="3"/>
+    </svg>`
+  );
 
 function PopupCard({ p, onRoute, routing }) {
   const color = STATUS_COLORS[p.status] ?? '#8b877c';
@@ -82,64 +77,87 @@ function PopupCard({ p, onRoute, routing }) {
   );
 }
 
-// Marker + gom cụm (MarkerClusterer chính chủ Google)
+// Marker + gom cụm (google.maps.Marker cổ điển — chạy được không cần Map ID)
 function Markers({ properties, onSelect }) {
   const map = useMap();
-  const markerLib = useMapsLibrary('marker'); // đảm bảo AdvancedMarkerElement sẵn sàng
   const clustererRef = useRef(null);
-  const markersRef = useRef({});
 
   useEffect(() => {
-    if (!map || !markerLib || clustererRef.current) return;
-    clustererRef.current = new MarkerClusterer({
-      map,
-      markers: [],
-      renderer: {
-        render: ({ count, position }) => {
-          const size = count < 10 ? 36 : count < 50 ? 42 : 48;
-          const div = document.createElement('div');
-          div.className = 'cluster-icon';
-          div.style.width = `${size}px`;
-          div.style.height = `${size}px`;
-          div.textContent = String(count);
-          return new markerLib.AdvancedMarkerElement({
-            position,
-            content: div,
-            zIndex: 1000 + count,
-          });
+    if (!map || typeof google === 'undefined') return;
+
+    // Dọn cụm cũ
+    clustererRef.current?.clearMarkers();
+
+    const markers = properties
+      .filter((p) => p.lat != null && p.lng != null)
+      .map((p) => {
+        const m = new google.maps.Marker({
+          position: { lat: p.lat, lng: p.lng },
+          title: p.title,
+          icon: {
+            url: pinIconUrl(STATUS_COLORS[p.status] ?? '#8b877c'),
+            scaledSize: new google.maps.Size(28, 36),
+            anchor: new google.maps.Point(14, 36),
+          },
+        });
+        m.addListener('click', () => onSelect(p));
+        return m;
+      });
+
+    if (!clustererRef.current) {
+      clustererRef.current = new MarkerClusterer({
+        map,
+        markers,
+        renderer: {
+          render: ({ count, position }) => {
+            const size = count < 10 ? 36 : count < 50 ? 42 : 48;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+              <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2 - 3}" fill="#275838" stroke="white" stroke-width="3"/>
+            </svg>`;
+            return new google.maps.Marker({
+              position,
+              icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+                scaledSize: new google.maps.Size(size, size),
+                anchor: new google.maps.Point(size / 2, size / 2),
+              },
+              label: { text: String(count), color: '#fff', fontSize: '13px', fontWeight: '700' },
+              zIndex: 1000 + count,
+            });
+          },
         },
-      },
-    });
-  }, [map, markerLib]);
+      });
+    } else {
+      clustererRef.current.addMarkers(markers);
+    }
 
-  // Đồng bộ marker vào clusterer mỗi khi danh sách (lọc) thay đổi
+    return () => {
+      markers.forEach((m) => m.setMap(null));
+    };
+  }, [map, properties, onSelect]);
+
+  return null;
+}
+
+// Chấm vị trí người dùng
+function UserDot({ pos }) {
+  const map = useMap();
   useEffect(() => {
-    const c = clustererRef.current;
-    if (!c) return;
-    c.clearMarkers();
-    c.addMarkers(Object.values(markersRef.current));
-  }, [properties, markerLib]);
-
-  if (!markerLib) return null;
-
-  const setMarkerRef = (marker, id) => {
-    if (marker) markersRef.current[id] = marker;
-    else delete markersRef.current[id];
-  };
-
-  return properties
-    .filter((p) => p.lat != null && p.lng != null)
-    .map((p) => (
-      <AdvancedMarker
-        key={p.id}
-        position={{ lat: p.lat, lng: p.lng }}
-        ref={(m) => setMarkerRef(m, p.id)}
-        onClick={() => onSelect(p)}
-        title={p.title}
-      >
-        <Pin color={STATUS_COLORS[p.status] ?? '#8b877c'} />
-      </AdvancedMarker>
-    ));
+    if (!map || !pos || typeof google === 'undefined') return;
+    const m = new google.maps.Marker({
+      position: pos,
+      title: 'Vị trí của bạn',
+      icon: {
+        url: USER_DOT_URL,
+        scaledSize: new google.maps.Size(20, 20),
+        anchor: new google.maps.Point(10, 10),
+      },
+      zIndex: 9999,
+    });
+    m.setMap(map);
+    return () => m.setMap(null);
+  }, [map, pos]);
+  return null;
 }
 
 // Vẽ tuyến đường OSRM, tự zoom vừa khít
@@ -239,7 +257,6 @@ function MapInner({ properties }) {
   return (
     <>
       <Map
-        mapId={MAP_ID}
         defaultCenter={HOA_LAC_CENTER}
         defaultZoom={14}
         minZoom={5}
@@ -253,11 +270,7 @@ function MapInner({ properties }) {
         <Markers properties={properties} onSelect={setSelected} />
 
         {/* Vị trí người dùng */}
-        {userPos && (
-          <AdvancedMarker position={userPos} title="Vị trí của bạn">
-            <div className="origin-dot" />
-          </AdvancedMarker>
-        )}
+        <UserDot pos={userPos} />
 
         {selected && (
           <InfoWindow
@@ -308,7 +321,7 @@ export default function MapView({ properties }) {
     );
   }
   return (
-    <APIProvider apiKey={API_KEY} language="vi" region="VN" libraries={['marker']}>
+    <APIProvider apiKey={API_KEY} language="vi" region="VN">
       <MapInner properties={properties} />
     </APIProvider>
   );
