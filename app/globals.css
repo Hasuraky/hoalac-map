@@ -664,6 +664,44 @@ input[type='range'] {
   background: #fff;
 }
 
+/* Khung bản đồ Goong */
+.gmap-container {
+  width: 100%;
+  height: 100%;
+}
+
+.goong-pin {
+  cursor: pointer;
+  line-height: 0;
+}
+
+.origin-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2b6cb0;
+  border: 3px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* Popup Goong: bỏ padding mặc định cho khớp popup-card */
+.goong-popup .mapboxgl-popup-content,
+.goong-popup .goongjs-popup-content {
+  padding: 0 !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.goong-popup .mapboxgl-popup-close-button,
+.goong-popup .goongjs-popup-close-button {
+  font-size: 20px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  padding: 2px 8px;
+  z-index: 2;
+}
+
 /* Nút chuyển lớp nền bản đồ */
 .layer-switch {
   position: absolute;

@@ -1,55 +1,33 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Circle, useMap } from 'react-leaflet';
-import MarkerClusterGroup from 'react-leaflet-cluster';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import goongjs from '@goongmaps/goong-js';
+import '@goongmaps/goong-js/dist/goong-js.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
 
 // Tâm bản đồ: khu Hòa Lạc
-const HOA_LAC_CENTER = [21.008, 105.526];
+const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
+const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 
-// Marker hình pin theo màu trạng thái
-function createPinIcon(color) {
-  const svg = `
+const STYLES = {
+  streets: 'https://tiles.goong.io/assets/goong_map_web.json',
+  satellite: 'https://tiles.goong.io/assets/goong_satellite.json',
+};
+
+// Ghim SVG theo màu trạng thái
+function pinElement(color) {
+  const el = document.createElement('div');
+  el.className = 'goong-pin';
+  el.innerHTML = `
     <svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
       <path d="M14 0C6.27 0 0 6.27 0 14c0 10.5 14 22 14 22s14-11.5 14-22C28 6.27 21.73 0 14 0z"
         fill="${color}" stroke="white" stroke-width="2"/>
       <circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/>
     </svg>`;
-  return L.divIcon({
-    html: svg,
-    className: 'custom-marker-icon',
-    iconSize: [28, 36],
-    iconAnchor: [14, 36],
-    popupAnchor: [0, -36],
-  });
-}
-
-// Icon cụm marker — màu moss green theo theme
-function createClusterIcon(cluster) {
-  const count = cluster.getChildCount();
-  const size = count < 10 ? 36 : count < 50 ? 42 : 48;
-  return L.divIcon({
-    html: `<div class="cluster-icon" style="width:${size}px;height:${size}px;">${count}</div>`,
-    className: 'custom-cluster-icon',
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-}
-
-// Tự zoom vừa khít tuyến đường khi có route mới
-function FitRoute({ route }) {
-  const map = useMap();
-  useEffect(() => {
-    if (route?.coords?.length) {
-      map.fitBounds(L.latLngBounds(route.coords), { padding: [50, 50] });
-    }
-  }, [route, map]);
-  return null;
+  return el;
 }
 
 function PopupCard({ p, onRoute, routing }) {
@@ -100,60 +78,153 @@ function PopupCard({ p, onRoute, routing }) {
   );
 }
 
-// 2 lớp nền: đường phố (Carto Voyager — phong cách giống Google Maps) & vệ tinh (Esri)
-const BASE_LAYERS = {
-  streets: {
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    maxNativeZoom: 19, // trên mức này phóng to ảnh tile thay vì trắng
-  },
-  satellite: {
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    attribution: '&copy; Esri — Maxar, Earthstar Geographics',
-    maxNativeZoom: 17, // ảnh vệ tinh vùng ven chỉ có đến ~z17
-  },
-};
-
-// Nút bay về vị trí của tôi
-function FlyToMe({ pos }) {
-  const map = useMap();
-  if (!pos) return null;
-  return (
-    <button
-      type="button"
-      className="btn-locate"
-      title="Vị trí của tôi"
-      onClick={() => map.flyTo(pos, 16, { duration: 0.8 })}
-    >
-      ◎
-    </button>
-  );
-}
-
 export default function MapView({ properties }) {
-  const [baseLayer, setBaseLayer] = useState('streets');
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
+  const markersRef = useRef([]);
+  const popupRef = useRef(null);
+  const userMarkerRef = useRef(null);
+
+  const [ready, setReady] = useState(false);
+  const [baseStyle, setBaseStyle] = useState('streets');
+  const [selected, setSelected] = useState(null);
+  const [popupNode, setPopupNode] = useState(null);
   const [route, setRoute] = useState(null);
   const [routing, setRouting] = useState(false);
   const [routeError, setRouteError] = useState(null);
-  const [userPos, setUserPos] = useState(null); // [lat, lng]
-  const [userAccuracy, setUserAccuracy] = useState(0);
-  const layer = BASE_LAYERS[baseLayer];
+  const [userPos, setUserPos] = useState(null); // [lng, lat]
 
-  // Tự động lấy vị trí người dùng khi mở bản đồ
+  // Khởi tạo bản đồ
+  useEffect(() => {
+    if (!MAPTILES_KEY || mapRef.current || !containerRef.current) return;
+    goongjs.accessToken = MAPTILES_KEY;
+    const map = new goongjs.Map({
+      container: containerRef.current,
+      style: STYLES.streets,
+      center: HOA_LAC_CENTER,
+      zoom: 13,
+      minZoom: 5,
+      maxZoom: 19,
+    });
+    map.addControl(new goongjs.NavigationControl(), 'top-left');
+    map.on('load', () => setReady(true));
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Đổi lớp nền
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    map.setStyle(STYLES[baseStyle]);
+  }, [baseStyle, ready]);
+
+  // Lấy vị trí người dùng
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserPos([pos.coords.latitude, pos.coords.longitude]);
-        setUserAccuracy(pos.coords.accuracy ?? 0);
-      },
-      () => {}, // từ chối quyền -> thôi, không làm phiền
+      (pos) => setUserPos([pos.coords.longitude, pos.coords.latitude]),
+      () => {},
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }, []);
 
-  // Tìm đường từ vị trí hiện tại đến BĐS bằng OSRM (miễn phí, không cần key)
+  // Chấm vị trí người dùng
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !userPos) return;
+    userMarkerRef.current?.remove();
+    const el = document.createElement('div');
+    el.className = 'origin-dot';
+    userMarkerRef.current = new goongjs.Marker({ element: el }).setLngLat(userPos).addTo(map);
+    return () => userMarkerRef.current?.remove();
+  }, [userPos, ready]);
+
+  // Vẽ marker BĐS
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    // Popup dùng chung, nội dung render bằng React portal
+    if (!popupRef.current) {
+      popupRef.current = new goongjs.Popup({
+        offset: 38,
+        closeButton: true,
+        maxWidth: '280px',
+        className: 'goong-popup',
+      });
+      popupRef.current.on('close', () => setSelected(null));
+    }
+
+    properties
+      .filter((p) => p.lat != null && p.lng != null)
+      .forEach((p) => {
+        const el = pinElement(STATUS_COLORS[p.status] ?? '#8b877c');
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const node = document.createElement('div');
+          popupRef.current.setLngLat([p.lng, p.lat]).setDOMContent(node).addTo(map);
+          setPopupNode(node);
+          setSelected(p);
+        });
+        const marker = new goongjs.Marker({ element: el, anchor: 'bottom' })
+          .setLngLat([p.lng, p.lat])
+          .addTo(map);
+        markersRef.current.push(marker);
+      });
+
+    return () => {
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = [];
+    };
+  }, [properties, ready, baseStyle]);
+
+  // Vẽ tuyến đường
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+
+    const draw = () => {
+      if (map.getLayer('route-line')) map.removeLayer('route-line');
+      if (map.getSource('route')) map.removeSource('route');
+      if (!route) return;
+      map.addSource('route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: route.coords },
+        },
+      });
+      map.addLayer({
+        id: 'route-line',
+        type: 'line',
+        source: 'route',
+        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        paint: { 'line-color': '#275838', 'line-width': 5, 'line-opacity': 0.85 },
+      });
+      const lngs = route.coords.map((c) => c[0]);
+      const lats = route.coords.map((c) => c[1]);
+      map.fitBounds(
+        [
+          [Math.min(...lngs), Math.min(...lats)],
+          [Math.max(...lngs), Math.max(...lats)],
+        ],
+        { padding: 60, duration: 800 }
+      );
+    };
+
+    if (map.isStyleLoaded()) draw();
+    else map.once('styledata', draw);
+  }, [route, ready, baseStyle]);
+
+  // Tìm đường bằng OSRM (miễn phí, không tốn quota Goong)
   function handleRoute(p) {
     setRouteError(null);
     if (!navigator.geolocation) {
@@ -171,9 +242,10 @@ export default function MapView({ properties }) {
           const json = await res.json();
           const r = json?.routes?.[0];
           if (!r) throw new Error('no route');
+          popupRef.current?.remove();
+          setSelected(null);
           setRoute({
-            coords: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
-            origin: [lat0, lng0],
+            coords: r.geometry.coordinates, // [lng, lat] — đúng chuẩn Goong
             distanceKm: (r.distance / 1000).toFixed(1),
             durationMin: Math.round(r.duration / 60),
             dest: p,
@@ -191,82 +263,21 @@ export default function MapView({ properties }) {
     );
   }
 
+  if (!MAPTILES_KEY) {
+    return (
+      <div className="map-loading">
+        Chưa cấu hình Goong — thêm biến NEXT_PUBLIC_GOONG_MAPTILES_KEY vào Vercel / .env.local
+      </div>
+    );
+  }
+
   return (
-    <MapContainer center={HOA_LAC_CENTER} zoom={14} minZoom={5} maxZoom={19} scrollWheelZoom>
-      <TileLayer
-        key={baseLayer}
-        attribution={layer.attribution}
-        url={layer.url}
-        maxNativeZoom={layer.maxNativeZoom}
-        maxZoom={19}
-      />
+    <>
+      <div ref={containerRef} className="gmap-container" />
 
-      {/* Vệ tinh + lớp nhãn (tên đường, địa danh) = chế độ hybrid như Guland/Google */}
-      {baseLayer === 'satellite' && (
-        <TileLayer
-          key="labels"
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png"
-          maxNativeZoom={19}
-          maxZoom={19}
-          zIndex={5}
-        />
-      )}
-      <MarkerClusterGroup
-        chunkedLoading
-        iconCreateFunction={createClusterIcon}
-        maxClusterRadius={60}
-        showCoverageOnHover={false}
-        zoomToBoundsOnClick
-        spiderfyOnMaxZoom
-      >
-        {properties
-          .filter((p) => p.lat != null && p.lng != null)
-          .map((p) => (
-            <Marker
-              key={p.id}
-              position={[p.lat, p.lng]}
-              icon={createPinIcon(STATUS_COLORS[p.status] ?? '#8b877c')}
-            >
-              <Popup minWidth={250} maxWidth={260}>
-                <PopupCard p={p} onRoute={handleRoute} routing={routing} />
-              </Popup>
-            </Marker>
-          ))}
-      </MarkerClusterGroup>
-
-      {/* Vị trí người dùng: chấm xanh + vòng độ chính xác */}
-      {userPos && (
-        <>
-          {userAccuracy > 0 && userAccuracy < 500 && (
-            <Circle
-              center={userPos}
-              radius={userAccuracy}
-              pathOptions={{ color: '#2b6cb0', weight: 1, fillOpacity: 0.08 }}
-            />
-          )}
-          <CircleMarker
-            center={userPos}
-            radius={7}
-            pathOptions={{ color: '#fff', weight: 2.5, fillColor: '#2b6cb0', fillOpacity: 1 }}
-          />
-        </>
-      )}
-
-      {/* Tuyến đường đang hiển thị */}
-      {route && (
-        <>
-          <Polyline
-            positions={route.coords}
-            pathOptions={{ color: '#275838', weight: 5, opacity: 0.85 }}
-          />
-          <CircleMarker
-            center={route.origin}
-            radius={7}
-            pathOptions={{ color: '#fff', weight: 2, fillColor: '#2b6cb0', fillOpacity: 1 }}
-          />
-          <FitRoute route={route} />
-        </>
-      )}
+      {/* Nội dung popup render bằng React */}
+      {selected && popupNode &&
+        createPortal(<PopupCard p={selected} onRoute={handleRoute} routing={routing} />, popupNode)}
 
       {(route || routeError) && (
         <div className="route-banner">
@@ -290,25 +301,35 @@ export default function MapView({ properties }) {
         </div>
       )}
 
-      <FlyToMe pos={userPos} />
+      {/* Nút về vị trí của tôi */}
+      {userPos && (
+        <button
+          type="button"
+          className="btn-locate"
+          title="Vị trí của tôi"
+          onClick={() => mapRef.current?.flyTo({ center: userPos, zoom: 16 })}
+        >
+          ◎
+        </button>
+      )}
 
-      {/* Nút chuyển lớp nền */}
+      {/* Chuyển lớp nền */}
       <div className="layer-switch">
         <button
           type="button"
-          className={baseLayer === 'streets' ? 'active' : ''}
-          onClick={() => setBaseLayer('streets')}
+          className={baseStyle === 'streets' ? 'active' : ''}
+          onClick={() => setBaseStyle('streets')}
         >
           Bản đồ
         </button>
         <button
           type="button"
-          className={baseLayer === 'satellite' ? 'active' : ''}
-          onClick={() => setBaseLayer('satellite')}
+          className={baseStyle === 'satellite' ? 'active' : ''}
+          onClick={() => setBaseStyle('satellite')}
         >
           Vệ tinh
         </button>
       </div>
-    </MapContainer>
+    </>
   );
 }

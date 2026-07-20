@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "^2.6.2",
+    "@goongmaps/goong-js": "^1.0.9",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.0",
     "@vis.gl/react-google-maps": "^1.9.0",
