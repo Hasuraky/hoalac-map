@@ -639,14 +639,20 @@ input[type='range'] {
   text-decoration: none;
 }
 
-/* Nút bay về vị trí của tôi */
-.btn-locate {
+/* Cụm nút dưới phải */
+.map-controls-bottom {
   position: absolute;
-  bottom: 118px;
+  bottom: 24px;
   right: 10px;
   z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* Nút bay về vị trí của tôi */
+.btn-locate {
   width: 40px;
-  height: 40px;
   border-radius: 10px;
   border: 1px solid var(--stone-dark);
   background: rgba(255, 255, 255, 0.92);
@@ -727,10 +733,6 @@ input[type='range'] {
 
 /* Nút chuyển lớp nền bản đồ */
 .layer-switch {
-  position: absolute;
-  bottom: 24px;
-  right: 10px;
-  z-index: 1000;
   display: flex;
   border-radius: 10px;
   overflow: hidden;

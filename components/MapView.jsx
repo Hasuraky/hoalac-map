@@ -349,18 +349,6 @@ export default function MapView({ properties }) {
         </div>
       )}
 
-      {/* Nút về vị trí của tôi */}
-      {userPos && (
-        <button
-          type="button"
-          className="btn-locate"
-          title="Vị trí của tôi"
-          onClick={() => mapRef.current?.flyTo({ center: userPos, zoom: 16 })}
-        >
-          ◎
-        </button>
-      )}
-
       {/* Nút địa điểm — riêng, phía trên (chỉ ở chế độ Bản đồ) */}
       {baseStyle === 'streets' && (
         <button
@@ -373,22 +361,34 @@ export default function MapView({ properties }) {
         </button>
       )}
 
-      {/* Chuyển lớp nền */}
-      <div className="layer-switch">
-        <button
-          type="button"
-          className={baseStyle === 'streets' ? 'active' : ''}
-          onClick={() => setBaseStyle('streets')}
-        >
-          Bản đồ
-        </button>
-        <button
-          type="button"
-          className={baseStyle === 'satellite' ? 'active' : ''}
-          onClick={() => setBaseStyle('satellite')}
-        >
-          Vệ tinh
-        </button>
+      {/* Cụm dưới phải: định vị (trái) + chuyển lớp nền */}
+      <div className="map-controls-bottom">
+        {userPos && (
+          <button
+            type="button"
+            className="btn-locate"
+            title="Vị trí của tôi"
+            onClick={() => mapRef.current?.flyTo({ center: userPos, zoom: 16 })}
+          >
+            ◎
+          </button>
+        )}
+        <div className="layer-switch">
+          <button
+            type="button"
+            className={baseStyle === 'streets' ? 'active' : ''}
+            onClick={() => setBaseStyle('streets')}
+          >
+            Bản đồ
+          </button>
+          <button
+            type="button"
+            className={baseStyle === 'satellite' ? 'active' : ''}
+            onClick={() => setBaseStyle('satellite')}
+          >
+            Vệ tinh
+          </button>
+        </div>
       </div>
     </>
   );
