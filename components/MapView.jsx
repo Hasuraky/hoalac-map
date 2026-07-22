@@ -114,21 +114,17 @@ function PopupCard({ p, onRoute, routing }) {
   );
 }
 
-// Ngôi sao vàng + nhãn 2 quần đảo — hiện khi zoom ra (biển Đông)
-const SEA_MARKS = [
-  { lngLat: [114.3, 16.5], label: 'Quần đảo Hoàng Sa\n(Việt Nam)' },
-  { lngLat: [113.8, 9.5], label: 'Quần đảo Trường Sa\n(Việt Nam)' },
-];
+// 1 ngôi sao vàng lớn mờ, đặt giữa biển Đông, hiện khi zoom ra
+const SEA_STAR_CENTER = [113.5, 13.5];
 
-function starElement(withLabel) {
+function bigStarElement() {
   const el = document.createElement('div');
-  el.className = 'sea-star';
+  el.className = 'sea-star-big';
   el.innerHTML = `
-    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="220" height="220" aria-hidden="true">
       <polygon points="12,2 14.9,8.6 22,9.2 16.5,13.9 18.2,21 12,17.3 5.8,21 7.5,13.9 2,9.2 9.1,8.6"
-        fill="#ffcc00" stroke="#c00" stroke-width="1"/>
-    </svg>
-    ${withLabel ? `<span class="sea-star-label">${withLabel.replace(/\n/g, '<br>')}</span>` : ''}`;
+        fill="#ffcc00"/>
+    </svg>`;
   return el;
 }
 
@@ -170,18 +166,14 @@ export default function MapView({ properties }) {
     map.on('styledata', () => applyPoiVisibility(map, showPoiRef.current));
     mapRef.current = map;
 
-    // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
-    SEA_MARKS.forEach((m) => {
-      const marker = new goongjs.Marker({ element: starElement(m.label), anchor: 'center' })
-        .setLngLat(m.lngLat)
-        .addTo(map);
-      seaMarkersRef.current.push(marker);
-    });
+    // 1 ngôi sao vàng lớn mờ giữa biển Đông, chỉ hiện khi zoom ra
+    const star = new goongjs.Marker({ element: bigStarElement(), anchor: 'center' })
+      .setLngLat(SEA_STAR_CENTER)
+      .addTo(map);
+    seaMarkersRef.current.push(star);
     const updateSea = () => {
       const show = map.getZoom() <= 7.5;
-      seaMarkersRef.current.forEach((mk) => {
-        mk.getElement().style.display = show ? 'flex' : 'none';
-      });
+      star.getElement().style.display = show ? 'block' : 'none';
     };
     map.on('zoom', updateSea);
     updateSea();
