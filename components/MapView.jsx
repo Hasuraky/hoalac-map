@@ -12,21 +12,50 @@ import ShareButton from '@/components/ShareButton';
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
 const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 
-// Style vệ tinh tự dựng từ kho ảnh Goong (style trọn gói của họ lỗi với goong-js)
+// Style vệ tinh HYBRID tự dựng: ảnh vệ tinh Goong + lớp nhãn (đường, địa danh, POI)
+// lấy từ style đường phố. Cache để không fetch lại.
+let hybridStylePromise = null;
 function goongSatelliteStyle(key) {
-  return {
-    version: 8,
-    sources: {
-      'goong-sat': {
-        type: 'raster',
-        tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
-        tileSize: 256,
-        maxzoom: 20,
-        attribution: '© Goong Maps',
-      },
-    },
-    layers: [{ id: 'goong-satellite', type: 'raster', source: 'goong-sat' }],
-  };
+  if (!hybridStylePromise) {
+    hybridStylePromise = fetch(
+      `https://tiles.goong.io/assets/goong_map_web.json?api_key=${key}`
+    )
+      .then((r) => r.json())
+      .then((street) => ({
+        version: 8,
+        glyphs: street.glyphs,
+        sprite: street.sprite,
+        sources: {
+          ...street.sources,
+          'goong-sat': {
+            type: 'raster',
+            tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
+            tileSize: 256,
+            maxzoom: 20,
+            attribution: '© Goong Maps',
+          },
+        },
+        layers: [
+          { id: 'goong-satellite', type: 'raster', source: 'goong-sat' },
+          // chỉ lấy các lớp nhãn chữ/biểu tượng đè lên ảnh
+          ...(street.layers ?? []).filter((l) => l.type === 'symbol'),
+        ],
+      }))
+      .catch(() => ({
+        // lỗi mạng -> vệ tinh thuần, không nhãn
+        version: 8,
+        sources: {
+          'goong-sat': {
+            type: 'raster',
+            tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
+            tileSize: 256,
+            maxzoom: 20,
+          },
+        },
+        layers: [{ id: 'goong-satellite', type: 'raster', source: 'goong-sat' }],
+      }));
+  }
+  return hybridStylePromise;
 }
 
 const STYLES = {
@@ -131,7 +160,7 @@ export default function MapView({ properties }) {
     goongjs.accessToken = MAPTILES_KEY;
     const map = new goongjs.Map({
       container: containerRef.current,
-      style: goongSatelliteStyle(MAPTILES_KEY), // mặc định: vệ tinh
+      style: STYLES.streets, // style tạm trong lúc chờ hybrid (đổi ngay bên dưới)
       center: HOA_LAC_CENTER,
       zoom: 13,
       minZoom: 5,
@@ -151,8 +180,17 @@ export default function MapView({ properties }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    map.setStyle(baseStyle === 'satellite' ? goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets);
-    map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
+    let cancelled = false;
+    (async () => {
+      const style =
+        baseStyle === 'satellite' ? await goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets;
+      if (cancelled || !mapRef.current) return;
+      map.setStyle(style);
+      map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [baseStyle, ready]);
 
   // Bật/tắt địa điểm nền
@@ -369,16 +407,14 @@ export default function MapView({ properties }) {
         >
           Vệ tinh
         </button>
-        {baseStyle === 'streets' && (
-          <button
-            type="button"
-            className={showPoi ? 'active' : ''}
-            onClick={() => setShowPoi((v) => !v)}
-            title="Ẩn/hiện trường học, chùa, quán xá... của nền bản đồ"
-          >
-            📍 Địa điểm
-          </button>
-        )}
+        <button
+          type="button"
+          className={showPoi ? 'active' : ''}
+          onClick={() => setShowPoi((v) => !v)}
+          title="Ẩn/hiện trường học, chùa, quán xá... của nền bản đồ"
+        >
+          📍 Địa điểm
+        </button>
       </div>
     </>
   );
