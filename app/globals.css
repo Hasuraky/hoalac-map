@@ -681,14 +681,28 @@ input[type='range'] {
   line-height: 0;
 }
 
-/* Ngôi sao vàng lớn mờ giữa biển Đông */
-.sea-star-big {
+/* Sao vàng + nhãn quần đảo trên biển Đông */
+.sea-star {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   pointer-events: none;
-  line-height: 0;
+  text-align: center;
 }
 
-.sea-star-big svg {
-  opacity: 0.3;
+.sea-star svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+  opacity: 0.9;
+}
+
+.sea-star-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #b3402f;
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
 }
 
 .origin-dot {
