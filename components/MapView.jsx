@@ -12,24 +12,27 @@ import ShareButton from '@/components/ShareButton';
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
 const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 
+// Dự phòng: ảnh vệ tinh Esri nếu key Goong không truy cập được lớp vệ tinh
+const ESRI_SATELLITE = {
+  version: 8,
+  sources: {
+    esri: {
+      type: 'raster',
+      tiles: [
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      ],
+      tileSize: 256,
+      maxzoom: 19,
+      attribution: '© Esri — Maxar, Earthstar Geographics',
+    },
+  },
+  layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' }],
+};
+
 const STYLES = {
   streets: 'https://tiles.goong.io/assets/goong_map_web.json',
-  // Goong chưa có style vệ tinh -> dùng ảnh vệ tinh Esri (miễn phí) render trong Goong
-  satellite: {
-    version: 8,
-    sources: {
-      esri: {
-        type: 'raster',
-        tiles: [
-          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        ],
-        tileSize: 256,
-        maxzoom: 19,
-        attribution: '© Esri — Maxar, Earthstar Geographics',
-      },
-    },
-    layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' }],
-  },
+  // Vệ tinh Goong (style không công bố trong docs nhưng maps.goong.io dùng)
+  satellite: 'https://tiles.goong.io/assets/goong_satellite.json',
 };
 
 // Ghim SVG theo màu trạng thái
@@ -131,11 +134,22 @@ export default function MapView({ properties }) {
     };
   }, []);
 
-  // Đổi lớp nền
+  // Đổi lớp nền (vệ tinh Goong lỗi -> tự chuyển Esri)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
     map.setStyle(STYLES[baseStyle]);
+
+    if (baseStyle === 'satellite') {
+      const onError = (e) => {
+        if (e?.error?.status === 403 || e?.error?.status === 404) {
+          map.off('error', onError);
+          map.setStyle(ESRI_SATELLITE);
+        }
+      };
+      map.on('error', onError);
+      return () => map.off('error', onError);
+    }
   }, [baseStyle, ready]);
 
   // Lấy vị trí người dùng
