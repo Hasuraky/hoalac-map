@@ -642,7 +642,7 @@ input[type='range'] {
 /* Nút bay về vị trí của tôi */
 .btn-locate {
   position: absolute;
-  bottom: 70px;
+  bottom: 118px;
   right: 10px;
   z-index: 1000;
   width: 40px;
@@ -700,6 +700,29 @@ input[type='range'] {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   padding: 2px 8px;
   z-index: 2;
+}
+
+/* Nút địa điểm — riêng, ngay trên nhóm chuyển lớp nền */
+.poi-toggle {
+  position: absolute;
+  bottom: 70px;
+  right: 10px;
+  z-index: 1000;
+  border: 1px solid var(--stone-dark);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.poi-toggle.active {
+  background: var(--moss);
+  color: #fff;
+  border-color: var(--moss);
 }
 
 /* Nút chuyển lớp nền bản đồ */

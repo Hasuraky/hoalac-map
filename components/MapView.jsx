@@ -12,50 +12,21 @@ import ShareButton from '@/components/ShareButton';
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
 const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 
-// Style vệ tinh HYBRID tự dựng: ảnh vệ tinh Goong + lớp nhãn (đường, địa danh, POI)
-// lấy từ style đường phố. Cache để không fetch lại.
-let hybridStylePromise = null;
+// Style vệ tinh thuần từ kho ảnh Goong
 function goongSatelliteStyle(key) {
-  if (!hybridStylePromise) {
-    hybridStylePromise = fetch(
-      `https://tiles.goong.io/assets/goong_map_web.json?api_key=${key}`
-    )
-      .then((r) => r.json())
-      .then((street) => ({
-        version: 8,
-        glyphs: street.glyphs,
-        sprite: street.sprite,
-        sources: {
-          ...street.sources,
-          'goong-sat': {
-            type: 'raster',
-            tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
-            tileSize: 256,
-            maxzoom: 20,
-            attribution: '© Goong Maps',
-          },
-        },
-        layers: [
-          { id: 'goong-satellite', type: 'raster', source: 'goong-sat' },
-          // chỉ lấy các lớp nhãn chữ/biểu tượng đè lên ảnh
-          ...(street.layers ?? []).filter((l) => l.type === 'symbol'),
-        ],
-      }))
-      .catch(() => ({
-        // lỗi mạng -> vệ tinh thuần, không nhãn
-        version: 8,
-        sources: {
-          'goong-sat': {
-            type: 'raster',
-            tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
-            tileSize: 256,
-            maxzoom: 20,
-          },
-        },
-        layers: [{ id: 'goong-satellite', type: 'raster', source: 'goong-sat' }],
-      }));
-  }
-  return hybridStylePromise;
+  return {
+    version: 8,
+    sources: {
+      'goong-sat': {
+        type: 'raster',
+        tiles: [`https://satellite.goong.io/{z}/{x}/{y}.png?api_key=${key}`],
+        tileSize: 256,
+        maxzoom: 20,
+        attribution: '© Goong Maps',
+      },
+    },
+    layers: [{ id: 'goong-satellite', type: 'raster', source: 'goong-sat' }],
+  };
 }
 
 const STYLES = {
@@ -143,8 +114,8 @@ export default function MapView({ properties }) {
   const userMarkerRef = useRef(null);
 
   const [ready, setReady] = useState(false);
-  const [baseStyle, setBaseStyle] = useState('satellite'); // mặc định: vệ tinh
-  const [showPoi, setShowPoi] = useState(true);
+  const [baseStyle, setBaseStyle] = useState('streets'); // mặc định: bản đồ
+  const [showPoi, setShowPoi] = useState(false); // mặc định: ẩn địa điểm
   const showPoiRef = useRef(true);
   showPoiRef.current = showPoi;
   const [selected, setSelected] = useState(null);
@@ -160,7 +131,7 @@ export default function MapView({ properties }) {
     goongjs.accessToken = MAPTILES_KEY;
     const map = new goongjs.Map({
       container: containerRef.current,
-      style: STYLES.streets, // style tạm trong lúc chờ hybrid (đổi ngay bên dưới)
+      style: STYLES.streets,
       center: HOA_LAC_CENTER,
       zoom: 13,
       minZoom: 5,
@@ -180,17 +151,8 @@ export default function MapView({ properties }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    let cancelled = false;
-    (async () => {
-      const style =
-        baseStyle === 'satellite' ? await goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets;
-      if (cancelled || !mapRef.current) return;
-      map.setStyle(style);
-      map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
-    })();
-    return () => {
-      cancelled = true;
-    };
+    map.setStyle(baseStyle === 'satellite' ? goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets);
+    map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
   }, [baseStyle, ready]);
 
   // Bật/tắt địa điểm nền
@@ -391,7 +353,19 @@ export default function MapView({ properties }) {
         </button>
       )}
 
-      {/* Chuyển lớp nền + bật/tắt địa điểm */}
+      {/* Nút địa điểm — riêng, phía trên (chỉ ở chế độ Bản đồ) */}
+      {baseStyle === 'streets' && (
+        <button
+          type="button"
+          className={`poi-toggle${showPoi ? ' active' : ''}`}
+          onClick={() => setShowPoi((v) => !v)}
+          title="Ẩn/hiện trường học, chùa, quán xá... của nền bản đồ"
+        >
+          📍 Địa điểm
+        </button>
+      )}
+
+      {/* Chuyển lớp nền */}
       <div className="layer-switch">
         <button
           type="button"
@@ -406,14 +380,6 @@ export default function MapView({ properties }) {
           onClick={() => setBaseStyle('satellite')}
         >
           Vệ tinh
-        </button>
-        <button
-          type="button"
-          className={showPoi ? 'active' : ''}
-          onClick={() => setShowPoi((v) => !v)}
-          title="Ẩn/hiện trường học, chùa, quán xá... của nền bản đồ"
-        >
-          📍 Địa điểm
         </button>
       </div>
     </>
