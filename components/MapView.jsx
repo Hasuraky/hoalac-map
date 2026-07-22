@@ -35,12 +35,20 @@ const STYLES = {
 
 // Ẩn/hiện các địa điểm (POI) của nền bản đồ — trường học, chùa, quán xá...
 function applyPoiVisibility(map, show) {
-  const style = map.getStyle();
+  let style;
+  try {
+    style = map.getStyle();
+  } catch {
+    return;
+  }
   if (!style?.layers) return;
+  const want = show ? 'visible' : 'none';
   for (const layer of style.layers) {
     const sourceLayer = layer['source-layer'] ?? '';
     if (layer.type === 'symbol' && (/poi/i.test(layer.id) || /poi/i.test(sourceLayer))) {
-      map.setLayoutProperty(layer.id, 'visibility', show ? 'visible' : 'none');
+      // chỉ set khi khác — tránh vòng lặp styledata
+      const cur = layer.layout?.visibility ?? 'visible';
+      if (cur !== want) map.setLayoutProperty(layer.id, 'visibility', want);
     }
   }
 }
@@ -139,6 +147,8 @@ export default function MapView({ properties }) {
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
     map.on('load', () => setReady(true));
+    // Ẩn địa điểm ngay khi style vừa nạp — không chờ vẽ xong (tránh nháy)
+    map.on('styledata', () => applyPoiVisibility(map, showPoiRef.current));
     mapRef.current = map;
 
     return () => {
@@ -152,15 +162,13 @@ export default function MapView({ properties }) {
     const map = mapRef.current;
     if (!map || !ready) return;
     map.setStyle(baseStyle === 'satellite' ? goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets);
-    map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
   }, [baseStyle, ready]);
 
-  // Bật/tắt địa điểm nền
+  // Bật/tắt địa điểm nền (styledata handler lo phần còn lại)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    if (map.isStyleLoaded()) applyPoiVisibility(map, showPoi);
-    else map.once('idle', () => applyPoiVisibility(map, showPoi));
+    applyPoiVisibility(map, showPoi);
   }, [showPoi, ready]);
 
   // Lấy vị trí người dùng
