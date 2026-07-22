@@ -33,6 +33,18 @@ const STYLES = {
   streets: 'https://tiles.goong.io/assets/goong_map_web.json',
 };
 
+// Ẩn/hiện các địa điểm (POI) của nền bản đồ — trường học, chùa, quán xá...
+function applyPoiVisibility(map, show) {
+  const style = map.getStyle();
+  if (!style?.layers) return;
+  for (const layer of style.layers) {
+    const sourceLayer = layer['source-layer'] ?? '';
+    if (layer.type === 'symbol' && (/poi/i.test(layer.id) || /poi/i.test(sourceLayer))) {
+      map.setLayoutProperty(layer.id, 'visibility', show ? 'visible' : 'none');
+    }
+  }
+}
+
 // Ghim SVG theo màu trạng thái
 function pinElement(color) {
   const el = document.createElement('div');
@@ -103,6 +115,9 @@ export default function MapView({ properties }) {
 
   const [ready, setReady] = useState(false);
   const [baseStyle, setBaseStyle] = useState('satellite'); // mặc định: vệ tinh
+  const [showPoi, setShowPoi] = useState(true);
+  const showPoiRef = useRef(true);
+  showPoiRef.current = showPoi;
   const [selected, setSelected] = useState(null);
   const [popupNode, setPopupNode] = useState(null);
   const [route, setRoute] = useState(null);
@@ -132,12 +147,21 @@ export default function MapView({ properties }) {
     };
   }, []);
 
-  // Đổi lớp nền
+  // Đổi lớp nền (đổi xong áp lại trạng thái ẩn/hiện địa điểm)
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
     map.setStyle(baseStyle === 'satellite' ? goongSatelliteStyle(MAPTILES_KEY) : STYLES.streets);
+    map.once('idle', () => applyPoiVisibility(map, showPoiRef.current));
   }, [baseStyle, ready]);
+
+  // Bật/tắt địa điểm nền
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    if (map.isStyleLoaded()) applyPoiVisibility(map, showPoi);
+    else map.once('idle', () => applyPoiVisibility(map, showPoi));
+  }, [showPoi, ready]);
 
   // Lấy vị trí người dùng
   useEffect(() => {
@@ -329,7 +353,7 @@ export default function MapView({ properties }) {
         </button>
       )}
 
-      {/* Chuyển lớp nền */}
+      {/* Chuyển lớp nền + bật/tắt địa điểm */}
       <div className="layer-switch">
         <button
           type="button"
@@ -345,6 +369,16 @@ export default function MapView({ properties }) {
         >
           Vệ tinh
         </button>
+        {baseStyle === 'streets' && (
+          <button
+            type="button"
+            className={showPoi ? 'active' : ''}
+            onClick={() => setShowPoi((v) => !v)}
+            title="Ẩn/hiện trường học, chùa, quán xá... của nền bản đồ"
+          >
+            📍 Địa điểm
+          </button>
+        )}
       </div>
     </>
   );
