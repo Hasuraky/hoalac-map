@@ -121,7 +121,7 @@ function bigStarElement() {
   const el = document.createElement('div');
   el.className = 'sea-star-big';
   el.innerHTML = `
-    <svg viewBox="0 0 24 24" width="220" height="220" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="600" height="600" aria-hidden="true">
       <polygon points="12,2 14.9,8.6 22,9.2 16.5,13.9 18.2,21 12,17.3 5.8,21 7.5,13.9 2,9.2 9.1,8.6"
         fill="#ffcc00"/>
     </svg>`;
