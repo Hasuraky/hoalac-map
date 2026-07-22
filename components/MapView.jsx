@@ -102,7 +102,7 @@ export default function MapView({ properties }) {
   const userMarkerRef = useRef(null);
 
   const [ready, setReady] = useState(false);
-  const [baseStyle, setBaseStyle] = useState('streets');
+  const [baseStyle, setBaseStyle] = useState('satellite'); // mặc định: vệ tinh
   const [selected, setSelected] = useState(null);
   const [popupNode, setPopupNode] = useState(null);
   const [route, setRoute] = useState(null);
@@ -116,7 +116,7 @@ export default function MapView({ properties }) {
     goongjs.accessToken = MAPTILES_KEY;
     const map = new goongjs.Map({
       container: containerRef.current,
-      style: STYLES.streets,
+      style: goongSatelliteStyle(MAPTILES_KEY), // mặc định: vệ tinh
       center: HOA_LAC_CENTER,
       zoom: 13,
       minZoom: 5,
