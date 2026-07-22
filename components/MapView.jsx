@@ -114,12 +114,31 @@ function PopupCard({ p, onRoute, routing }) {
   );
 }
 
+// Ngôi sao vàng + nhãn 2 quần đảo — hiện khi zoom ra (biển Đông)
+const SEA_MARKS = [
+  { lngLat: [114.3, 16.5], label: 'Quần đảo Hoàng Sa\n(Việt Nam)' },
+  { lngLat: [113.8, 9.5], label: 'Quần đảo Trường Sa\n(Việt Nam)' },
+];
+
+function starElement(withLabel) {
+  const el = document.createElement('div');
+  el.className = 'sea-star';
+  el.innerHTML = `
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+      <polygon points="12,2 14.9,8.6 22,9.2 16.5,13.9 18.2,21 12,17.3 5.8,21 7.5,13.9 2,9.2 9.1,8.6"
+        fill="#ffcc00" stroke="#c00" stroke-width="1"/>
+    </svg>
+    ${withLabel ? `<span class="sea-star-label">${withLabel.replace(/\n/g, '<br>')}</span>` : ''}`;
+  return el;
+}
+
 export default function MapView({ properties }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
   const popupRef = useRef(null);
   const userMarkerRef = useRef(null);
+  const seaMarkersRef = useRef([]);
 
   const [ready, setReady] = useState(false);
   const [baseStyle, setBaseStyle] = useState('streets'); // mặc định: bản đồ
@@ -151,7 +170,25 @@ export default function MapView({ properties }) {
     map.on('styledata', () => applyPoiVisibility(map, showPoiRef.current));
     mapRef.current = map;
 
+    // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
+    SEA_MARKS.forEach((m) => {
+      const marker = new goongjs.Marker({ element: starElement(m.label), anchor: 'center' })
+        .setLngLat(m.lngLat)
+        .addTo(map);
+      seaMarkersRef.current.push(marker);
+    });
+    const updateSea = () => {
+      const show = map.getZoom() <= 7.5;
+      seaMarkersRef.current.forEach((mk) => {
+        mk.getElement().style.display = show ? 'flex' : 'none';
+      });
+    };
+    map.on('zoom', updateSea);
+    updateSea();
+
     return () => {
+      seaMarkersRef.current.forEach((mk) => mk.remove());
+      seaMarkersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
