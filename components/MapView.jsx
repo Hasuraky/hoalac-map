@@ -14,7 +14,22 @@ const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 
 const STYLES = {
   streets: 'https://tiles.goong.io/assets/goong_map_web.json',
-  satellite: 'https://tiles.goong.io/assets/goong_satellite.json',
+  // Goong chưa có style vệ tinh -> dùng ảnh vệ tinh Esri (miễn phí) render trong Goong
+  satellite: {
+    version: 8,
+    sources: {
+      esri: {
+        type: 'raster',
+        tiles: [
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        ],
+        tileSize: 256,
+        maxzoom: 19,
+        attribution: '© Esri — Maxar, Earthstar Geographics',
+      },
+    },
+    layers: [{ id: 'esri-satellite', type: 'raster', source: 'esri' }],
+  },
 };
 
 // Ghim SVG theo màu trạng thái
