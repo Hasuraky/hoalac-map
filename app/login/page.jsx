@@ -83,6 +83,17 @@ export default function LoginPage() {
             {loading ? 'Đang đăng nhập…' : 'Đăng nhập'}
           </button>
         </form>
+
+        <a
+          className="login-contact"
+          href="https://huongdm.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Chưa có tài khoản? Liên hệ đơn vị phát triển
+        </a>
+
+        <a href="/" className="login-back">← Về trang bản đồ</a>
       </div>
     </div>
   );

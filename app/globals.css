@@ -959,6 +959,39 @@ input[type='range'] {
   cursor: default;
 }
 
+.login-contact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 11px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 10px;
+  background: var(--stone-light);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--moss);
+}
+
+.login-contact:hover {
+  background: var(--moss-soft);
+  text-decoration: none;
+}
+
+.login-back {
+  display: block;
+  text-align: center;
+  margin-top: 14px;
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.login-back:hover {
+  color: var(--moss);
+}
+
 /* ---- Trang chi tiết ---- */
 .detail-shell {
   min-height: 100vh;
