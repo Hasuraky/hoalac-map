@@ -1331,6 +1331,134 @@ input[type='range'] {
   display: block;
 }
 
+/* ---- Trang quản trị tài khoản ---- */
+.admin-card {
+  padding: 20px 22px;
+  margin-bottom: 18px;
+}
+
+.admin-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.admin-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-form input,
+.admin-form select {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 9px;
+  background: var(--stone-light);
+  color: var(--ink);
+}
+
+.admin-form .btn-inline {
+  height: 42px;
+}
+
+.admin-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 10px;
+  background: #fff;
+  flex-wrap: wrap;
+}
+
+.admin-row.locked {
+  opacity: 0.55;
+}
+
+.admin-user {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 160px;
+}
+
+.admin-meta {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.role-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.role-owner { background: #2d1b4e; color: #fff; }
+.role-admin { background: var(--moss); color: #fff; }
+.role-sale { background: var(--moss-soft); color: var(--moss); }
+.role-user { background: var(--stone-light); color: var(--ink-soft); }
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-actions select {
+  padding: 7px 9px;
+  font-size: 13px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 8px;
+  background: var(--stone-light);
+}
+
+.btn-mini {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 12px;
+  border: 1px solid var(--stone-dark);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.btn-mini.danger {
+  color: var(--st-sold);
+  border-color: #e4c3bd;
+}
+
+.btn-mini:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.admin-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+@media (max-width: 640px) {
+  .admin-form {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Khóa thông tin cho khách */
 .price-locked {
   font-size: 13px;
