@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import UserMenu from '@/components/UserMenu';
 import Sidebar from '@/components/Sidebar';
+import LeadForm from '@/components/LeadForm';
 import { fetchProperties } from '@/lib/properties';
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import { usePropertyFilter, DEFAULT_FILTERS } from '@/lib/usePropertyFilter';
@@ -52,6 +53,9 @@ export default function HomePage() {
             ))}
           </div>
           {isMock && <span className="badge">dữ liệu mẫu</span>}
+          {(role === 'sale' || role === 'admin' || role === 'owner') && (
+            <a href="/tu-van" className="btn-add">Tư vấn</a>
+          )}
           {(role === 'admin' || role === 'owner') && (
             <>
               <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
@@ -82,6 +86,9 @@ export default function HomePage() {
           <button className="btn-filter-toggle" onClick={() => setSidebarOpen((v) => !v)}>
             {sidebarOpen ? 'Đóng bộ lọc' : `Bộ lọc (${filtered.length})`}
           </button>
+
+          {/* Nút yêu cầu tư vấn — cho mọi người, kể cả khách */}
+          <LeadForm />
         </div>
       </div>
     </div>

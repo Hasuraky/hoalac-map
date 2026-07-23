@@ -36,7 +36,10 @@ export async function middleware(request) {
   // Khách được xem bản đồ + trang chi tiết.
   // Bắt đăng nhập ở trang thêm/sửa BĐS và trang quản trị.
   const needsAuth =
-    pathname === '/bds/moi' || pathname.endsWith('/sua') || pathname.startsWith('/quan-tri');
+    pathname === '/bds/moi' ||
+    pathname.endsWith('/sua') ||
+    pathname.startsWith('/quan-tri') ||
+    pathname.startsWith('/tu-van');
 
   if (!user && needsAuth) {
     const redirectUrl = request.nextUrl.clone();
