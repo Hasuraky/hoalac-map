@@ -3,29 +3,40 @@ import { adminClient, getCaller, RANK } from '@/lib/supabase-admin';
 
 const DEFAULT_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
 
-// GET: danh sách tài khoản (admin/owner)
+// GET: danh sách tài khoản
+// - sale: danh bạ chỉ xem (tên, SĐT, cấp) để liên hệ đồng nghiệp
+// - admin/owner: đầy đủ + quyền quản lý
 export async function GET() {
-  const { role } = await getCaller();
-  if (RANK[role] < RANK.admin) {
+  const { user, role } = await getCaller();
+  if (RANK[role] < RANK.sale) {
     return NextResponse.json({ error: 'Không có quyền.' }, { status: 403 });
   }
+  const canManage = RANK[role] >= RANK.admin;
 
   const admin = adminClient();
   const { data: profiles, error } = await admin
     .from('profiles')
     .select('id, full_name, phone, role, is_active, created_at')
-    .order('role', { ascending: true })
     .order('created_at', { ascending: true });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Ghép email từ Auth
-  const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const emailById = {};
-  for (const u of list?.users ?? []) emailById[u.id] = u.email;
+  // Email chỉ trả cho admin/owner
+  let emailById = {};
+  if (canManage) {
+    const { data: list } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    for (const u of list?.users ?? []) emailById[u.id] = u.email;
+  }
 
-  return NextResponse.json({
-    users: (profiles ?? []).map((p) => ({ ...p, email: emailById[p.id] ?? null })),
-  });
+  const users = (profiles ?? [])
+    // Sale chỉ thấy đồng nghiệp (sale/admin/owner), không thấy tài khoản cấp khách hàng
+    .filter((p) => canManage || p.role !== 'user')
+    .map((p) =>
+      canManage
+        ? { ...p, email: emailById[p.id] ?? null }
+        : { id: p.id, full_name: p.full_name, phone: p.phone, role: p.role }
+    );
+
+  return NextResponse.json({ callerId: user.id, canManage, users });
 }
 
 // POST: tạo tài khoản mới

@@ -53,14 +53,11 @@ export default function HomePage() {
             ))}
           </div>
           {isMock && <span className="badge">dữ liệu mẫu</span>}
-          {(role === 'sale' || role === 'admin' || role === 'owner') && (
-            <a href="/tu-van" className="btn-add">Tư vấn</a>
-          )}
           {(role === 'admin' || role === 'owner') && (
-            <>
-              <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
-              <a href="/quan-tri" className="btn-add">Quản trị</a>
-            </>
+            <a href="/bds/moi" className="btn-add">+ Thêm BĐS</a>
+          )}
+          {(role === 'sale' || role === 'admin' || role === 'owner') && (
+            <a href="/quan-tri" className="btn-add">Nội bộ</a>
           )}
           <UserMenu />
         </div>

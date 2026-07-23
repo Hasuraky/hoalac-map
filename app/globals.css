@@ -1364,6 +1364,120 @@ input[type='range'] {
   display: block;
 }
 
+/* ---- Khu nội bộ (sidebar + nội dung) ---- */
+.internal-shell {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--stone);
+}
+
+.internal-sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--moss);
+  color: var(--on-moss);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 12px;
+}
+
+.internal-brand {
+  padding: 0 8px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 12px;
+}
+
+.internal-back {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-weight: 600;
+}
+
+.internal-brand h1 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  margin-top: 8px;
+  color: #fff;
+}
+
+.internal-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.internal-navitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: none;
+  background: transparent;
+  color: var(--on-moss);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.internal-navitem:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.internal-navitem.active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.internal-navicon {
+  font-size: 16px;
+}
+
+.internal-main {
+  flex: 1;
+  padding: 26px 30px 40px;
+  max-width: 900px;
+  overflow-y: auto;
+}
+
+.internal-heading {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--ink);
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .internal-shell {
+    flex-direction: column;
+  }
+  .internal-sidebar {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+  .internal-brand {
+    border: none;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .internal-brand h1 {
+    font-size: 16px;
+    margin-top: 2px;
+  }
+  .internal-nav {
+    flex-direction: row;
+    flex: 1;
+  }
+  .internal-main {
+    padding: 18px 16px 32px;
+  }
+}
+
 /* ---- Trang quản trị tài khoản ---- */
 .admin-card {
   padding: 20px 22px;
