@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { adminClient, getCaller, RANK } from '@/lib/supabase-admin';
 
 const DEFAULT_COMPANY_ID = '00000000-0000-0000-0000-000000000001';
-const MAX_ADMINS = 3;
 
 // GET: danh sách tài khoản (admin/owner)
 export async function GET() {
@@ -52,16 +51,9 @@ export async function POST(request) {
   if (!['user', 'sale', 'admin'].includes(newRole)) {
     return NextResponse.json({ error: 'Cấp tài khoản không hợp lệ.' }, { status: 400 });
   }
-  // Chỉ owner được tạo admin, và không vượt 3 admin
-  if (newRole === 'admin') {
-    if (callerRole !== 'owner') {
-      return NextResponse.json({ error: 'Chỉ chủ sở hữu được tạo admin.' }, { status: 403 });
-    }
-    const admin0 = adminClient();
-    const { data } = await admin0.rpc('count_admins');
-    if ((data ?? 0) >= MAX_ADMINS) {
-      return NextResponse.json({ error: `Đã đủ ${MAX_ADMINS} admin.` }, { status: 400 });
-    }
+  // Chỉ owner được tạo admin (số lượng không giới hạn)
+  if (newRole === 'admin' && callerRole !== 'owner') {
+    return NextResponse.json({ error: 'Chỉ chủ sở hữu được tạo admin.' }, { status: 403 });
   }
 
   const admin = adminClient();

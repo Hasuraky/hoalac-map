@@ -17,7 +17,6 @@ export default function AdminPage() {
   const [form, setForm] = useState({ email: '', password: '', full_name: '', phone: '', role: 'sale' });
 
   const isOwner = myRole === 'owner';
-  const adminCount = users.filter((u) => u.role === 'admin').length;
 
   async function load() {
     setError(null);
@@ -143,11 +142,7 @@ export default function AdminPage() {
               <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
                 <option value="user">Người dùng</option>
                 <option value="sale">Sale</option>
-                {isOwner && (
-                  <option value="admin" disabled={adminCount >= 3}>
-                    Admin {adminCount >= 3 ? '(đã đủ 3)' : ''}
-                  </option>
-                )}
+                {isOwner && <option value="admin">Admin</option>}
               </select>
             </label>
             <button type="submit" className="btn-primary btn-inline" disabled={busy}>
@@ -189,11 +184,7 @@ export default function AdminPage() {
                     >
                       <option value="user">Người dùng</option>
                       <option value="sale">Sale</option>
-                      {isOwner && (
-                        <option value="admin" disabled={u.role !== 'admin' && adminCount >= 3}>
-                          Admin
-                        </option>
-                      )}
+                      {isOwner && <option value="admin">Admin</option>}
                     </select>
 
                     <button

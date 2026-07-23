@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { adminClient, getCaller, RANK } from '@/lib/supabase-admin';
 
-const MAX_ADMINS = 3;
-
 // Đọc cấp hiện tại của tài khoản đích
 async function getTarget(admin, id) {
   const { data } = await admin.from('profiles').select('role').eq('id', id).maybeSingle();
@@ -40,14 +38,8 @@ export async function PATCH(request, { params }) {
     if (!['user', 'sale', 'admin'].includes(body.role)) {
       return NextResponse.json({ error: 'Cấp không hợp lệ.' }, { status: 400 });
     }
-    if (body.role === 'admin') {
-      if (callerRole !== 'owner') {
-        return NextResponse.json({ error: 'Chỉ chủ sở hữu được phong admin.' }, { status: 403 });
-      }
-      const { data } = await admin.rpc('count_admins');
-      if ((data ?? 0) >= MAX_ADMINS) {
-        return NextResponse.json({ error: `Đã đủ ${MAX_ADMINS} admin.` }, { status: 400 });
-      }
+    if (body.role === 'admin' && callerRole !== 'owner') {
+      return NextResponse.json({ error: 'Chỉ chủ sở hữu được phong admin.' }, { status: 403 });
     }
     if (callerRole === 'admin' && !['user', 'sale'].includes(body.role)) {
       return NextResponse.json({ error: 'Admin chỉ đặt được cấp sale/user.' }, { status: 403 });
