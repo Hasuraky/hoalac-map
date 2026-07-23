@@ -87,8 +87,8 @@ export default function HomePage() {
             {sidebarOpen ? 'Đóng bộ lọc' : `Bộ lọc (${filtered.length})`}
           </button>
 
-          {/* Nút yêu cầu tư vấn — cho mọi người, kể cả khách */}
-          <LeadForm />
+          {/* Nút yêu cầu tư vấn — chỉ hiện với khách chưa đăng nhập */}
+          {role === 'guest' && <LeadForm />}
         </div>
       </div>
     </div>
