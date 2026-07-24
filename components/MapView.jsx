@@ -154,22 +154,25 @@ export default function MapView({ properties, flyTarget }) {
   const [userPos, setUserPos] = useState(null); // [lng, lat]
   const overlaysRef = useRef([]); // dự án có sơ đồ
 
-  // Vẽ lại toàn bộ sơ đồ dự án (gọi sau mỗi lần đổi style)
+  // Vẽ sơ đồ dự án — CHỈ thêm khi chưa có (tránh xóa/thêm liên tục làm hủy ảnh đang tải)
   function drawOverlays(map) {
     for (const pr of overlaysRef.current) {
       const url = overlayUrl(pr.overlay_path);
       if (!url || !pr.overlay_coords) continue;
       const srcId = `ov-${pr.id}`;
       const lyrId = `ovl-${pr.id}`;
-      if (map.getLayer(lyrId)) map.removeLayer(lyrId);
-      if (map.getSource(srcId)) map.removeSource(srcId);
-      map.addSource(srcId, { type: 'image', url, coordinates: pr.overlay_coords });
-      map.addLayer({
-        id: lyrId,
-        type: 'raster',
-        source: srcId,
-        paint: { 'raster-opacity': pr.overlay_opacity ?? 0.85 },
-      });
+      if (map.getSource(srcId)) continue; // đã có -> bỏ qua
+      try {
+        map.addSource(srcId, { type: 'image', url, coordinates: pr.overlay_coords });
+        map.addLayer({
+          id: lyrId,
+          type: 'raster',
+          source: srcId,
+          paint: { 'raster-opacity': pr.overlay_opacity ?? 0.85 },
+        });
+      } catch {
+        // style chưa sẵn sàng -> lần idle sau sẽ thêm
+      }
     }
   }
 
