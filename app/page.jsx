@@ -38,6 +38,12 @@ export default function HomePage() {
   }, []);
 
   function flyToProject(p) {
+    // Có sơ đồ -> canh khít khung ảnh (luôn thấy trọn hình)
+    if (p.overlay_coords && p.overlay_coords.length === 4) {
+      setFlyTarget({ bounds: p.overlay_coords, key: Date.now() });
+      setSidebarOpen(false);
+      return;
+    }
     if (p.center_lat == null || p.center_lng == null) return;
     setFlyTarget({ lng: p.center_lng, lat: p.center_lat, zoom: p.zoom ?? 16, key: Date.now() });
     setSidebarOpen(false);
