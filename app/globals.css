@@ -1474,15 +1474,20 @@ input[type='range'] {
   padding: 8px 12px;
 }
 
-/* Chấm góc kéo được trên editor */
-.overlay-corner {
-  width: 18px;
-  height: 18px;
+/* Dấu tâm kéo di chuyển sơ đồ */
+.overlay-center-handle {
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: #fff;
-  border: 3px solid var(--moss);
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  background: rgba(39, 88, 56, 0.85);
+  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
   cursor: move;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 @media (max-width: 640px) {
