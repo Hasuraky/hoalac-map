@@ -1423,6 +1423,82 @@ input[type='range'] {
   display: block;
 }
 
+/* ---- Trình chỉnh sơ đồ dự án ---- */
+.overlay-editor {
+  display: flex;
+  height: calc(100vh - 52px);
+  height: calc(100dvh - 52px);
+}
+
+.overlay-map {
+  flex: 1;
+  height: 100%;
+}
+
+.overlay-tools {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 20px 18px;
+  background: #fff;
+  border-left: 1px solid var(--stone-dark);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.overlay-upload {
+  text-align: center;
+  cursor: pointer;
+}
+
+.overlay-opacity {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay-opacity input {
+  width: 100%;
+  accent-color: var(--moss);
+}
+
+.overlay-ok {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--moss);
+  background: var(--moss-soft);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+/* Chấm góc kéo được trên editor */
+.overlay-corner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 3px solid var(--moss);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  cursor: move;
+}
+
+@media (max-width: 640px) {
+  .overlay-editor {
+    flex-direction: column;
+  }
+  .overlay-map {
+    height: 55%;
+  }
+  .overlay-tools {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--stone-dark);
+  }
+}
+
 /* ---- Khu nội bộ (sidebar + nội dung) ---- */
 .internal-shell {
   display: flex;

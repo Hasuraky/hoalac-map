@@ -114,6 +114,14 @@ export default function ProjectsPanel() {
                 </span>
               </div>
               <div className="admin-actions">
+                <a
+                  className="btn-mini"
+                  href={p.center_lat == null ? undefined : `/du-an/${p.id}/so-do`}
+                  title={p.center_lat == null ? 'Cần tọa độ tâm trước' : 'Chỉnh sơ đồ'}
+                  style={p.center_lat == null ? { opacity: 0.4, pointerEvents: 'none' } : {}}
+                >
+                  🗺️ Sơ đồ{p.overlay_path ? ' ✓' : ''}
+                </a>
                 <button
                   type="button"
                   className={`btn-mini${p.is_featured ? ' star-on' : ''}`}

@@ -23,6 +23,9 @@ export async function PATCH(request, { params }) {
   if (body.center_lng !== undefined) updates.center_lng = body.center_lng;
   if (body.zoom !== undefined) updates.zoom = body.zoom;
   if (body.is_featured !== undefined) updates.is_featured = !!body.is_featured;
+  if (body.overlay_path !== undefined) updates.overlay_path = body.overlay_path;
+  if (body.overlay_coords !== undefined) updates.overlay_coords = body.overlay_coords;
+  if (body.overlay_opacity !== undefined) updates.overlay_opacity = body.overlay_opacity;
 
   if (!Object.keys(updates).length) {
     return NextResponse.json({ error: 'Không có thay đổi.' }, { status: 400 });

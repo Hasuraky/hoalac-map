@@ -38,6 +38,7 @@ export async function middleware(request) {
   const needsAuth =
     pathname === '/bds/moi' ||
     pathname.endsWith('/sua') ||
+    pathname.endsWith('/so-do') ||
     pathname.startsWith('/quan-tri') ||
     pathname.startsWith('/tu-van');
 

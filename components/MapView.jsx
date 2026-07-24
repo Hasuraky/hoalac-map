@@ -7,6 +7,7 @@ import goongjs from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
+import { fetchProjects, overlayUrl } from '@/lib/projects';
 
 // Tâm bản đồ: khu Hòa Lạc
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
@@ -151,6 +152,26 @@ export default function MapView({ properties, flyTarget }) {
   const [routing, setRouting] = useState(false);
   const [routeError, setRouteError] = useState(null);
   const [userPos, setUserPos] = useState(null); // [lng, lat]
+  const overlaysRef = useRef([]); // dự án có sơ đồ
+
+  // Vẽ lại toàn bộ sơ đồ dự án (gọi sau mỗi lần đổi style)
+  function drawOverlays(map) {
+    for (const pr of overlaysRef.current) {
+      const url = overlayUrl(pr.overlay_path);
+      if (!url || !pr.overlay_coords) continue;
+      const srcId = `ov-${pr.id}`;
+      const lyrId = `ovl-${pr.id}`;
+      if (map.getLayer(lyrId)) map.removeLayer(lyrId);
+      if (map.getSource(srcId)) map.removeSource(srcId);
+      map.addSource(srcId, { type: 'image', url, coordinates: pr.overlay_coords });
+      map.addLayer({
+        id: lyrId,
+        type: 'raster',
+        source: srcId,
+        paint: { 'raster-opacity': pr.overlay_opacity ?? 0.85 },
+      });
+    }
+  }
 
   // Khởi tạo bản đồ
   useEffect(() => {
@@ -166,8 +187,19 @@ export default function MapView({ properties, flyTarget }) {
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
     map.on('load', () => setReady(true));
-    // Ẩn địa điểm ngay khi style vừa nạp — không chờ vẽ xong (tránh nháy)
-    map.on('styledata', () => applyPoiVisibility(map, showPoiRef.current));
+    // Ẩn địa điểm + vẽ sơ đồ ngay khi style vừa nạp (giữ qua mỗi lần đổi nền)
+    map.on('styledata', () => {
+      applyPoiVisibility(map, showPoiRef.current);
+      drawOverlays(map);
+    });
+
+    // Tải danh sách dự án có sơ đồ
+    fetchProjects()
+      .then((list) => {
+        overlaysRef.current = list.filter((p) => p.overlay_path && p.overlay_coords);
+        if (map.isStyleLoaded()) drawOverlays(map);
+      })
+      .catch(() => {});
     mapRef.current = map;
 
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
