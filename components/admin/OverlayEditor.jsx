@@ -54,11 +54,25 @@ export default function OverlayEditor({ project }) {
   const [imgPath, setImgPath] = useState(project.overlay_path || null);
   const [opacity, setOpacity] = useState(project.overlay_opacity ?? 0.85);
   const [widthM, setWidthM] = useState(400);
-  const [pos, setPos] = useState({
-    lat: project.center_lat ?? 21.008,
-    lng: project.center_lng ?? 105.526,
-  });
+  // Điểm gốc 0:0 = tâm dự án; offset tính bằng mét (x: đông +, y: bắc +)
+  const anchorRef = useRef([project.center_lng ?? 105.526, project.center_lat ?? 21.008]);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [hasOverlay, setHasOverlay] = useState(!!project.overlay_path);
+
+  const M_LAT = 111320;
+  function centerFromOffset(x, y) {
+    const [aLng, aLat] = anchorRef.current;
+    const lat = aLat + y / M_LAT;
+    const lng = aLng + x / (M_LAT * Math.cos((aLat * Math.PI) / 180));
+    return [lng, lat];
+  }
+  function offsetFromCenter([lng, lat]) {
+    const [aLng, aLat] = anchorRef.current;
+    return {
+      x: Math.round((lng - aLng) * M_LAT * Math.cos((aLat * Math.PI) / 180)),
+      y: Math.round((lat - aLat) * M_LAT),
+    };
+  }
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
 
@@ -92,7 +106,7 @@ export default function OverlayEditor({ project }) {
       centerMarkerRef.current.on('drag', () => {
         const ll = centerMarkerRef.current.getLngLat();
         centerRef.current = [ll.lng, ll.lat];
-        setPos({ lat: ll.lat, lng: ll.lng }); // đồng bộ ô nhập số
+        setOffset(offsetFromCenter([ll.lng, ll.lat])); // đồng bộ ô dịch chuyển
         refresh();
       });
     } else {
@@ -118,7 +132,7 @@ export default function OverlayEditor({ project }) {
         widthRef.current = d.widthM;
         aspectRef.current = d.aspect;
         setWidthM(Math.round(d.widthM));
-        setPos({ lat: d.center[1], lng: d.center[0] });
+        setOffset(offsetFromCenter(d.center));
         refresh();
       }
     });
@@ -135,12 +149,13 @@ export default function OverlayEditor({ project }) {
     }
   }, [opacity]);
 
-  // Đặt vị trí tâm bằng số (ô nhập / dán tọa độ)
-  function applyPos(lat, lng) {
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-    centerRef.current = [lng, lat];
-    setPos({ lat, lng });
-    mapRef.current?.panTo([lng, lat]);
+  // Dịch chuyển theo mét từ tâm dự án (x: đông +, y: bắc +)
+  function applyOffset(x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+    const c = centerFromOffset(x, y);
+    centerRef.current = c;
+    setOffset({ x, y });
+    mapRef.current?.panTo(c);
     refresh();
   }
 
@@ -217,24 +232,19 @@ export default function OverlayEditor({ project }) {
             </label>
 
             <label className="overlay-num">
-              Vị trí tâm (vĩ độ, kinh độ)
+              Dịch chuyển từ tâm dự án (m) — gốc 0:0
               <div className="overlay-num-row">
-                <input type="number" step="0.00001" value={pos.lat}
-                  onChange={(e) => applyPos(Number(e.target.value), pos.lng)} />
-                <input type="number" step="0.00001" value={pos.lng}
-                  onChange={(e) => applyPos(pos.lat, Number(e.target.value))} />
+                <span className="overlay-axis">→ Đông</span>
+                <input type="number" step="1" value={offset.x}
+                  onChange={(e) => applyOffset(Number(e.target.value) || 0, offset.y)} />
+                <span className="overlay-axis">↑ Bắc</span>
+                <input type="number" step="1" value={offset.y}
+                  onChange={(e) => applyOffset(offset.x, Number(e.target.value) || 0)} />
               </div>
             </label>
-
-            <label className="overlay-num">
-              Dán tọa độ Google Maps
-              <input type="text" placeholder="21.00812, 105.52643"
-                onKeyDown={(e) => {
-                  if (e.key !== 'Enter') return;
-                  const m = e.target.value.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
-                  if (m) { applyPos(Number(m[1]), Number(m[2])); e.target.value = ''; }
-                }} />
-            </label>
+            <button type="button" className="btn-mini" onClick={() => applyOffset(0, 0)}>
+              ↺ Về tâm dự án (0:0)
+            </button>
 
             <label className="overlay-opacity">
               Độ mờ: {Math.round(opacity * 100)}%
