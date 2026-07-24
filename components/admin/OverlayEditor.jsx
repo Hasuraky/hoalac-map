@@ -54,6 +54,10 @@ export default function OverlayEditor({ project }) {
   const [imgPath, setImgPath] = useState(project.overlay_path || null);
   const [opacity, setOpacity] = useState(project.overlay_opacity ?? 0.85);
   const [widthM, setWidthM] = useState(400);
+  const [pos, setPos] = useState({
+    lat: project.center_lat ?? 21.008,
+    lng: project.center_lng ?? 105.526,
+  });
   const [hasOverlay, setHasOverlay] = useState(!!project.overlay_path);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
@@ -88,6 +92,7 @@ export default function OverlayEditor({ project }) {
       centerMarkerRef.current.on('drag', () => {
         const ll = centerMarkerRef.current.getLngLat();
         centerRef.current = [ll.lng, ll.lat];
+        setPos({ lat: ll.lat, lng: ll.lng }); // đồng bộ ô nhập số
         refresh();
       });
     } else {
@@ -113,6 +118,7 @@ export default function OverlayEditor({ project }) {
         widthRef.current = d.widthM;
         aspectRef.current = d.aspect;
         setWidthM(Math.round(d.widthM));
+        setPos({ lat: d.center[1], lng: d.center[0] });
         refresh();
       }
     });
@@ -128,6 +134,15 @@ export default function OverlayEditor({ project }) {
       map.setPaintProperty('overlay-layer', 'raster-opacity', opacity);
     }
   }, [opacity]);
+
+  // Đặt vị trí tâm bằng số (ô nhập / dán tọa độ)
+  function applyPos(lat, lng) {
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    centerRef.current = [lng, lat];
+    setPos({ lat, lng });
+    mapRef.current?.panTo([lng, lat]);
+    refresh();
+  }
 
   // Đổi kích thước (giữ tỉ lệ)
   function changeWidth(v) {
@@ -191,17 +206,42 @@ export default function OverlayEditor({ project }) {
 
         {hasOverlay && (
           <>
-            <label className="overlay-opacity">
-              Kích thước (rộng {widthM} m)
-              <input type="range" min="50" max="3000" step="10" value={widthM}
-                onChange={(e) => changeWidth(Number(e.target.value))} />
+            <label className="overlay-num">
+              Chiều rộng (m)
+              <div className="overlay-num-row">
+                <input type="range" min="50" max="3000" step="10" value={widthM}
+                  onChange={(e) => changeWidth(Number(e.target.value))} />
+                <input type="number" min="10" step="1" value={widthM}
+                  onChange={(e) => changeWidth(Number(e.target.value) || 0)} />
+              </div>
             </label>
+
+            <label className="overlay-num">
+              Vị trí tâm (vĩ độ, kinh độ)
+              <div className="overlay-num-row">
+                <input type="number" step="0.00001" value={pos.lat}
+                  onChange={(e) => applyPos(Number(e.target.value), pos.lng)} />
+                <input type="number" step="0.00001" value={pos.lng}
+                  onChange={(e) => applyPos(pos.lat, Number(e.target.value))} />
+              </div>
+            </label>
+
+            <label className="overlay-num">
+              Dán tọa độ Google Maps
+              <input type="text" placeholder="21.00812, 105.52643"
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  const m = e.target.value.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+                  if (m) { applyPos(Number(m[1]), Number(m[2])); e.target.value = ''; }
+                }} />
+            </label>
+
             <label className="overlay-opacity">
               Độ mờ: {Math.round(opacity * 100)}%
               <input type="range" min="0.2" max="1" step="0.05" value={opacity}
                 onChange={(e) => setOpacity(Number(e.target.value))} />
             </label>
-            <p className="form-hint">Kéo dấu ✥ ở giữa để di chuyển sơ đồ. Ảnh giữ nguyên tỉ lệ.</p>
+            <p className="form-hint">Nhập số cho chính xác, hoặc kéo dấu ✥ trên bản đồ. Ảnh giữ nguyên tỉ lệ.</p>
           </>
         )}
 
