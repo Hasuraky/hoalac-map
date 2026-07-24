@@ -1485,7 +1485,14 @@ input[type='range'] {
 }
 
 .overlay-num-row input[type='number'] {
-  width: 90px;
+  width: 72px;
+}
+
+.overlay-axis {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  white-space: nowrap;
 }
 
 .overlay-num input[type='number'],
