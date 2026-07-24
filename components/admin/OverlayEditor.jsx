@@ -47,6 +47,7 @@ export default function OverlayEditor({ project }) {
   const aspectRef = useRef(1);
   const widthRef = useRef(400);
 
+  const imgUrlRef = useRef(overlayUrl(project.overlay_path));
   const [ready, setReady] = useState(false);
   const [imgUrl, setImgUrl] = useState(overlayUrl(project.overlay_path));
   const [imgPath, setImgPath] = useState(project.overlay_path || null);
@@ -56,14 +57,15 @@ export default function OverlayEditor({ project }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
 
-  // Vẽ lại ảnh + marker tâm theo center/width hiện tại
+  // Vẽ lại ảnh + marker tâm theo center/width hiện tại (dùng URL từ ref cho mới nhất)
   function refresh() {
     const map = mapRef.current;
-    if (!map || !imgUrl) return;
+    const url = imgUrlRef.current;
+    if (!map || !url) return;
     const coords = rectCoords(centerRef.current, widthRef.current, aspectRef.current);
     if (map.getLayer('overlay-layer')) map.removeLayer('overlay-layer');
     if (map.getSource('overlay')) map.removeSource('overlay');
-    map.addSource('overlay', { type: 'image', url: imgUrl, coordinates: coords });
+    map.addSource('overlay', { type: 'image', url, coordinates: coords });
     map.addLayer({ id: 'overlay-layer', type: 'raster', source: 'overlay', paint: { 'raster-opacity': opacity } });
 
     // Marker tâm để kéo di chuyển
@@ -140,11 +142,12 @@ export default function OverlayEditor({ project }) {
       aspectRef.current = aspect;
 
       const path = await uploadOverlay(project.id, file);
+      const url = overlayUrl(path);
+      imgUrlRef.current = url; // cập nhật ngay cho refresh dùng
       setImgPath(path);
-      setImgUrl(overlayUrl(path));
+      setImgUrl(url);
       setHasOverlay(true);
-      // đợi imgUrl vào state rồi vẽ
-      setTimeout(refresh, 60);
+      refresh();
     } catch (err) {
       setMsg('Lỗi tải ảnh: ' + err.message);
     }
