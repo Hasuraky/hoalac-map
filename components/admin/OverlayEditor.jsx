@@ -48,6 +48,7 @@ export default function OverlayEditor({ project }) {
   const widthRef = useRef(400);
 
   const imgUrlRef = useRef(overlayUrl(project.overlay_path));
+  const drawnUrlRef = useRef(null); // URL ảnh đang vẽ trên bản đồ
   const [ready, setReady] = useState(false);
   const [imgUrl, setImgUrl] = useState(overlayUrl(project.overlay_path));
   const [imgPath, setImgPath] = useState(project.overlay_path || null);
@@ -57,16 +58,24 @@ export default function OverlayEditor({ project }) {
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState(null);
 
-  // Vẽ lại ảnh + marker tâm theo center/width hiện tại (dùng URL từ ref cho mới nhất)
+  // Vẽ/cập nhật ảnh. Di chuyển/đổi cỡ -> dời tại chỗ (không tải lại, không nháy).
+  // Chỉ tải lại khi đổi sang ảnh khác.
   function refresh() {
     const map = mapRef.current;
     const url = imgUrlRef.current;
     if (!map || !url) return;
     const coords = rectCoords(centerRef.current, widthRef.current, aspectRef.current);
-    if (map.getLayer('overlay-layer')) map.removeLayer('overlay-layer');
-    if (map.getSource('overlay')) map.removeSource('overlay');
-    map.addSource('overlay', { type: 'image', url, coordinates: coords });
-    map.addLayer({ id: 'overlay-layer', type: 'raster', source: 'overlay', paint: { 'raster-opacity': opacity } });
+    const src = map.getSource('overlay');
+
+    if (src && drawnUrlRef.current === url) {
+      src.setCoordinates(coords); // chỉ dời, giữ nguyên ảnh
+    } else {
+      if (map.getLayer('overlay-layer')) map.removeLayer('overlay-layer');
+      if (map.getSource('overlay')) map.removeSource('overlay');
+      map.addSource('overlay', { type: 'image', url, coordinates: coords });
+      map.addLayer({ id: 'overlay-layer', type: 'raster', source: 'overlay', paint: { 'raster-opacity': opacity } });
+      drawnUrlRef.current = url;
+    }
 
     // Marker tâm để kéo di chuyển
     if (!centerMarkerRef.current) {
