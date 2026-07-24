@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { fetchRole } from '@/lib/properties';
 import MembersPanel from '@/components/admin/MembersPanel';
 import LeadsPanel from '@/components/admin/LeadsPanel';
+import ProjectsPanel from '@/components/admin/ProjectsPanel';
 
 export default function InternalPage() {
   const [role, setRole] = useState(null);
@@ -30,11 +31,14 @@ export default function InternalPage() {
     );
   }
 
-  // Danh sách mục thanh bên (dễ mở rộng sau) — sale cũng xem được Thành viên (danh bạ)
+  const canManage = role === 'admin' || role === 'owner';
+
+  // Danh sách mục thanh bên (dễ mở rộng sau) — sale cũng xem Thành viên (danh bạ)
   const menu = [
     { key: 'members', label: 'Thành viên', icon: '👥' },
     { key: 'leads', label: 'Data tư vấn', icon: '💬' },
-  ];
+    canManage && { key: 'projects', label: 'Dự án', icon: '🏗️' },
+  ].filter(Boolean);
 
   return (
     <div className="internal-shell">
@@ -60,10 +64,13 @@ export default function InternalPage() {
 
       <main className="internal-main">
         <h2 className="internal-heading">
-          {tab === 'members' ? 'Thành viên' : 'Data yêu cầu tư vấn'}
+          {tab === 'members' && 'Thành viên'}
+          {tab === 'leads' && 'Data yêu cầu tư vấn'}
+          {tab === 'projects' && 'Quản lý dự án'}
         </h2>
         {tab === 'members' && <MembersPanel myRole={role} />}
         {tab === 'leads' && <LeadsPanel myRole={role} />}
+        {tab === 'projects' && canManage && <ProjectsPanel />}
       </main>
     </div>
   );

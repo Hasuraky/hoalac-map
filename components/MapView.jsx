@@ -132,7 +132,7 @@ function starElement(withLabel) {
   return el;
 }
 
-export default function MapView({ properties }) {
+export default function MapView({ properties, flyTarget }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -217,6 +217,13 @@ export default function MapView({ properties }) {
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }, []);
+
+  // Bay tới dự án khi bấm chip nổi bật
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !flyTarget) return;
+    map.flyTo({ center: [flyTarget.lng, flyTarget.lat], zoom: flyTarget.zoom ?? 16, duration: 1200 });
+  }, [flyTarget, ready]);
 
   // Chấm vị trí người dùng
   useEffect(() => {

@@ -14,6 +14,7 @@ import {
   findNearbyProperties,
   fetchRole,
 } from '@/lib/properties';
+import { fetchProjects } from '@/lib/projects';
 
 const LocationPicker = dynamic(() => import('@/components/LocationPicker'), {
   ssr: false,
@@ -43,8 +44,10 @@ export default function PropertyForm({ property = null }) {
     description: property?.description ?? '',
     lat: property?.lat ?? null,
     lng: property?.lng ?? null,
+    project_id: property?.project_id ?? '',
   });
   const [allProperties, setAllProperties] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [confirmDuplicate, setConfirmDuplicate] = useState(false);
@@ -109,6 +112,7 @@ export default function PropertyForm({ property = null }) {
       .then(({ data }) => setAllProperties(data))
       .catch(() => {});
     fetchRole().then(setRole);
+    fetchProjects().then(setProjects);
   }, []);
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -119,19 +123,36 @@ export default function PropertyForm({ property = null }) {
     [allProperties, form.lat, form.lng, property?.id]
   );
 
-  // Mã tự sinh: HL-{diện tích}-{số thứ tự 5 chữ số}, ví dụ HL-120-00002
+  const selectedProject = projects.find((p) => p.id === form.project_id) || null;
+
+  // Số thứ tự tiếp theo:
+  //  - Thuộc dự án: đếm riêng trong dự án đó
+  //  - BĐS lẻ: đếm chung các mã lẻ HL-{số}-{seq}
   const nextSeq = useMemo(() => {
     let max = 0;
     for (const p of allProperties) {
-      const m = /^HL-\d+-(\d+)$/.exec(p.code ?? '');
-      if (m) max = Math.max(max, parseInt(m[1], 10));
+      if (form.project_id) {
+        if (p.project_id !== form.project_id) continue;
+        const m = /-(\d+)$/.exec(p.code ?? '');
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      } else {
+        const m = /^HL-\d+-(\d+)$/.exec(p.code ?? '');
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      }
     }
     return max + 1;
-  }, [allProperties]);
+  }, [allProperties, form.project_id]);
 
-  const autoCode = isEdit
-    ? form.code
-    : `HL-${form.area ? Math.round(Number(form.area)) : '?'}-${String(nextSeq).padStart(5, '0')}`;
+  // Sinh mã: có dự án -> HL-{prefix}-{diện tích}-{seq}; lẻ -> HL-{diện tích}-{seq}
+  function buildCode() {
+    const area = form.area ? Math.round(Number(form.area)) : '?';
+    const seq = String(nextSeq).padStart(4, '0');
+    return selectedProject
+      ? `HL-${selectedProject.code_prefix}-${area}-${seq}`
+      : `HL-${area}-${seq}`;
+  }
+
+  const autoCode = isEdit ? form.code : buildCode();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -151,9 +172,8 @@ export default function PropertyForm({ property = null }) {
     }
 
     const values = {
-      code: isEdit
-        ? form.code.trim()
-        : `HL-${Math.round(Number(form.area))}-${String(nextSeq).padStart(5, '0')}`,
+      code: isEdit ? form.code.trim() : buildCode(),
+      project_id: form.project_id || null,
       title: form.title.trim(),
       type: form.type || null,
       status: form.status,
@@ -270,8 +290,21 @@ export default function PropertyForm({ property = null }) {
         <h2 className="section-title">Thông tin chính</h2>
         <div className="form-grid">
           <label>
+            Thuộc dự án
+            <select
+              value={form.project_id}
+              onChange={(e) => setForm((f) => ({ ...f, project_id: e.target.value }))}
+              disabled={isEdit}
+            >
+              <option value="">— BĐS lẻ (không thuộc dự án) —</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </label>
+          <label>
             Mã BĐS (tự sinh)
-            <input value={autoCode} disabled title="Mã tự tạo theo diện tích + số thứ tự" />
+            <input value={autoCode} disabled title="Mã tự tạo theo dự án + diện tích + số thứ tự" />
           </label>
           <label>
             Trạng thái *

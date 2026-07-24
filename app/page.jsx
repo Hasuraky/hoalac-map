@@ -8,6 +8,7 @@ import LeadForm from '@/components/LeadForm';
 import { fetchProperties } from '@/lib/properties';
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import { usePropertyFilter, DEFAULT_FILTERS } from '@/lib/usePropertyFilter';
+import { fetchFeaturedProjects } from '@/lib/projects';
 
 // Leaflet chỉ chạy phía trình duyệt -> tắt SSR cho bản đồ
 const MapView = dynamic(() => import('@/components/MapView'), {
@@ -22,6 +23,8 @@ export default function HomePage() {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [featured, setFeatured] = useState([]);
+  const [flyTarget, setFlyTarget] = useState(null); // { lng, lat, zoom, key }
 
   useEffect(() => {
     fetchProperties()
@@ -31,7 +34,14 @@ export default function HomePage() {
         setRole(role ?? 'guest');
       })
       .catch((e) => setError(e.message));
+    fetchFeaturedProjects().then(setFeatured);
   }, []);
+
+  function flyToProject(p) {
+    if (p.center_lat == null || p.center_lng == null) return;
+    setFlyTarget({ lng: p.center_lng, lat: p.center_lat, zoom: p.zoom ?? 16, key: Date.now() });
+    setSidebarOpen(false);
+  }
 
   const filtered = usePropertyFilter(properties, filters);
 
@@ -70,13 +80,15 @@ export default function HomePage() {
           totalCount={properties.length}
           filteredCount={filtered.length}
           open={sidebarOpen}
+          featured={featured}
+          onFlyProject={flyToProject}
         />
 
         <div className="map-wrap">
           {error ? (
             <div className="map-loading">Lỗi tải dữ liệu: {error}</div>
           ) : (
-            <MapView properties={filtered} />
+            <MapView properties={filtered} flyTarget={flyTarget} />
           )}
 
           {/* Nút bộ lọc trên mobile */}

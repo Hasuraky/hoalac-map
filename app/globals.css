@@ -464,6 +464,64 @@ button {
   border-radius: 50%;
 }
 
+/* Dự án nổi bật ở bộ lọc */
+.featured-projects {
+  margin-bottom: 20px;
+}
+
+.featured-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.featured-chip {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 13px;
+  border-radius: 10px;
+  border: 1.5px solid var(--moss);
+  background: var(--moss-soft);
+  color: var(--moss);
+  cursor: pointer;
+  text-align: left;
+}
+
+.featured-chip:hover {
+  background: var(--moss);
+  color: #fff;
+}
+
+.featured-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+  border-color: var(--stone-dark);
+  background: var(--stone-light);
+  color: var(--ink-soft);
+}
+
+/* Checkbox trong form quản trị */
+.check-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.check-inline input {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--moss);
+}
+
+.btn-mini.star-on {
+  background: var(--moss);
+  color: #fff;
+  border-color: var(--moss);
+}
+
 /* Tag loại hình */
 .type-tags {
   display: flex;
