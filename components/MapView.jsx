@@ -254,7 +254,16 @@ export default function MapView({ properties, flyTarget }) {
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready || !flyTarget) return;
-    map.flyTo({ center: [flyTarget.lng, flyTarget.lat], zoom: flyTarget.zoom ?? 16, duration: 1200 });
+    if (flyTarget.bounds) {
+      const lngs = flyTarget.bounds.map((c) => c[0]);
+      const lats = flyTarget.bounds.map((c) => c[1]);
+      map.fitBounds(
+        [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
+        { padding: 80, duration: 1200 }
+      );
+    } else {
+      map.flyTo({ center: [flyTarget.lng, flyTarget.lat], zoom: flyTarget.zoom ?? 16, duration: 1200 });
+    }
   }, [flyTarget, ready]);
 
   // Chấm vị trí người dùng
