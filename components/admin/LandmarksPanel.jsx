@@ -136,8 +136,15 @@ export default function LandmarksPanel() {
           <label className="span-2">Ảnh (PNG nền trong suốt đẹp nhất)
             <input type="file" accept="image/*" onChange={handleFile} disabled={busy} />
           </label>
-          <label className="overlay-num span-2">Cỡ hiển thị: {width}px
-            <input type="range" min="40" max="200" step="5" value={width} onChange={(e) => setWidth(Number(e.target.value))} />
+          <label className="overlay-num span-2">Cỡ hiển thị: {Math.round((width / 2000) * 100)}%
+            <div className="overlay-num-row">
+              <input type="range" min="1" max="100" step="1"
+                value={Math.round((width / 2000) * 100)}
+                onChange={(e) => setWidth(Math.round((Number(e.target.value) / 100) * 2000))} />
+              <input type="number" min="1" max="100" step="1"
+                value={Math.round((width / 2000) * 100)}
+                onChange={(e) => setWidth(Math.round((Math.min(100, Number(e.target.value) || 0) / 100) * 2000))} />
+            </div>
           </label>
         </div>
 
