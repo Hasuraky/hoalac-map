@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchProperties } from '@/lib/properties';
+import { fetchProperties, deleteProperty } from '@/lib/properties';
 import { fetchProjects, overlayUrl } from '@/lib/projects';
 import { parseSvgLots } from '@/lib/svgLots';
 import { STATUS_LABELS, formatPrice } from '@/lib/format';
@@ -66,6 +66,18 @@ export default function InventoryPanel() {
     if (!res.ok) setError(json.error);
     await load();
     return res.ok;
+  }
+
+  async function removeProperty(p) {
+    if (!window.confirm(`Xóa vĩnh viễn "${p.code}"? Không thể hoàn tác.`)) return;
+    setBusy(true); setError(null);
+    try {
+      await deleteProperty(p.id);
+    } catch (err) {
+      setError(err.message);
+    }
+    setBusy(false);
+    load();
   }
 
   async function removeProject(p) {
@@ -168,7 +180,10 @@ export default function InventoryPanel() {
                   <span className="admin-meta">{p.title} · {formatPrice(p.price)}</span>
                 </div>
                 <span className={`role-badge lead-status-${p.status === 'available' ? 'converted' : 'assigned'}`}>{STATUS_LABELS[p.status]}</span>
-                <a className="btn-mini" href={`/bds/${p.id}/sua`}>✎ Sửa</a>
+                <div className="admin-actions">
+                  <a className="btn-mini" href={`/bds/${p.id}/sua`}>✎ Sửa</a>
+                  <button className="btn-mini danger" disabled={busy} onClick={() => removeProperty(p)}>Xóa</button>
+                </div>
               </div>
             ))}
             {inProject.length === 0 && <p className="form-hint">Chưa có sản phẩm nào.</p>}
@@ -247,7 +262,10 @@ export default function InventoryPanel() {
                 <span className="admin-meta">{p.title} · {formatPrice(p.price)}</span>
               </div>
               <span className={`role-badge lead-status-${p.status === 'available' ? 'converted' : 'assigned'}`}>{STATUS_LABELS[p.status]}</span>
-              <a className="btn-mini" href={`/bds/${p.id}/sua`}>✎ Sửa</a>
+              <div className="admin-actions">
+                <a className="btn-mini" href={`/bds/${p.id}/sua`}>✎ Sửa</a>
+                <button className="btn-mini danger" disabled={busy} onClick={() => removeProperty(p)}>Xóa</button>
+              </div>
             </div>
           ))}
           {standalone.length === 0 && <p className="form-hint">Chưa có sản phẩm lẻ nào.</p>}
