@@ -231,7 +231,9 @@ export default function MapView({ properties, flyTarget }) {
       .catch(() => {});
     mapRef.current = map;
 
-    // Điểm nổi bật — ghim ảnh PNG (markers là DOM, giữ qua mỗi lần đổi nền)
+    // Điểm nổi bật — ghim ảnh PNG, co giãn theo zoom (mốc zoom 16)
+    const LM_REF_ZOOM = 16;
+    const lmImgs = []; // { img, base }
     fetchLandmarks()
       .then((list) => {
         for (const lm of list) {
@@ -239,15 +241,26 @@ export default function MapView({ properties, flyTarget }) {
           el.className = 'landmark-marker';
           const img = document.createElement('img');
           img.src = landmarkUrl(lm.image_path);
-          img.style.width = `${lm.width_px || 90}px`;
           if (lm.name) img.title = lm.name;
           el.appendChild(img);
           new goongjs.Marker({ element: el, anchor: 'bottom' })
             .setLngLat([lm.lng, lm.lat])
             .addTo(map);
+          lmImgs.push({ img, base: lm.width_px || 90 });
         }
+        scaleLandmarks();
       })
       .catch(() => {});
+
+    function scaleLandmarks() {
+      const z = map.getZoom();
+      const factor = Math.pow(2, z - LM_REF_ZOOM);
+      for (const { img, base } of lmImgs) {
+        const w = Math.max(6, Math.min(4000, base * factor));
+        img.style.width = `${w}px`;
+      }
+    }
+    map.on('zoom', scaleLandmarks);
 
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
     SEA_MARKS.forEach((m) => {
