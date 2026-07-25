@@ -98,7 +98,7 @@ function PopupCard({ p, onRoute, routing, onRegionLinks }) {
         {p.address && <div className="meta">{p.address}</div>}
         <ShareButton
           title={`${p.code} — ${p.title}`}
-          url={`${typeof window !== 'undefined' ? window.location.origin : ''}/bds/${p.id}`}
+          url={`${typeof window !== 'undefined' ? window.location.origin : ''}/?bds=${p.id}`}
         />
         <div className="popup-actions">
           <Link href={`/bds/${p.id}`} className="popup-btn">
@@ -691,6 +691,16 @@ export default function MapView({ properties, flyTarget, focusId }) {
       markersRef.current = [];
     };
   }, [properties, ready, baseStyle, lotsVersion]);
+
+  // Link chia sẻ sản phẩm (?bds=id) -> bay tới marker + mở popup
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready || !focusId) return;
+    const p = propertiesRef.current.find((x) => x.id === focusId);
+    if (!p || p.lat == null || p.lng == null) return;
+    map.flyTo({ center: [p.lng, p.lat], zoom: 17, duration: 1200 });
+    openPropertyPopup(p);
+  }, [focusId, ready, properties]);
 
   // Vẽ tuyến đường
   useEffect(() => {

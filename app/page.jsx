@@ -26,6 +26,12 @@ export default function HomePage() {
   const [featured, setFeatured] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [flyTarget, setFlyTarget] = useState(null); // { lng, lat, zoom, key }
+  const [focusId, setFocusId] = useState(null); // id sản phẩm mở từ link chia sẻ
+
+  useEffect(() => {
+    const bds = new URLSearchParams(window.location.search).get('bds');
+    if (bds) setFocusId(bds);
+  }, []);
 
   useEffect(() => {
     fetchProperties()
@@ -106,7 +112,7 @@ export default function HomePage() {
           {error ? (
             <div className="map-loading">Lỗi tải dữ liệu: {error}</div>
           ) : (
-            <MapView properties={filtered} flyTarget={flyTarget} />
+            <MapView properties={filtered} flyTarget={flyTarget} focusId={focusId} />
           )}
 
           {/* Nút bộ lọc trên mobile */}
