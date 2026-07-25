@@ -10,6 +10,7 @@ import ShareButton from '@/components/ShareButton';
 import { fetchProjects, overlayUrl, toDisplayImage } from '@/lib/projects';
 import { parseSvgLots } from '@/lib/svgLots';
 import { fetchLandmarks, landmarkUrl } from '@/lib/landmarks';
+import { fetchRegionLinks } from '@/lib/regionLinks';
 
 // Tâm bản đồ: khu Hòa Lạc
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
@@ -69,7 +70,7 @@ function pinElement(color) {
   return el;
 }
 
-function PopupCard({ p, onRoute, routing }) {
+function PopupCard({ p, onRoute, routing, onRegionLinks }) {
   const color = STATUS_COLORS[p.status] ?? '#8b877c';
   return (
     <div className="popup-card">
@@ -112,6 +113,15 @@ function PopupCard({ p, onRoute, routing }) {
             {routing ? 'Đang tìm…' : '🧭 Đường đi'}
           </button>
         </div>
+        {p._linkCount > 0 && (
+          <button
+            type="button"
+            className="popup-btn popup-btn-outline popup-btn-full"
+            onClick={() => onRegionLinks(p)}
+          >
+            🔗 Liên kết vùng ({p._linkCount})
+          </button>
+        )}
       </div>
     </div>
   );
@@ -151,6 +161,8 @@ export default function MapView({ properties, flyTarget }) {
 
   const lotsRef = useRef({}); // projectId -> [{lot_number, ring, project_id}]
   const [lotsVersion, setLotsVersion] = useState(0);
+  const regionLinksRef = useRef([]); // liên kết vùng
+  const shownLinkForRef = useRef(null); // id sản phẩm đang hiện mũi tên
   const propertiesRef = useRef(properties);
   propertiesRef.current = properties;
 
@@ -231,6 +243,9 @@ export default function MapView({ properties, flyTarget }) {
       .catch(() => {});
     mapRef.current = map;
 
+    // Liên kết vùng (dùng khi bấm nút trong popup)
+    fetchRegionLinks().then((list) => { regionLinksRef.current = list; }).catch(() => {});
+
     // Điểm nổi bật — ghim ảnh PNG, co giãn theo zoom (mốc zoom 16)
     const LM_REF_ZOOM = 16;
     const lmImgs = []; // { img, base }
@@ -310,6 +325,82 @@ export default function MapView({ properties, flyTarget }) {
     );
   }, []);
 
+  // Liên kết vùng của 1 sản phẩm = link riêng của nó + link của dự án nó thuộc
+  function linksForProduct(p) {
+    return regionLinksRef.current.filter(
+      (l) => l.property_id === p.id || (p.project_id && l.project_id === p.project_id)
+    );
+  }
+  // Gắn số lượng liên kết vùng vào object để popup biết có hiện nút không
+  function withLinkCount(p) {
+    if (!p || p.__lotOnly) return p;
+    return { ...p, _linkCount: linksForProduct(p).length };
+  }
+
+  // Tính 3 điểm tạo đầu mũi tên tại đích
+  function arrowHead(from, to) {
+    const [lng1, lat1] = from;
+    const [lng2, lat2] = to;
+    const latR = (lat2 * Math.PI) / 180;
+    const dx = (lng2 - lng1) * Math.cos(latR);
+    const dy = lat2 - lat1;
+    const len = Math.hypot(dx, dy);
+    if (!len) return [];
+    const ux = dx / len;
+    const uy = dy / len;
+    const headLen = Math.min(len * 0.15, 0.004); // độ (~450m tối đa)
+    const ang = (26 * Math.PI) / 180;
+    const wing = (s) => {
+      const ca = Math.cos(s * ang);
+      const sa = Math.sin(s * ang);
+      const rx = -ux * ca - -uy * sa;
+      const ry = -ux * sa + -uy * ca;
+      return [lng2 + (rx * headLen) / Math.cos(latR), lat2 + ry * headLen];
+    };
+    return [wing(1), to, wing(-1)];
+  }
+
+  // Bật/tắt hiển thị mũi tên liên kết vùng cho sản phẩm p
+  function toggleRegionLinks(p) {
+    const map = mapRef.current;
+    if (!map) return;
+    // đang hiện cho chính p -> ẩn
+    if (shownLinkForRef.current === p.id) {
+      clearRegionLinks();
+      return;
+    }
+    const links = linksForProduct(p);
+    if (!links.length) return;
+    const from = [p.lng, p.lat];
+    const feats = [];
+    for (const l of links) {
+      const to = [l.to_lng, l.to_lat];
+      feats.push({ type: 'Feature', properties: { label: l.label || '' }, geometry: { type: 'LineString', coordinates: [from, to] } });
+      const head = arrowHead(from, to);
+      if (head.length) feats.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: head } });
+    }
+    const data = { type: 'FeatureCollection', features: feats };
+
+    if (map.getSource('rlinks')) {
+      map.getSource('rlinks').setData(data);
+    } else {
+      map.addSource('rlinks', { type: 'geojson', data });
+      map.addLayer({ id: 'rlinks-line', type: 'line', source: 'rlinks', paint: { 'line-color': '#b3402f', 'line-width': 3 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks',
+        layout: { 'symbol-placement': 'line-center', 'text-field': ['get', 'label'], 'text-size': 13, 'text-font': ['Roboto Regular'] },
+        paint: { 'text-color': '#7a2a1f', 'text-halo-color': '#fff', 'text-halo-width': 2 } });
+    }
+    shownLinkForRef.current = p.id;
+  }
+
+  function clearRegionLinks() {
+    const map = mapRef.current;
+    if (map?.getSource && map.getSource('rlinks')) {
+      map.getSource('rlinks').setData({ type: 'FeatureCollection', features: [] });
+    }
+    shownLinkForRef.current = null;
+  }
+
   // Bấm vào lô -> popup nhanh (property nếu đã gắn, hoặc "chưa có thông tin")
   function handleLotClick(e) {
     const map = mapRef.current;
@@ -320,7 +411,7 @@ export default function MapView({ properties, flyTarget }) {
     const node = document.createElement('div');
     popupRef.current.setLngLat(e.lngLat).setDOMContent(node).addTo(map);
     setPopupNode(node);
-    setSelected(prop || { __lotOnly: true, lot_number: f.properties.lot_number });
+    setSelected(prop ? withLinkCount(prop) : { __lotOnly: true, lot_number: f.properties.lot_number });
   }
 
   // Dựng/cập nhật vùng lô từ SVG, tô màu theo trạng thái BĐS
@@ -432,7 +523,7 @@ export default function MapView({ properties, flyTarget }) {
         maxWidth: '280px',
         className: 'goong-popup',
       });
-      popupRef.current.on('close', () => setSelected(null));
+      popupRef.current.on('close', () => { setSelected(null); clearRegionLinks(); });
     }
 
     // BĐS đã có vùng lô trên sơ đồ -> ẩn marker (vùng lô đại diện rồi)
@@ -459,7 +550,7 @@ export default function MapView({ properties, flyTarget }) {
           const node = document.createElement('div');
           popupRef.current.setLngLat([p.lng, p.lat]).setDOMContent(node).addTo(map);
           setPopupNode(node);
-          setSelected(p);
+          setSelected(withLinkCount(p));
         });
         const marker = new goongjs.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([p.lng, p.lat])
@@ -572,7 +663,7 @@ export default function MapView({ properties, flyTarget }) {
           popupNode
         )}
       {selected && popupNode && !selected.__lotOnly &&
-        createPortal(<PopupCard p={selected} onRoute={handleRoute} routing={routing} />, popupNode)}
+        createPortal(<PopupCard p={selected} onRoute={handleRoute} routing={routing} onRegionLinks={toggleRegionLinks} />, popupNode)}
 
       {(route || routeError) && (
         <div className="route-banner">

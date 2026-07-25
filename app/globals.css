@@ -883,6 +883,17 @@ input[type='range'] {
   background: var(--moss-soft) !important;
 }
 
+.popup-btn-full {
+  width: 100%;
+  margin-top: 6px;
+  color: #b3402f !important;
+  border-color: #b3402f;
+}
+
+.popup-btn-full:hover {
+  background: #b3402f14 !important;
+}
+
 /* Banner quãng đường */
 .route-banner {
   position: absolute;

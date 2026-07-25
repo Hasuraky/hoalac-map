@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ImageManager from '@/components/ImageManager';
+import RegionLinksEditor from '@/components/admin/RegionLinksEditor';
 import { STATUS_LABELS, PROPERTY_TYPES } from '@/lib/format';
 import {
   fetchProperties,
@@ -400,6 +401,15 @@ export default function PropertyForm({ property = null }) {
         <ImageManager propertyId={property.id} />
       ) : (
         <p className="form-hint">💡 Lưu BĐS xong sẽ chuyển sang bước thêm ảnh.</p>
+      )}
+
+      {/* Liên kết vùng: BĐS lẻ quản lý ở đây; BĐS trong dự án quản lý ở dự án */}
+      {isEdit && (
+        property.project_id ? (
+          <p className="form-hint">Liên kết vùng của BĐS trong dự án được quản lý ở chi tiết dự án (Bảng hàng).</p>
+        ) : (
+          <RegionLinksEditor propertyId={property.id} />
+        )
       )}
 
       {error && <div className="login-error">{error}</div>}

@@ -5,6 +5,7 @@ import { fetchProperties, deleteProperty } from '@/lib/properties';
 import { fetchProjects, overlayUrl } from '@/lib/projects';
 import { parseSvgLots } from '@/lib/svgLots';
 import { STATUS_LABELS, formatPrice } from '@/lib/format';
+import RegionLinksEditor from '@/components/admin/RegionLinksEditor';
 
 // Quản lý toàn bộ bảng hàng: dự án + sản phẩm lẻ. Xem chi tiết dự án.
 export default function InventoryPanel() {
@@ -164,6 +165,11 @@ export default function InventoryPanel() {
               {selected.center_lat != null ? ` · ${selected.center_lat.toFixed(4)}, ${selected.center_lng.toFixed(4)}` : ' · chưa có tọa độ'}
             </p>
           )}
+        </div>
+
+        {/* Liên kết vùng của dự án (áp cho mọi sản phẩm) */}
+        <div className="detail-card admin-card">
+          <RegionLinksEditor projectId={selected.id} />
         </div>
 
         {/* Sản phẩm đã có thông tin */}
