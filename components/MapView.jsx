@@ -403,8 +403,23 @@ export default function MapView({ properties, flyTarget }) {
       popupRef.current.on('close', () => setSelected(null));
     }
 
+    // BĐS đã có vùng lô trên sơ đồ -> ẩn marker (vùng lô đại diện rồi)
+    const covered = new Set();
+    {
+      const byKey = {};
+      for (const p of properties) {
+        if (p.project_id && p.lot_number) byKey[`${p.project_id}|${p.lot_number}`] = p.id;
+      }
+      for (const pid in lotsRef.current) {
+        for (const lot of lotsRef.current[pid]) {
+          const id = byKey[`${pid}|${lot.lot_number}`];
+          if (id) covered.add(id);
+        }
+      }
+    }
+
     properties
-      .filter((p) => p.lat != null && p.lng != null)
+      .filter((p) => p.lat != null && p.lng != null && !covered.has(p.id))
       .forEach((p) => {
         const el = pinElement(STATUS_COLORS[p.status] ?? '#8b877c');
         el.addEventListener('click', (e) => {
@@ -424,7 +439,7 @@ export default function MapView({ properties, flyTarget }) {
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
     };
-  }, [properties, ready, baseStyle]);
+  }, [properties, ready, baseStyle, lotsVersion]);
 
   // Vẽ tuyến đường
   useEffect(() => {
