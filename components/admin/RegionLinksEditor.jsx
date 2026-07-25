@@ -73,8 +73,8 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
           <input type="range" min={-100} max={100} step={5} value={curve} onChange={(e) => setCurve(Number(e.target.value))} />
         </div>
         <div className="rlink-actions">
-          <button className="btn-mini" disabled={busy} onClick={submit}>{editingId ? 'Lưu' : '+ Thêm'}</button>
-          {editingId && <button className="btn-mini ghost" disabled={busy} onClick={resetForm}>Hủy</button>}
+          <button type="button" className="btn-mini" disabled={busy} onClick={submit}>{editingId ? 'Lưu' : '+ Thêm'}</button>
+          {editingId && <button type="button" className="btn-mini ghost" disabled={busy} onClick={resetForm}>Hủy</button>}
         </div>
       </div>
       {error && <div className="login-error">{error}</div>}
@@ -87,8 +87,8 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
               <span className="admin-meta">→ {l.to_lat.toFixed(4)}, {l.to_lng.toFixed(4)}{l.curve ? ` · ${l.curve > 0 ? 'cong lên' : 'cong xuống'} ${Math.abs(Math.round(l.curve * 100))}` : ''}</span>
             </div>
             <div className="rlink-row-actions">
-              <button className="btn-mini" disabled={busy} onClick={() => startEdit(l)}>Sửa</button>
-              <button className="btn-mini danger" disabled={busy} onClick={() => remove(l.id)}>Xóa</button>
+              <button type="button" className="btn-mini" disabled={busy} onClick={() => startEdit(l)}>Sửa</button>
+              <button type="button" className="btn-mini danger" disabled={busy} onClick={() => remove(l.id)}>Xóa</button>
             </div>
           </div>
         ))}
