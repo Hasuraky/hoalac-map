@@ -740,6 +740,23 @@ input[type='range'] {
   line-height: 0;
 }
 
+/* Điểm nổi bật + mini-map chọn vị trí */
+.landmark-marker {
+  line-height: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+}
+.landmark-marker img {
+  display: block;
+}
+.landmark-map {
+  width: 100%;
+  height: 300px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stone-dark);
+  overflow: hidden;
+}
+
 .popup-lot-empty {
   padding: 14px 16px;
 }

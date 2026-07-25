@@ -9,6 +9,7 @@ import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
 import { fetchProjects, overlayUrl, toDisplayImage } from '@/lib/projects';
 import { parseSvgLots } from '@/lib/svgLots';
+import { fetchLandmarks, landmarkUrl } from '@/lib/landmarks';
 
 // Tâm bản đồ: khu Hòa Lạc
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
@@ -229,6 +230,24 @@ export default function MapView({ properties, flyTarget }) {
       })
       .catch(() => {});
     mapRef.current = map;
+
+    // Điểm nổi bật — ghim ảnh PNG (markers là DOM, giữ qua mỗi lần đổi nền)
+    fetchLandmarks()
+      .then((list) => {
+        for (const lm of list) {
+          const el = document.createElement('div');
+          el.className = 'landmark-marker';
+          const img = document.createElement('img');
+          img.src = landmarkUrl(lm.image_path);
+          img.style.width = `${lm.width_px || 90}px`;
+          if (lm.name) img.title = lm.name;
+          el.appendChild(img);
+          new goongjs.Marker({ element: el, anchor: 'bottom' })
+            .setLngLat([lm.lng, lm.lat])
+            .addTo(map);
+        }
+      })
+      .catch(() => {});
 
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
     SEA_MARKS.forEach((m) => {

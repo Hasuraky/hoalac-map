@@ -6,6 +6,7 @@ import { fetchRole } from '@/lib/properties';
 import MembersPanel from '@/components/admin/MembersPanel';
 import LeadsPanel from '@/components/admin/LeadsPanel';
 import InventoryPanel from '@/components/admin/InventoryPanel';
+import LandmarksPanel from '@/components/admin/LandmarksPanel';
 
 export default function InternalPage() {
   const [role, setRole] = useState(null);
@@ -38,6 +39,7 @@ export default function InternalPage() {
     { key: 'members', label: 'Thành viên', icon: '👥' },
     { key: 'leads', label: 'Data tư vấn', icon: '💬' },
     canManage && { key: 'inventory', label: 'Bảng hàng', icon: '📋' },
+    canManage && { key: 'landmarks', label: 'Điểm nổi bật', icon: '📍' },
   ].filter(Boolean);
 
   return (
@@ -67,10 +69,12 @@ export default function InternalPage() {
           {tab === 'members' && 'Thành viên'}
           {tab === 'leads' && 'Data yêu cầu tư vấn'}
           {tab === 'inventory' && 'Bảng hàng'}
+          {tab === 'landmarks' && 'Điểm nổi bật'}
         </h2>
         {tab === 'members' && <MembersPanel myRole={role} />}
         {tab === 'leads' && <LeadsPanel myRole={role} />}
         {tab === 'inventory' && canManage && <InventoryPanel />}
+        {tab === 'landmarks' && canManage && <LandmarksPanel />}
       </main>
     </div>
   );
