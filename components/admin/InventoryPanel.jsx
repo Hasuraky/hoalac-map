@@ -156,7 +156,10 @@ export default function InventoryPanel() {
               <label>Tên dự án<input value={edit.name} onChange={(e) => setEdit({ ...edit, name: e.target.value })} /></label>
               <label>Mã rút gọn<input value={edit.code_prefix} onChange={(e) => setEdit({ ...edit, code_prefix: e.target.value })} /></label>
               <label className="span-2">Tọa độ tâm<input value={edit.coords} onChange={(e) => setEdit({ ...edit, coords: e.target.value })} placeholder="21.008, 105.526" /></label>
-              <label className="check-inline"><input type="checkbox" checked={edit.is_featured} onChange={(e) => setEdit({ ...edit, is_featured: e.target.checked })} /> Nổi bật</label>
+              <div className="check-inline star-toggle-wrap">
+                <span>Nổi bật</span>
+                <button type="button" className={`star-toggle${edit.is_featured ? ' on' : ''}`} aria-pressed={edit.is_featured} title="Dự án nổi bật" onClick={() => setEdit({ ...edit, is_featured: !edit.is_featured })}>★</button>
+              </div>
               <button className="btn-primary btn-inline" disabled={busy} onClick={saveEdit}>Lưu</button>
             </div>
           ) : (
@@ -227,7 +230,10 @@ export default function InventoryPanel() {
           <label>Tên dự án *<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Xanh Villas" required /></label>
           <label>Mã rút gọn<input value={form.code_prefix} onChange={(e) => setForm({ ...form, code_prefix: e.target.value })} placeholder="XanhVillas (để trống = tự tạo)" /></label>
           <label className="span-2">Tọa độ tâm (dán Google Maps)<input value={form.coords} onChange={(e) => setForm({ ...form, coords: e.target.value })} placeholder="21.00812, 105.52643" /></label>
-          <label className="check-inline"><input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} /> Dự án nổi bật</label>
+          <div className="check-inline star-toggle-wrap">
+            <span>Dự án nổi bật</span>
+            <button type="button" className={`star-toggle${form.is_featured ? ' on' : ''}`} aria-pressed={form.is_featured} title="Dự án nổi bật" onClick={() => setForm({ ...form, is_featured: !form.is_featured })}>★</button>
+          </div>
           <button type="submit" className="btn-primary btn-inline" disabled={busy}>{busy ? 'Đang lưu…' : 'Thêm dự án'}</button>
         </form>
       </div>

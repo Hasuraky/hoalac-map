@@ -493,6 +493,35 @@ button {
   border-color: var(--moss, #4a5d3a);
 }
 
+.star-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.star-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line, #d8d3c8);
+  background: #fff;
+  color: #c9c4b8;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.star-toggle:hover {
+  border-color: var(--moss, #35502f);
+}
+
+.star-toggle.on {
+  background: var(--moss, #35502f);
+  border-color: var(--moss, #35502f);
+  color: #fff;
+}
+
 .project-share {
   margin-top: 8px;
 }
