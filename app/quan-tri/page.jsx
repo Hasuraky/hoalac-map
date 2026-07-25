@@ -5,8 +5,14 @@ import Link from 'next/link';
 import { fetchRole } from '@/lib/properties';
 import MembersPanel from '@/components/admin/MembersPanel';
 import LeadsPanel from '@/components/admin/LeadsPanel';
+import dynamic from 'next/dynamic';
 import InventoryPanel from '@/components/admin/InventoryPanel';
-import LandmarksPanel from '@/components/admin/LandmarksPanel';
+
+// Dùng bản đồ Goong (window) -> tắt SSR để build không lỗi
+const LandmarksPanel = dynamic(() => import('@/components/admin/LandmarksPanel'), {
+  ssr: false,
+  loading: () => <p className="form-hint">Đang tải…</p>,
+});
 
 export default function InternalPage() {
   const [role, setRole] = useState(null);
