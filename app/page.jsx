@@ -54,10 +54,10 @@ export default function HomePage() {
   return (
     <div className="map-page">
       <header className="topbar">
-        <div className="topbar-brand">
+        <a className="topbar-brand" href="/" title="Tải lại trang">
           <img className="brand-logo" src="/logo.svg" alt="" />
           <h1>Bản đồ BĐS Hòa Lạc</h1>
-        </div>
+        </a>
 
         <div className="topbar-right">
           <div className="topbar-legend">
