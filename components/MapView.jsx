@@ -145,7 +145,7 @@ function starElement(withLabel) {
   return el;
 }
 
-export default function MapView({ properties, flyTarget }) {
+export default function MapView({ properties, flyTarget, focusId }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef([]);
@@ -520,6 +520,17 @@ export default function MapView({ properties, flyTarget }) {
     shownArrowRef.current = null;
   }
 
+  // Mở popup marker cho 1 sản phẩm (dùng chung: click marker + link chia sẻ)
+  function openPropertyPopup(p) {
+    const map = mapRef.current;
+    if (!map || !popupRef.current || p.lat == null || p.lng == null) return;
+    clearRegionLinks();
+    const node = document.createElement('div');
+    popupRef.current.setLngLat([p.lng, p.lat]).setDOMContent(node).addTo(map);
+    setPopupNode(node);
+    setSelected(withLinkCount(p));
+  }
+
   // Bấm vào lô -> popup nhanh (property nếu đã gắn, hoặc "chưa có thông tin")
   function handleLotClick(e) {
     const map = mapRef.current;
@@ -667,11 +678,7 @@ export default function MapView({ properties, flyTarget }) {
         const el = pinElement(STATUS_COLORS[p.status] ?? '#8b877c');
         el.addEventListener('click', (e) => {
           e.stopPropagation();
-          clearRegionLinks();
-          const node = document.createElement('div');
-          popupRef.current.setLngLat([p.lng, p.lat]).setDOMContent(node).addTo(map);
-          setPopupNode(node);
-          setSelected(withLinkCount(p));
+          openPropertyPopup(p);
         });
         const marker = new goongjs.Marker({ element: el, anchor: 'bottom' })
           .setLngLat([p.lng, p.lat])
