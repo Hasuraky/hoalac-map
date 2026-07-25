@@ -280,6 +280,13 @@ export default function MapView({ properties, flyTarget }) {
     map.on('zoom', scaleLandmarks);
     map.on('zoom', () => refreshRegionLabels());
 
+    // Click vào vùng trống -> ẩn mũi tên liên kết vùng (như đóng popup)
+    map.on('click', (e) => {
+      if (!shownArrowRef.current) return;
+      const hits = map.getLayer('lots-fill') ? map.queryRenderedFeatures(e.point, { layers: ['lots-fill'] }) : [];
+      if (!hits.length) clearRegionLinks(); // không trúng lô nào -> vùng trống
+    });
+
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
     SEA_MARKS.forEach((m) => {
       const marker = new goongjs.Marker({ element: starElement(m.label), anchor: 'center' })
