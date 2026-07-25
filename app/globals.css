@@ -740,6 +740,10 @@ input[type='range'] {
   line-height: 0;
 }
 
+.popup-lot-empty {
+  padding: 14px 16px;
+}
+
 /* Sao vàng + nhãn quần đảo trên biển Đông */
 .sea-star {
   display: flex;

@@ -45,6 +45,7 @@ export default function PropertyForm({ property = null }) {
     lat: property?.lat ?? null,
     lng: property?.lng ?? null,
     project_id: property?.project_id ?? '',
+    lot_number: property?.lot_number ?? '',
   });
   const [allProperties, setAllProperties] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -174,6 +175,7 @@ export default function PropertyForm({ property = null }) {
     const values = {
       code: isEdit ? form.code.trim() : buildCode(),
       project_id: form.project_id || null,
+      lot_number: form.lot_number.trim() || null,
       title: form.title.trim(),
       type: form.type || null,
       status: form.status,
@@ -306,6 +308,12 @@ export default function PropertyForm({ property = null }) {
             Mã BĐS (tự sinh)
             <input value={autoCode} disabled title="Mã tự tạo theo dự án + diện tích + số thứ tự" />
           </label>
+          {form.project_id && (
+            <label>
+              Số lô (khớp id trong sơ đồ SVG)
+              <input value={form.lot_number} onChange={set('lot_number')} placeholder="A5-06" />
+            </label>
+          )}
           <label>
             Trạng thái *
             <select value={form.status} onChange={set('status')}>

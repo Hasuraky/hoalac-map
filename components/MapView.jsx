@@ -8,6 +8,7 @@ import '@goongmaps/goong-js/dist/goong-js.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
 import { fetchProjects, overlayUrl } from '@/lib/projects';
+import { parseSvgLots } from '@/lib/svgLots';
 
 // Tâm bản đồ: khu Hòa Lạc
 const HOA_LAC_CENTER = [105.526, 21.008]; // Goong dùng [lng, lat]
@@ -146,6 +147,12 @@ export default function MapView({ properties, flyTarget }) {
   const [showPoi, setShowPoi] = useState(false); // mặc định: ẩn địa điểm
   const showPoiRef = useRef(true);
   showPoiRef.current = showPoi;
+
+  const lotsRef = useRef({}); // projectId -> [{lot_number, ring, project_id}]
+  const [lotsVersion, setLotsVersion] = useState(0);
+  const propertiesRef = useRef(properties);
+  propertiesRef.current = properties;
+
   const [selected, setSelected] = useState(null);
   const [popupNode, setPopupNode] = useState(null);
   const [route, setRoute] = useState(null);
@@ -196,11 +203,24 @@ export default function MapView({ properties, flyTarget }) {
       drawOverlays(map);
     });
 
-    // Tải danh sách dự án có sơ đồ
+    // Tải danh sách dự án có sơ đồ + đọc lô từ SVG
     fetchProjects()
-      .then((list) => {
+      .then(async (list) => {
         overlaysRef.current = list.filter((p) => p.overlay_path && p.overlay_coords);
         if (map.isStyleLoaded()) drawOverlays(map);
+        for (const pr of list) {
+          if (
+            pr.overlay_path &&
+            pr.overlay_path.toLowerCase().endsWith('.svg') &&
+            pr.overlay_coords
+          ) {
+            const rings = await parseSvgLots(overlayUrl(pr.overlay_path), pr.overlay_coords);
+            if (rings.length) {
+              lotsRef.current[pr.id] = rings.map((r) => ({ ...r, project_id: pr.id }));
+            }
+          }
+        }
+        setLotsVersion((v) => v + 1);
       })
       .catch(() => {});
     mapRef.current = map;
@@ -252,6 +272,85 @@ export default function MapView({ properties, flyTarget }) {
       { enableHighAccuracy: true, timeout: 8000 }
     );
   }, []);
+
+  // Bấm vào lô -> popup nhanh (property nếu đã gắn, hoặc "chưa có thông tin")
+  function handleLotClick(e) {
+    const map = mapRef.current;
+    const f = e.features && e.features[0];
+    if (!f) return;
+    const pid = f.properties.pid;
+    const prop = pid ? propertiesRef.current.find((p) => p.id === pid) : null;
+    const node = document.createElement('div');
+    popupRef.current.setLngLat(e.lngLat).setDOMContent(node).addTo(map);
+    setPopupNode(node);
+    setSelected(prop || { __lotOnly: true, lot_number: f.properties.lot_number });
+  }
+
+  // Dựng/cập nhật vùng lô từ SVG, tô màu theo trạng thái BĐS
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+
+    const build = () => {
+      // tra BĐS theo (dự án | số lô)
+      const byKey = {};
+      for (const p of propertiesRef.current) {
+        if (p.project_id && p.lot_number) byKey[`${p.project_id}|${p.lot_number}`] = p;
+      }
+      const feats = [];
+      for (const pid in lotsRef.current) {
+        for (const lot of lotsRef.current[pid]) {
+          const prop = byKey[`${pid}|${lot.lot_number}`];
+          feats.push({
+            type: 'Feature',
+            properties: {
+              lot_number: lot.lot_number,
+              status: prop ? prop.status : 'none',
+              pid: prop ? prop.id : '',
+            },
+            geometry: { type: 'Polygon', coordinates: [[...lot.ring, lot.ring[0]]] },
+          });
+        }
+      }
+      const data = { type: 'FeatureCollection', features: feats };
+
+      if (map.getSource('lots')) {
+        map.getSource('lots').setData(data);
+        return;
+      }
+      map.addSource('lots', { type: 'geojson', data });
+      map.addLayer({
+        id: 'lots-fill',
+        type: 'fill',
+        source: 'lots',
+        paint: {
+          'fill-color': [
+            'match',
+            ['get', 'status'],
+            'available', STATUS_COLORS.available,
+            'deposited', STATUS_COLORS.deposited,
+            'sold', STATUS_COLORS.sold,
+            'inactive', STATUS_COLORS.inactive,
+            '#8b877c', // chưa gắn -> xám
+          ],
+          'fill-opacity': 0.5,
+        },
+      });
+      map.addLayer({
+        id: 'lots-line',
+        type: 'line',
+        source: 'lots',
+        paint: { 'line-color': '#ffffff', 'line-width': 1 },
+      });
+      map.on('click', 'lots-fill', handleLotClick);
+      map.on('mouseenter', 'lots-fill', () => (map.getCanvas().style.cursor = 'pointer'));
+      map.on('mouseleave', 'lots-fill', () => (map.getCanvas().style.cursor = ''));
+    };
+
+    if (map.isStyleLoaded()) build();
+    else map.once('idle', build);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [properties, lotsVersion, ready, baseStyle]);
 
   // Bay tới dự án khi bấm chip nổi bật
   useEffect(() => {
@@ -412,7 +511,15 @@ export default function MapView({ properties, flyTarget }) {
       <div ref={containerRef} className="gmap-container" />
 
       {/* Nội dung popup render bằng React */}
-      {selected && popupNode &&
+      {selected && popupNode && selected.__lotOnly &&
+        createPortal(
+          <div className="popup-card popup-lot-empty">
+            <p className="popup-code">Lô {selected.lot_number}</p>
+            <p className="meta">Chưa có thông tin — chưa gắn BĐS cho lô này.</p>
+          </div>,
+          popupNode
+        )}
+      {selected && popupNode && !selected.__lotOnly &&
         createPortal(<PopupCard p={selected} onRoute={handleRoute} routing={routing} />, popupNode)}
 
       {(route || routeError) && (
