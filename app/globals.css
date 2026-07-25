@@ -895,6 +895,23 @@ input[type='range'] {
   width: 100%;
 }
 
+.rlink-actions,
+.rlink-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-mini.ghost {
+  background: transparent;
+  color: var(--ink-soft, #6b675e);
+  border: 1px solid var(--line, #d8d3c8);
+}
+
+.admin-row.editing {
+  outline: 2px solid var(--moss, #4a5d3a);
+  border-radius: 8px;
+}
+
 .popup-btn-full {
   width: 100%;
   margin-top: 6px;
