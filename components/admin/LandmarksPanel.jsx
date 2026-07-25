@@ -21,6 +21,7 @@ export default function LandmarksPanel() {
   const [width, setWidth] = useState(90);
   const [imgPath, setImgPath] = useState(null);
   const [imgUrl, setImgUrl] = useState(null);
+  const [editingId, setEditingId] = useState(null); // null = thêm mới
 
   async function load() {
     const res = await fetch('/api/admin/landmarks');
@@ -78,18 +79,33 @@ export default function LandmarksPanel() {
     }
   }
 
-  async function add() {
+  function resetForm() {
+    setName(''); setPos(null); setImgPath(null); setImgUrl(null); setWidth(90); setEditingId(null);
+    markerRef.current?.remove(); markerRef.current = null;
+  }
+
+  function startEdit(it) {
+    setEditingId(it.id);
+    setName(it.name || '');
+    setWidth(it.width_px || 90);
+    setImgPath(it.image_path);
+    setImgUrl(landmarkUrl(it.image_path));
+    setPos([it.lng, it.lat]);
+    mapRef.current?.flyTo({ center: [it.lng, it.lat], zoom: 15 });
+    window.scrollTo?.({ top: 0, behavior: 'smooth' });
+  }
+
+  async function save() {
     if (!pos || !imgPath) { setError('Cần chọn vị trí và ảnh.'); return; }
     setBusy(true); setError(null);
-    const res = await fetch('/api/admin/landmarks', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, lat: pos[1], lng: pos[0], image_path: imgPath, width_px: width }),
-    });
+    const body = { name, lat: pos[1], lng: pos[0], image_path: imgPath, width_px: width };
+    const res = editingId
+      ? await fetch(`/api/admin/landmarks/${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      : await fetch('/api/admin/landmarks', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const json = await res.json();
     setBusy(false);
     if (!res.ok) { setError(json.error); return; }
-    setName(''); setPos(null); setImgPath(null); setImgUrl(null); setWidth(90);
-    markerRef.current?.remove();
+    resetForm();
     load();
   }
 
@@ -106,7 +122,7 @@ export default function LandmarksPanel() {
       {error && <div className="login-error">{error}</div>}
 
       <div className="detail-card admin-card">
-        <h2 className="section-title">Thêm điểm nổi bật</h2>
+        <h2 className="section-title">{editingId ? 'Sửa điểm nổi bật' : 'Thêm điểm nổi bật'}</h2>
         <div ref={mapEl} className="landmark-map" />
         <p className="form-hint">Bấm lên bản đồ để chọn vị trí, hoặc dán tọa độ Google Maps bên dưới.</p>
 
@@ -126,8 +142,13 @@ export default function LandmarksPanel() {
         </div>
 
         {imgUrl && <img src={imgUrl} alt="" style={{ width, marginTop: 8 }} />}
-        <div style={{ marginTop: 12 }}>
-          <button className="btn-primary btn-inline" disabled={busy} onClick={add}>Thêm điểm</button>
+        <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+          <button className="btn-primary btn-inline" disabled={busy} onClick={save}>
+            {editingId ? 'Lưu thay đổi' : 'Thêm điểm'}
+          </button>
+          {editingId && (
+            <button className="btn-secondary" disabled={busy} onClick={resetForm}>Hủy</button>
+          )}
         </div>
       </div>
 
@@ -141,7 +162,10 @@ export default function LandmarksPanel() {
                 <strong>{it.name || '(không tên)'}</strong>
                 <span className="admin-meta">{it.lat.toFixed(4)}, {it.lng.toFixed(4)} · {it.width_px}px</span>
               </div>
-              <button className="btn-mini danger" disabled={busy} onClick={() => remove(it)}>Xóa</button>
+              <div className="admin-actions">
+                <button className="btn-mini" disabled={busy} onClick={() => startEdit(it)}>✎ Sửa</button>
+                <button className="btn-mini danger" disabled={busy} onClick={() => remove(it)}>Xóa</button>
+              </div>
             </div>
           ))}
           {items.length === 0 && <p className="form-hint">Chưa có điểm nổi bật nào.</p>}
