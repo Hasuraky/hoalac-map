@@ -29,6 +29,7 @@ export async function POST(request) {
     to_lat: b.to_lat,
     to_lng: b.to_lng,
     label: (b.label ?? '').trim() || null,
+    curve: Number.isFinite(b.curve) ? b.curve : 0,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });

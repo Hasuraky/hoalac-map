@@ -7,6 +7,7 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
   const [links, setLinks] = useState([]);
   const [coords, setCoords] = useState('');
   const [label, setLabel] = useState('');
+  const [curve, setCurve] = useState(0); // -100..100, 0 = thẳng
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
@@ -25,12 +26,12 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
     setBusy(true); setError(null);
     const res = await fetch('/api/admin/region-links', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ project_id: projectId ?? null, property_id: propertyId ?? null, to_lat: Number(m[1]), to_lng: Number(m[2]), label }),
+      body: JSON.stringify({ project_id: projectId ?? null, property_id: propertyId ?? null, to_lat: Number(m[1]), to_lng: Number(m[2]), label, curve: curve / 100 }),
     });
     const json = await res.json();
     setBusy(false);
     if (!res.ok) { setError(json.error); return; }
-    setCoords(''); setLabel(''); load();
+    setCoords(''); setLabel(''); setCurve(0); load();
   }
 
   async function remove(id) {
@@ -47,6 +48,10 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
       <div className="rlink-add">
         <input value={coords} onChange={(e) => setCoords(e.target.value)} placeholder="Tọa độ đích: 21.0125, 105.5254" />
         <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Nội dung: 2 km · 5 phút tới ĐH FPT" />
+        <div className="rlink-curve">
+          <label>Độ cong: <b>{curve === 0 ? 'thẳng' : (curve > 0 ? `cong lên ${curve}` : `cong xuống ${Math.abs(curve)}`)}</b></label>
+          <input type="range" min={-100} max={100} step={5} value={curve} onChange={(e) => setCurve(Number(e.target.value))} />
+        </div>
         <button className="btn-mini" disabled={busy} onClick={add}>+ Thêm</button>
       </div>
       {error && <div className="login-error">{error}</div>}
@@ -56,7 +61,7 @@ export default function RegionLinksEditor({ projectId, propertyId }) {
           <div className="admin-row" key={l.id}>
             <div className="admin-user">
               <strong>{l.label || '(không nhãn)'}</strong>
-              <span className="admin-meta">→ {l.to_lat.toFixed(4)}, {l.to_lng.toFixed(4)}</span>
+              <span className="admin-meta">→ {l.to_lat.toFixed(4)}, {l.to_lng.toFixed(4)}{l.curve ? ` · ${l.curve > 0 ? 'cong lên' : 'cong xuống'} ${Math.abs(Math.round(l.curve * 100))}` : ''}</span>
             </div>
             <button className="btn-mini danger" disabled={busy} onClick={() => remove(l.id)}>Xóa</button>
           </div>

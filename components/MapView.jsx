@@ -340,29 +340,61 @@ export default function MapView({ properties, flyTarget }) {
     return { ...p, _linkCount: linksForProduct(p).length };
   }
 
-  // Đầu mũi tên đặc (polygon) tại đích — trả về ring [[w1, tip, w2, w1]]
-  function arrowHeadPolygon(from, to) {
-    const [lng1, lat1] = from;
-    const [lng2, lat2] = to;
-    const latR = (lat2 * Math.PI) / 180;
-    const dx = (lng2 - lng1) * Math.cos(latR);
-    const dy = lat2 - lat1;
+  // Điểm điều khiển + đỉnh cong cho đường Bézier từ from->to theo độ cong (-1..1)
+  // curve > 0 = cong lên (về phía Bắc), < 0 = cong xuống
+  function curveGeometry(from, to, curve) {
+    const latR = (((from[1] + to[1]) / 2) * Math.PI) / 180;
+    const cos = Math.cos(latR);
+    const dx = (to[0] - from[0]) * cos;
+    const dy = to[1] - from[1];
+    const len = Math.hypot(dx, dy) || 1e-9;
+    let px = -dy / len; // vuông góc (đơn vị, không gian đã co theo vĩ độ)
+    let py = dx / len;
+    if (py < 0) { px = -px; py = -py; } // luôn hướng Bắc -> dương = cong lên
+    const offset = (curve || 0) * len * 0.4;
+    const mx = (from[0] + to[0]) / 2;
+    const my = (from[1] + to[1]) / 2;
+    return {
+      control: [mx + (px * 2 * offset) / cos, my + py * 2 * offset],
+      apex: [mx + (px * offset) / cos, my + py * offset],
+      len,
+    };
+  }
+
+  // Chuỗi điểm trên đường Bézier bậc 2 (thẳng nếu control ~ điểm giữa)
+  function bezierLine(from, to, control, n = 40) {
+    const pts = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n;
+      const mt = 1 - t;
+      pts.push([
+        mt * mt * from[0] + 2 * mt * t * control[0] + t * t * to[0],
+        mt * mt * from[1] + 2 * mt * t * control[1] + t * t * to[1],
+      ]);
+    }
+    return pts;
+  }
+
+  // Đầu mũi tên đặc tại đích, hướng theo tiếp tuyến base->tip
+  function arrowHeadPolygon(base, tip, maxLen) {
+    const latR = (tip[1] * Math.PI) / 180;
+    const cos = Math.cos(latR);
+    const dx = (tip[0] - base[0]) * cos;
+    const dy = tip[1] - base[1];
     const len = Math.hypot(dx, dy);
     if (!len) return null;
     const ux = dx / len;
     const uy = dy / len;
-    const headLen = Math.min(0.004, len * 0.4); // kích thước cố định cho mọi mũi tên
+    const headLen = Math.min(0.004, (maxLen ?? len) * 0.4); // cố định cho mọi mũi tên
     const ang = (32 * Math.PI) / 180;
     const wing = (s) => {
       const ca = Math.cos(s * ang);
       const sa = Math.sin(s * ang);
       const rx = -ux * ca - -uy * sa;
       const ry = -ux * sa + -uy * ca;
-      return [lng2 + (rx * headLen) / Math.cos(latR), lat2 + ry * headLen];
+      return [tip[0] + (rx * headLen) / cos, tip[1] + ry * headLen];
     };
-    const w1 = wing(1);
-    const w2 = wing(-1);
-    return [[w1, to, w2, w1]];
+    return [[wing(1), tip, wing(-1), wing(1)]];
   }
 
   // Cỡ chữ theo zoom (khớp các mốc trong layer)
@@ -387,11 +419,11 @@ export default function MapView({ properties, flyTarget }) {
       const screenLen = Math.hypot(pb.x - pa.x, pb.y - pa.y);
       const textW = l.label.length * fs * 0.55; // ước lượng bề rộng chữ (px)
       if (screenLen < textW + 16) continue; // không đủ chỗ -> ẩn nhãn này
-      const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
-      const latR = (mid[1] * Math.PI) / 180;
+      const g = curveGeometry(from, to, l.curve || 0); // đặt nhãn tại đỉnh cong
+      const latR = (g.apex[1] * Math.PI) / 180;
       let rotate = Math.atan2(-(to[1] - from[1]), (to[0] - from[0]) * Math.cos(latR)) * (180 / Math.PI);
       if (rotate > 90) rotate -= 180; else if (rotate < -90) rotate += 180;
-      feats.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: mid } });
+      feats.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: g.apex } });
     }
     return { type: 'FeatureCollection', features: feats };
   }
@@ -415,8 +447,12 @@ export default function MapView({ properties, flyTarget }) {
     const heads = [];
     for (const l of links) {
       const to = [l.to_lng, l.to_lat];
-      shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [from, to] } });
-      const ring = arrowHeadPolygon(from, to);
+      const g = curveGeometry(from, to, l.curve || 0);
+      const line = bezierLine(from, to, g.control);
+      shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line } });
+      // đầu mũi tên hướng theo tiếp tuyến cuối (điểm áp chót -> đích)
+      const base = line[line.length - 2];
+      const ring = arrowHeadPolygon(base, to, g.len);
       if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
     }
     shownArrowRef.current = { from, links }; // để dựng lại nhãn khi zoom

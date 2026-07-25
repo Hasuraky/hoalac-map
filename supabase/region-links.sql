@@ -11,11 +11,15 @@ create table if not exists region_links (
   to_lat double precision not null,
   to_lng double precision not null,
   label text,                       -- ví dụ: "2 km" / "5 phút tới ĐH FPT"
+  curve double precision not null default 0,  -- độ cong: 0 = thẳng, âm = cong xuống, dương = cong lên
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_rlinks_project on region_links (project_id);
 create index if not exists idx_rlinks_property on region_links (property_id);
+
+-- thêm cột cho bảng đã tồn tại
+alter table region_links add column if not exists curve double precision not null default 0;
 
 alter table region_links enable row level security;
 drop policy if exists "public read region_links" on region_links;
