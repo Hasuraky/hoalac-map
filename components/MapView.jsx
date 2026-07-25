@@ -395,8 +395,17 @@ export default function MapView({ properties, flyTarget }) {
       map.addLayer({ id: 'rlinks-head-outline', type: 'line', source: 'rlinks-head', paint: { 'line-color': '#fff', 'line-width': 3 }, layout: { 'line-join': 'round' } });
       // nhãn: chữ đậm, fill trắng, viền xám dày
       map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks',
-        layout: { 'symbol-placement': 'line-center', 'text-field': ['get', 'label'], 'text-size': 14, 'text-font': ['Roboto Bold'] },
-        paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 2.5 } });
+        layout: {
+          'symbol-placement': 'line-center',
+          'text-field': ['get', 'label'],
+          'text-size': 18,
+          'text-font': ['Roboto Bold'],
+          'text-allow-overlap': true,
+          'text-ignore-placement': true,
+          'text-padding': 0,
+          'text-max-angle': 90,
+        },
+        paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 3 } });
     }
     shownLinkForRef.current = p.id;
     // ẩn popup marker mà không xóa mũi tên vừa vẽ
