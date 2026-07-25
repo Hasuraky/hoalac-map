@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import ImageManager from '@/components/ImageManager';
 import { STATUS_LABELS, PROPERTY_TYPES } from '@/lib/format';
@@ -27,7 +27,11 @@ const DIRECTIONS = ['Đông', 'Tây', 'Nam', 'Bắc', 'Đông Bắc', 'Đông Na
 // property = null -> thêm mới; có property -> sửa
 export default function PropertyForm({ property = null }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isEdit = !!property;
+  // Thêm mới từ Bảng hàng: điền sẵn dự án + số lô qua query
+  const initProject = !isEdit ? searchParams.get('project') || '' : '';
+  const initLot = !isEdit ? searchParams.get('lot') || '' : '';
 
   const [form, setForm] = useState({
     code: property?.code ?? '',
@@ -44,8 +48,8 @@ export default function PropertyForm({ property = null }) {
     description: property?.description ?? '',
     lat: property?.lat ?? null,
     lng: property?.lng ?? null,
-    project_id: property?.project_id ?? '',
-    lot_number: property?.lot_number ?? '',
+    project_id: property?.project_id ?? initProject,
+    lot_number: property?.lot_number ?? initLot,
   });
   const [allProperties, setAllProperties] = useState([]);
   const [projects, setProjects] = useState([]);

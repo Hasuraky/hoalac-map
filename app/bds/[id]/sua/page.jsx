@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchProperty } from '@/lib/properties';
@@ -36,7 +36,9 @@ export default function EditPropertyPage() {
       </header>
       <main className="detail-page">
         <div className="detail-card form-card">
-          <PropertyForm property={property} />
+          <Suspense fallback={<div className="form-hint">Đang tải…</div>}>
+            <PropertyForm property={property} />
+          </Suspense>
         </div>
       </main>
     </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import PropertyForm from '@/components/PropertyForm';
 
@@ -13,7 +14,9 @@ export default function NewPropertyPage() {
       </header>
       <main className="detail-page">
         <div className="detail-card form-card">
-          <PropertyForm />
+          <Suspense fallback={<div className="form-hint">Đang tải…</div>}>
+            <PropertyForm />
+          </Suspense>
         </div>
       </main>
     </div>
