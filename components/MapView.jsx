@@ -254,7 +254,7 @@ export default function MapView({ properties, flyTarget }) {
 
     function scaleLandmarks() {
       const z = map.getZoom();
-      const factor = 5 * Math.pow(2, z - LM_REF_ZOOM); // to gấp 5 lần so với trước
+      const factor = 7.5 * Math.pow(2, z - LM_REF_ZOOM); // 5 x 1.5
       for (const { img, base } of lmImgs) {
         const w = Math.max(6, Math.min(6000, base * factor));
         img.style.width = `${w}px`;
