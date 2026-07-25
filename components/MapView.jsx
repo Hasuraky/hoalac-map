@@ -458,6 +458,10 @@ export default function MapView({ properties, flyTarget }) {
     suppressClearRef.current = true;
     popupRef.current?.remove();
     suppressClearRef.current = false;
+    // zoom để hiển thị toàn bộ liên kết vùng của sản phẩm
+    const bounds = new goongjs.LngLatBounds(from, from);
+    for (const l of links) bounds.extend([l.to_lng, l.to_lat]);
+    map.fitBounds(bounds, { padding: 90, maxZoom: 16, duration: 600 });
   }
 
   function clearRegionLinks() {
