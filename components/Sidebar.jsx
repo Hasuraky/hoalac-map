@@ -60,7 +60,7 @@ export default function Sidebar({
               </option>
               {allProjects.map((p) => (
                 <option key={p.id} value={p.id} disabled={p.center_lat == null && !(p.overlay_coords && p.overlay_coords.length === 4)}>
-                  {featuredIds.has(p.id) ? '⭐ ' : ''}{p.name}
+                  {p.name}{featuredIds.has(p.id) ? ' ⭐' : ''}
                 </option>
               ))}
             </select>
