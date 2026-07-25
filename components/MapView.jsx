@@ -416,6 +416,7 @@ export default function MapView({ properties, flyTarget }) {
           'text-rotate': ['get', 'rotate'],
           'text-rotation-alignment': 'map',
           'text-offset': [0, -0.9],
+          'text-max-width': 999,
         },
         paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 3 } });
     }
