@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import goongjs from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
-import { overlayUrl, uploadOverlay } from '@/lib/projects';
+import { overlayUrl, uploadOverlay, toDisplayImage } from '@/lib/projects';
 
 const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
 const SAT_STYLE = (key) => ({
@@ -124,9 +124,13 @@ export default function OverlayEditor({ project }) {
       zoom: project.zoom ?? 16,
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
-    map.on('load', () => {
+    map.on('load', async () => {
       setReady(true);
-      if (project.overlay_coords && imgUrl) {
+      if (project.overlay_coords && project.overlay_path) {
+        // SVG -> rasterize để hiển thị; PNG giữ nguyên
+        const disp = await toDisplayImage(overlayUrl(project.overlay_path));
+        imgUrlRef.current = disp;
+        setImgUrl(disp);
         const d = fromCoords(project.overlay_coords);
         centerRef.current = d.center;
         widthRef.current = d.widthM;
@@ -171,20 +175,19 @@ export default function OverlayEditor({ project }) {
     if (!file) return;
     setBusy(true); setMsg(null);
     try {
-      // đọc tỉ lệ ảnh
+      const path = await uploadOverlay(project.id, file);
+      // Ảnh hiển thị (SVG -> PNG); tỉ lệ đọc từ ảnh hiển thị cho chuẩn
+      const disp = await toDisplayImage(overlayUrl(path));
       const aspect = await new Promise((resolve) => {
         const img = new Image();
         img.onload = () => resolve(img.naturalWidth / img.naturalHeight || 1);
         img.onerror = () => resolve(1);
-        img.src = URL.createObjectURL(file);
+        img.src = disp;
       });
       aspectRef.current = aspect;
-
-      const path = await uploadOverlay(project.id, file);
-      const url = overlayUrl(path);
-      imgUrlRef.current = url; // cập nhật ngay cho refresh dùng
-      setImgPath(path);
-      setImgUrl(url);
+      imgUrlRef.current = disp;
+      setImgPath(path); // lưu path gốc (dùng để đọc lô từ SVG)
+      setImgUrl(disp);
       setHasOverlay(true);
       refresh();
     } catch (err) {
@@ -215,7 +218,7 @@ export default function OverlayEditor({ project }) {
 
       <div className="overlay-tools">
         <label className="btn-secondary overlay-upload">
-          {hasOverlay ? 'Đổi ảnh sơ đồ' : '+ Tải ảnh sơ đồ (PNG)'}
+          {hasOverlay ? 'Đổi ảnh sơ đồ' : '+ Tải ảnh sơ đồ (PNG hoặc SVG)'}
           <input type="file" accept="image/*" onChange={handleFile} disabled={busy} hidden />
         </label>
 

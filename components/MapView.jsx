@@ -7,7 +7,7 @@ import goongjs from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
-import { fetchProjects, overlayUrl } from '@/lib/projects';
+import { fetchProjects, overlayUrl, toDisplayImage } from '@/lib/projects';
 import { parseSvgLots } from '@/lib/svgLots';
 
 // Tâm bản đồ: khu Hòa Lạc
@@ -164,7 +164,7 @@ export default function MapView({ properties, flyTarget }) {
   // Vẽ sơ đồ dự án — CHỈ thêm khi chưa có (tránh xóa/thêm liên tục làm hủy ảnh đang tải)
   function drawOverlays(map) {
     for (const pr of overlaysRef.current) {
-      const url = overlayUrl(pr.overlay_path);
+      const url = pr.displayUrl; // ảnh đã rasterize (SVG->PNG) nếu cần
       if (!url || !pr.overlay_coords) continue;
       const srcId = `ov-${pr.id}`;
       const lyrId = `ovl-${pr.id}`;
@@ -206,7 +206,12 @@ export default function MapView({ properties, flyTarget }) {
     // Tải danh sách dự án có sơ đồ + đọc lô từ SVG
     fetchProjects()
       .then(async (list) => {
-        overlaysRef.current = list.filter((p) => p.overlay_path && p.overlay_coords);
+        const withOverlay = list.filter((p) => p.overlay_path && p.overlay_coords);
+        // Chuẩn bị ảnh hiển thị (SVG -> PNG) rồi mới vẽ
+        for (const pr of withOverlay) {
+          pr.displayUrl = await toDisplayImage(overlayUrl(pr.overlay_path));
+        }
+        overlaysRef.current = withOverlay;
         if (map.isStyleLoaded()) drawOverlays(map);
         for (const pr of list) {
           if (
