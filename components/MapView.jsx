@@ -175,6 +175,21 @@ export default function MapView({ properties, flyTarget, focusId }) {
   const [routeError, setRouteError] = useState(null);
   const [userPos, setUserPos] = useState(null); // [lng, lat]
   const overlaysRef = useRef([]); // dự án có sơ đồ
+  const landmarksRef = useRef([]); // điểm nổi bật vẽ bằng lớp ảnh { id, url, coords }
+
+  // Vẽ điểm nổi bật (lớp ảnh, nằm dưới liên kết vùng) — chỉ thêm khi chưa có
+  function drawLandmarks(map) {
+    for (const lm of landmarksRef.current) {
+      const srcId = `lm-${lm.id}`;
+      if (map.getSource(srcId)) continue;
+      try {
+        map.addSource(srcId, { type: 'image', url: lm.url, coordinates: lm.coords });
+        map.addLayer({ id: `lml-${lm.id}`, type: 'raster', source: srcId, paint: { 'raster-opacity': 1, 'raster-resampling': 'nearest' } });
+      } catch {
+        // style chưa sẵn sàng -> lần styledata sau sẽ thêm
+      }
+    }
+  }
 
   // Vẽ sơ đồ dự án — CHỈ thêm khi chưa có (tránh xóa/thêm liên tục làm hủy ảnh đang tải)
   function drawOverlays(map) {
@@ -216,6 +231,7 @@ export default function MapView({ properties, flyTarget, focusId }) {
     map.on('styledata', () => {
       applyPoiVisibility(map, showPoiRef.current);
       drawOverlays(map);
+      drawLandmarks(map);
     });
 
     // Tải danh sách dự án có sơ đồ + đọc lô từ SVG
@@ -248,36 +264,39 @@ export default function MapView({ properties, flyTarget, focusId }) {
     // Liên kết vùng (dùng khi bấm nút trong popup)
     fetchRegionLinks().then((list) => { regionLinksRef.current = list; }).catch(() => {});
 
-    // Điểm nổi bật — ghim ảnh PNG, co giãn theo zoom (mốc zoom 16)
+    // Điểm nổi bật — vẽ bằng lớp ảnh (nằm dưới liên kết vùng, trên sơ đồ dự án).
+    // Kích thước quy về mét cố định để co giãn theo zoom như HTML cũ (mốc zoom 16).
     const LM_REF_ZOOM = 16;
-    const lmImgs = []; // { img, base }
     fetchLandmarks()
       .then((list) => {
-        for (const lm of list) {
-          const el = document.createElement('div');
-          el.className = 'landmark-marker';
-          const img = document.createElement('img');
-          img.src = landmarkUrl(lm.image_path);
-          if (lm.name) img.title = lm.name;
-          el.appendChild(img);
-          new goongjs.Marker({ element: el, anchor: 'bottom' })
-            .setLngLat([lm.lng, lm.lat])
-            .addTo(map);
-          lmImgs.push({ img, base: lm.width_px || 90 });
-        }
-        scaleLandmarks();
+        let pending = list.length;
+        if (!pending) return;
+        list.forEach((lm) => {
+          const url = landmarkUrl(lm.image_path);
+          const im = new Image();
+          im.crossOrigin = 'anonymous';
+          const done = () => { if (--pending === 0 && map.isStyleLoaded()) drawLandmarks(map); };
+          im.onload = () => {
+            const aspect = im.naturalHeight / im.naturalWidth || 1;
+            const latR = (lm.lat * Math.PI) / 180;
+            const mPerPx = (156543.03 * Math.cos(latR)) / Math.pow(2, LM_REF_ZOOM);
+            const widthM = (lm.width_px || 90) * 7.5 * mPerPx; // khớp hệ số HTML cũ
+            const heightM = widthM * aspect;
+            const wLng = widthM / (111320 * Math.cos(latR));
+            const hLat = heightM / 110540;
+            const left = lm.lng - wLng / 2;
+            const right = lm.lng + wLng / 2;
+            const bottom = lm.lat; // neo đáy ảnh vào điểm (như anchor 'bottom')
+            const top = lm.lat + hLat;
+            landmarksRef.current.push({ id: lm.id, url, coords: [[left, top], [right, top], [right, bottom], [left, bottom]] });
+            done();
+          };
+          im.onerror = done;
+          im.src = url;
+        });
       })
       .catch(() => {});
 
-    function scaleLandmarks() {
-      const z = map.getZoom();
-      const factor = 7.5 * Math.pow(2, z - LM_REF_ZOOM); // 5 x 1.5
-      for (const { img, base } of lmImgs) {
-        const w = Math.max(6, Math.min(6000, base * factor));
-        img.style.width = `${w}px`;
-      }
-    }
-    map.on('zoom', scaleLandmarks);
     map.on('zoom', () => refreshRegionLabels());
 
     // Click vào vùng trống -> ẩn mũi tên liên kết vùng (như đóng popup)
