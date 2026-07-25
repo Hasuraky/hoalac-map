@@ -493,6 +493,14 @@ button {
   border-color: var(--moss, #4a5d3a);
 }
 
+.project-share {
+  margin-top: 8px;
+}
+
+.project-share .btn-share {
+  width: 100%;
+}
+
 .featured-chips {
   display: flex;
   flex-wrap: wrap;

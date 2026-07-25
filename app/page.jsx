@@ -39,6 +39,15 @@ export default function HomePage() {
     fetchProjects().then(setAllProjects);
   }, []);
 
+  // Mở link chia sẻ dự án (?project=id) -> tự bay tới
+  useEffect(() => {
+    if (!allProjects.length) return;
+    const pid = new URLSearchParams(window.location.search).get('project');
+    if (!pid) return;
+    const p = allProjects.find((x) => x.id === pid);
+    if (p) flyToProject(p);
+  }, [allProjects]); // eslint-disable-line react-hooks/exhaustive-deps
+
   function flyToProject(p) {
     // Có sơ đồ -> canh khít khung ảnh (luôn thấy trọn hình)
     if (p.overlay_coords && p.overlay_coords.length === 4) {

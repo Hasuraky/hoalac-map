@@ -1,7 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import SearchBox from './SearchBox';
 import FilterPanel from './FilterPanel';
+import ShareButton from './ShareButton';
 
 export default function Sidebar({
   filters,
@@ -14,6 +16,9 @@ export default function Sidebar({
   onFlyProject,
 }) {
   const featuredIds = new Set(featured.map((p) => p.id));
+  const [pickedId, setPickedId] = useState('');
+  const picked = allProjects.find((p) => p.id === pickedId);
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
   return (
     <aside className={`sidebar${open ? ' open' : ''}`}>
       <div className="sidebar-search">
@@ -49,8 +54,9 @@ export default function Sidebar({
             <p className="filter-label">Tất cả dự án</p>
             <select
               className="project-select"
-              value=""
+              value={pickedId}
               onChange={(e) => {
+                setPickedId(e.target.value);
                 const p = allProjects.find((x) => x.id === e.target.value);
                 if (p) onFlyProject?.(p);
               }}
@@ -64,6 +70,11 @@ export default function Sidebar({
                 </option>
               ))}
             </select>
+            {picked && (
+              <div className="project-share">
+                <ShareButton title={`Dự án ${picked.name}`} url={`${origin}/?project=${picked.id}`} />
+              </div>
+            )}
           </div>
         )}
 
