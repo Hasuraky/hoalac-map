@@ -164,6 +164,7 @@ export default function MapView({ properties, flyTarget }) {
   const regionLinksRef = useRef([]); // liên kết vùng
   const shownLinkForRef = useRef(null); // id sản phẩm đang hiện mũi tên
   const suppressClearRef = useRef(false); // chặn xóa mũi tên khi chủ động ẩn popup
+  const shownArrowRef = useRef(null); // { from, links } mũi tên đang hiện, dựng lại khi zoom
   const propertiesRef = useRef(properties);
   propertiesRef.current = properties;
 
@@ -277,6 +278,7 @@ export default function MapView({ properties, flyTarget }) {
       }
     }
     map.on('zoom', scaleLandmarks);
+    map.on('zoom', () => refreshArrowHeads());
 
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
     SEA_MARKS.forEach((m) => {
@@ -338,8 +340,15 @@ export default function MapView({ properties, flyTarget }) {
     return { ...p, _linkCount: linksForProduct(p).length };
   }
 
+  // Độ dài đầu mũi tên (đơn vị độ vĩ) để giữ ~cố định theo pixel khi zoom
+  function headLenForZoom(zoom, lat) {
+    const px = 24; // chiều dài đầu mũi tên theo pixel
+    const latR = (lat * Math.PI) / 180;
+    return (px * 1.406 * Math.cos(latR)) / Math.pow(2, zoom);
+  }
+
   // Đầu mũi tên đặc (polygon) tại đích — trả về ring [[w1, tip, w2, w1]]
-  function arrowHeadPolygon(from, to) {
+  function arrowHeadPolygon(from, to, headLenBase) {
     const [lng1, lat1] = from;
     const [lng2, lat2] = to;
     const latR = (lat2 * Math.PI) / 180;
@@ -349,8 +358,8 @@ export default function MapView({ properties, flyTarget }) {
     if (!len) return null;
     const ux = dx / len;
     const uy = dy / len;
-    const headLen = Math.min(0.004, len * 0.4); // kích thước cố định cho mọi mũi tên
-    const ang = (32 * Math.PI) / 180;
+    const headLen = Math.min(headLenBase, len * 0.6); // giới hạn cho mũi tên rất ngắn
+    const ang = (28 * Math.PI) / 180;
     const wing = (s) => {
       const ca = Math.cos(s * ang);
       const sa = Math.sin(s * ang);
@@ -363,6 +372,20 @@ export default function MapView({ properties, flyTarget }) {
     return [[w1, to, w2, w1]];
   }
 
+  // Dựng dữ liệu đầu mũi tên theo mức zoom hiện tại (giữ cố định theo pixel)
+  function buildHeadData(from, links) {
+    const map = mapRef.current;
+    const zoom = map ? map.getZoom() : 15;
+    const heads = [];
+    for (const l of links) {
+      const to = [l.to_lng, l.to_lat];
+      const base = headLenForZoom(zoom, to[1]);
+      const ring = arrowHeadPolygon(from, to, base);
+      if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
+    }
+    return { type: 'FeatureCollection', features: heads };
+  }
+
   // Hiển thị mũi tên liên kết vùng cho sản phẩm p (đồng thời ẩn popup marker)
   function toggleRegionLinks(p) {
     const map = mapRef.current;
@@ -371,13 +394,10 @@ export default function MapView({ properties, flyTarget }) {
     if (!links.length) return;
     const from = [p.lng, p.lat];
     const shafts = [];
-    const heads = [];
     const labels = [];
     for (const l of links) {
       const to = [l.to_lng, l.to_lat];
       shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [from, to] } });
-      const ring = arrowHeadPolygon(from, to);
-      if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
       // 1 nhãn / mũi tên, đặt tại điểm giữa (point) -> không lặp, xoay theo hướng mũi tên
       if (l.label) {
         const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
@@ -387,8 +407,9 @@ export default function MapView({ properties, flyTarget }) {
         labels.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: mid } });
       }
     }
+    shownArrowRef.current = { from, links }; // để dựng lại đầu mũi tên khi zoom
     const shaftData = { type: 'FeatureCollection', features: shafts };
-    const headData = { type: 'FeatureCollection', features: heads };
+    const headData = buildHeadData(from, links);
     const labelData = { type: 'FeatureCollection', features: labels };
 
     if (map.getSource('rlinks')) {
@@ -435,6 +456,15 @@ export default function MapView({ properties, flyTarget }) {
       if (map.getSource('rlinks-label')) map.getSource('rlinks-label').setData({ type: 'FeatureCollection', features: [] });
     }
     shownLinkForRef.current = null;
+    shownArrowRef.current = null;
+  }
+
+  // Dựng lại đầu mũi tên khi zoom để giữ kích thước cố định theo pixel
+  function refreshArrowHeads() {
+    const map = mapRef.current;
+    const cur = shownArrowRef.current;
+    if (!map || !cur || !map.getSource('rlinks-head')) return;
+    map.getSource('rlinks-head').setData(buildHeadData(cur.from, cur.links));
   }
 
   // Bấm vào lô -> popup nhanh (property nếu đã gắn, hoặc "chưa có thông tin")
