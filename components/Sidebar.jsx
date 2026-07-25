@@ -13,6 +13,7 @@ export default function Sidebar({
   allProjects = [],
   onFlyProject,
 }) {
+  const featuredIds = new Set(featured.map((p) => p.id));
   return (
     <aside className={`sidebar${open ? ' open' : ''}`}>
       <div className="sidebar-search">
@@ -59,7 +60,7 @@ export default function Sidebar({
               </option>
               {allProjects.map((p) => (
                 <option key={p.id} value={p.id} disabled={p.center_lat == null && !(p.overlay_coords && p.overlay_coords.length === 4)}>
-                  {p.name}
+                  {featuredIds.has(p.id) ? '⭐ ' : ''}{p.name}
                 </option>
               ))}
             </select>
