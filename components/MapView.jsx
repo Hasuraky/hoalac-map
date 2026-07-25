@@ -164,6 +164,7 @@ export default function MapView({ properties, flyTarget }) {
   const regionLinksRef = useRef([]); // liên kết vùng
   const shownLinkForRef = useRef(null); // id sản phẩm đang hiện mũi tên
   const suppressClearRef = useRef(false); // chặn xóa mũi tên khi chủ động ẩn popup
+  const shownArrowRef = useRef(null); // { from, links } đang hiện, dựng lại nhãn khi zoom
   const propertiesRef = useRef(properties);
   propertiesRef.current = properties;
 
@@ -277,6 +278,7 @@ export default function MapView({ properties, flyTarget }) {
       }
     }
     map.on('zoom', scaleLandmarks);
+    map.on('zoom', () => refreshRegionLabels());
 
     // Sao vàng + nhãn 2 quần đảo, chỉ hiện khi zoom ra
     SEA_MARKS.forEach((m) => {
@@ -363,6 +365,45 @@ export default function MapView({ properties, flyTarget }) {
     return [[w1, to, w2, w1]];
   }
 
+  // Cỡ chữ theo zoom (khớp các mốc trong layer)
+  function fontSizeForZoom(z) {
+    if (z <= 10) return 10;
+    if (z >= 18) return 26;
+    if (z <= 14) return 10 + ((16 - 10) * (z - 10)) / 4;
+    return 16 + ((26 - 16) * (z - 14)) / 4;
+  }
+
+  // Dựng nhãn: chỉ hiện khi mũi tên trên màn hình đủ dài để chứa hết chữ
+  function buildLabelData(from, links) {
+    const map = mapRef.current;
+    if (!map) return { type: 'FeatureCollection', features: [] };
+    const fs = fontSizeForZoom(map.getZoom());
+    const pa = map.project(from);
+    const feats = [];
+    for (const l of links) {
+      if (!l.label) continue;
+      const to = [l.to_lng, l.to_lat];
+      const pb = map.project(to);
+      const screenLen = Math.hypot(pb.x - pa.x, pb.y - pa.y);
+      const textW = l.label.length * fs * 0.55; // ước lượng bề rộng chữ (px)
+      if (screenLen < textW + 16) continue; // không đủ chỗ -> ẩn nhãn này
+      const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+      const latR = (mid[1] * Math.PI) / 180;
+      let rotate = Math.atan2(-(to[1] - from[1]), (to[0] - from[0]) * Math.cos(latR)) * (180 / Math.PI);
+      if (rotate > 90) rotate -= 180; else if (rotate < -90) rotate += 180;
+      feats.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: mid } });
+    }
+    return { type: 'FeatureCollection', features: feats };
+  }
+
+  // Dựng lại nhãn khi zoom (chiều dài màn hình & cỡ chữ thay đổi)
+  function refreshRegionLabels() {
+    const map = mapRef.current;
+    const cur = shownArrowRef.current;
+    if (!map || !cur || !map.getSource('rlinks-label')) return;
+    map.getSource('rlinks-label').setData(buildLabelData(cur.from, cur.links));
+  }
+
   // Hiển thị mũi tên liên kết vùng cho sản phẩm p (đồng thời ẩn popup marker)
   function toggleRegionLinks(p) {
     const map = mapRef.current;
@@ -372,24 +413,16 @@ export default function MapView({ properties, flyTarget }) {
     const from = [p.lng, p.lat];
     const shafts = [];
     const heads = [];
-    const labels = [];
     for (const l of links) {
       const to = [l.to_lng, l.to_lat];
       shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [from, to] } });
       const ring = arrowHeadPolygon(from, to);
       if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
-      // 1 nhãn / mũi tên, đặt tại điểm giữa (point) -> không lặp, xoay theo hướng mũi tên
-      if (l.label) {
-        const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
-        const latR = (mid[1] * Math.PI) / 180;
-        let rotate = Math.atan2(-(to[1] - from[1]), (to[0] - from[0]) * Math.cos(latR)) * (180 / Math.PI);
-        if (rotate > 90) rotate -= 180; else if (rotate < -90) rotate += 180; // giữ chữ đứng
-        labels.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: mid } });
-      }
     }
+    shownArrowRef.current = { from, links }; // để dựng lại nhãn khi zoom
     const shaftData = { type: 'FeatureCollection', features: shafts };
     const headData = { type: 'FeatureCollection', features: heads };
-    const labelData = { type: 'FeatureCollection', features: labels };
+    const labelData = buildLabelData(from, links);
 
     if (map.getSource('rlinks')) {
       map.getSource('rlinks').setData(shaftData);
@@ -435,6 +468,7 @@ export default function MapView({ properties, flyTarget }) {
       if (map.getSource('rlinks-label')) map.getSource('rlinks-label').setData({ type: 'FeatureCollection', features: [] });
     }
     shownLinkForRef.current = null;
+    shownArrowRef.current = null;
   }
 
   // Bấm vào lô -> popup nhanh (property nếu đã gắn, hoặc "chưa có thông tin")
