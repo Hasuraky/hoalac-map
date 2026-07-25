@@ -349,7 +349,7 @@ export default function MapView({ properties, flyTarget }) {
     if (!len) return null;
     const ux = dx / len;
     const uy = dy / len;
-    const headLen = Math.min(len * 0.22, 0.0075); // to hơn, tối đa ~830m
+    const headLen = Math.min(0.004, len * 0.4); // kích thước cố định cho mọi mũi tên
     const ang = (32 * Math.PI) / 180;
     const wing = (s) => {
       const ca = Math.cos(s * ang);
@@ -372,38 +372,44 @@ export default function MapView({ properties, flyTarget }) {
     const from = [p.lng, p.lat];
     const shafts = [];
     const heads = [];
+    const labels = [];
     for (const l of links) {
       const to = [l.to_lng, l.to_lat];
-      shafts.push({ type: 'Feature', properties: { label: l.label || '' }, geometry: { type: 'LineString', coordinates: [from, to] } });
+      shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [from, to] } });
       const ring = arrowHeadPolygon(from, to);
       if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
+      // 1 nhãn / mũi tên, đặt tại điểm giữa (point) -> không lặp
+      if (l.label) {
+        const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
+        labels.push({ type: 'Feature', properties: { label: l.label }, geometry: { type: 'Point', coordinates: mid } });
+      }
     }
     const shaftData = { type: 'FeatureCollection', features: shafts };
     const headData = { type: 'FeatureCollection', features: heads };
+    const labelData = { type: 'FeatureCollection', features: labels };
 
     if (map.getSource('rlinks')) {
       map.getSource('rlinks').setData(shaftData);
       map.getSource('rlinks-head').setData(headData);
+      map.getSource('rlinks-label').setData(labelData);
     } else {
       map.addSource('rlinks', { type: 'geojson', data: shaftData });
       map.addSource('rlinks-head', { type: 'geojson', data: headData });
+      map.addSource('rlinks-label', { type: 'geojson', data: labelData });
       // thân: viền trắng dày dưới + lõi đỏ trên
       map.addLayer({ id: 'rlinks-casing', type: 'line', source: 'rlinks', paint: { 'line-color': '#fff', 'line-width': 9 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
       map.addLayer({ id: 'rlinks-line', type: 'line', source: 'rlinks', paint: { 'line-color': '#9F0201', 'line-width': 5 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
       // đầu mũi tên: fill đỏ + viền trắng dày
       map.addLayer({ id: 'rlinks-head-fill', type: 'fill', source: 'rlinks-head', paint: { 'fill-color': '#9F0201' } });
       map.addLayer({ id: 'rlinks-head-outline', type: 'line', source: 'rlinks-head', paint: { 'line-color': '#fff', 'line-width': 3 }, layout: { 'line-join': 'round' } });
-      // nhãn: chữ đậm, fill trắng, viền xám dày
-      map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks',
+      // nhãn: 1 nhãn/mũi tên tại điểm giữa, luôn hiện, chữ đậm trắng viền xám
+      map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks-label',
         layout: {
-          'symbol-placement': 'line-center',
           'text-field': ['get', 'label'],
           'text-size': 18,
           'text-font': ['Roboto Bold'],
           'text-allow-overlap': true,
           'text-ignore-placement': true,
-          'text-padding': 0,
-          'text-max-angle': 90,
         },
         paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 3 } });
     }
@@ -419,6 +425,7 @@ export default function MapView({ properties, flyTarget }) {
     if (map?.getSource) {
       if (map.getSource('rlinks')) map.getSource('rlinks').setData({ type: 'FeatureCollection', features: [] });
       if (map.getSource('rlinks-head')) map.getSource('rlinks-head').setData({ type: 'FeatureCollection', features: [] });
+      if (map.getSource('rlinks-label')) map.getSource('rlinks-label').setData({ type: 'FeatureCollection', features: [] });
     }
     shownLinkForRef.current = null;
   }
