@@ -378,10 +378,13 @@ export default function MapView({ properties, flyTarget }) {
       shafts.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [from, to] } });
       const ring = arrowHeadPolygon(from, to);
       if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
-      // 1 nhãn / mũi tên, đặt tại điểm giữa (point) -> không lặp
+      // 1 nhãn / mũi tên, đặt tại điểm giữa (point) -> không lặp, xoay theo hướng mũi tên
       if (l.label) {
         const mid = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2];
-        labels.push({ type: 'Feature', properties: { label: l.label }, geometry: { type: 'Point', coordinates: mid } });
+        const latR = (mid[1] * Math.PI) / 180;
+        let rotate = Math.atan2(-(to[1] - from[1]), (to[0] - from[0]) * Math.cos(latR)) * (180 / Math.PI);
+        if (rotate > 90) rotate -= 180; else if (rotate < -90) rotate += 180; // giữ chữ đứng
+        labels.push({ type: 'Feature', properties: { label: l.label, rotate }, geometry: { type: 'Point', coordinates: mid } });
       }
     }
     const shaftData = { type: 'FeatureCollection', features: shafts };
@@ -410,6 +413,9 @@ export default function MapView({ properties, flyTarget }) {
           'text-font': ['Roboto Bold'],
           'text-allow-overlap': true,
           'text-ignore-placement': true,
+          'text-rotate': ['get', 'rotate'],
+          'text-rotation-alignment': 'map',
+          'text-offset': [0, -0.9],
         },
         paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 3 } });
     }
