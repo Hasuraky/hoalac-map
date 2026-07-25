@@ -8,7 +8,7 @@ import LeadForm from '@/components/LeadForm';
 import { fetchProperties } from '@/lib/properties';
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import { usePropertyFilter, DEFAULT_FILTERS } from '@/lib/usePropertyFilter';
-import { fetchFeaturedProjects } from '@/lib/projects';
+import { fetchFeaturedProjects, fetchProjects } from '@/lib/projects';
 
 // Leaflet chỉ chạy phía trình duyệt -> tắt SSR cho bản đồ
 const MapView = dynamic(() => import('@/components/MapView'), {
@@ -24,6 +24,7 @@ export default function HomePage() {
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [featured, setFeatured] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
   const [flyTarget, setFlyTarget] = useState(null); // { lng, lat, zoom, key }
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function HomePage() {
       })
       .catch((e) => setError(e.message));
     fetchFeaturedProjects().then(setFeatured);
+    fetchProjects().then(setAllProjects);
   }, []);
 
   function flyToProject(p) {
@@ -87,6 +89,7 @@ export default function HomePage() {
           filteredCount={filtered.length}
           open={sidebarOpen}
           featured={featured}
+          allProjects={allProjects}
           onFlyProject={flyToProject}
         />
 

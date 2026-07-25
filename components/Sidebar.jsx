@@ -10,6 +10,7 @@ export default function Sidebar({
   filteredCount,
   open,
   featured = [],
+  allProjects = [],
   onFlyProject,
 }) {
   return (
@@ -39,6 +40,29 @@ export default function Sidebar({
                 </button>
               ))}
             </div>
+          </div>
+        )}
+
+        {allProjects.length > 0 && (
+          <div className="project-picker">
+            <p className="filter-label">Tất cả dự án</p>
+            <select
+              className="project-select"
+              value=""
+              onChange={(e) => {
+                const p = allProjects.find((x) => x.id === e.target.value);
+                if (p) onFlyProject?.(p);
+              }}
+            >
+              <option value="" disabled>
+                Chọn dự án để bay tới…
+              </option>
+              {allProjects.map((p) => (
+                <option key={p.id} value={p.id} disabled={p.center_lat == null && !(p.overlay_coords && p.overlay_coords.length === 4)}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
