@@ -163,6 +163,7 @@ export default function MapView({ properties, flyTarget }) {
   const [lotsVersion, setLotsVersion] = useState(0);
   const regionLinksRef = useRef([]); // liên kết vùng
   const shownLinkForRef = useRef(null); // id sản phẩm đang hiện mũi tên
+  const suppressClearRef = useRef(false); // chặn xóa mũi tên khi chủ động ẩn popup
   const propertiesRef = useRef(properties);
   propertiesRef.current = properties;
 
@@ -337,19 +338,19 @@ export default function MapView({ properties, flyTarget }) {
     return { ...p, _linkCount: linksForProduct(p).length };
   }
 
-  // Tính 3 điểm tạo đầu mũi tên tại đích
-  function arrowHead(from, to) {
+  // Đầu mũi tên đặc (polygon) tại đích — trả về ring [[w1, tip, w2, w1]]
+  function arrowHeadPolygon(from, to) {
     const [lng1, lat1] = from;
     const [lng2, lat2] = to;
     const latR = (lat2 * Math.PI) / 180;
     const dx = (lng2 - lng1) * Math.cos(latR);
     const dy = lat2 - lat1;
     const len = Math.hypot(dx, dy);
-    if (!len) return [];
+    if (!len) return null;
     const ux = dx / len;
     const uy = dy / len;
-    const headLen = Math.min(len * 0.15, 0.004); // độ (~450m tối đa)
-    const ang = (26 * Math.PI) / 180;
+    const headLen = Math.min(len * 0.22, 0.0075); // to hơn, tối đa ~830m
+    const ang = (32 * Math.PI) / 180;
     const wing = (s) => {
       const ca = Math.cos(s * ang);
       const sa = Math.sin(s * ang);
@@ -357,46 +358,58 @@ export default function MapView({ properties, flyTarget }) {
       const ry = -ux * sa + -uy * ca;
       return [lng2 + (rx * headLen) / Math.cos(latR), lat2 + ry * headLen];
     };
-    return [wing(1), to, wing(-1)];
+    const w1 = wing(1);
+    const w2 = wing(-1);
+    return [[w1, to, w2, w1]];
   }
 
-  // Bật/tắt hiển thị mũi tên liên kết vùng cho sản phẩm p
+  // Hiển thị mũi tên liên kết vùng cho sản phẩm p (đồng thời ẩn popup marker)
   function toggleRegionLinks(p) {
     const map = mapRef.current;
     if (!map) return;
-    // đang hiện cho chính p -> ẩn
-    if (shownLinkForRef.current === p.id) {
-      clearRegionLinks();
-      return;
-    }
     const links = linksForProduct(p);
     if (!links.length) return;
     const from = [p.lng, p.lat];
-    const feats = [];
+    const shafts = [];
+    const heads = [];
     for (const l of links) {
       const to = [l.to_lng, l.to_lat];
-      feats.push({ type: 'Feature', properties: { label: l.label || '' }, geometry: { type: 'LineString', coordinates: [from, to] } });
-      const head = arrowHead(from, to);
-      if (head.length) feats.push({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: head } });
+      shafts.push({ type: 'Feature', properties: { label: l.label || '' }, geometry: { type: 'LineString', coordinates: [from, to] } });
+      const ring = arrowHeadPolygon(from, to);
+      if (ring) heads.push({ type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: ring } });
     }
-    const data = { type: 'FeatureCollection', features: feats };
+    const shaftData = { type: 'FeatureCollection', features: shafts };
+    const headData = { type: 'FeatureCollection', features: heads };
 
     if (map.getSource('rlinks')) {
-      map.getSource('rlinks').setData(data);
+      map.getSource('rlinks').setData(shaftData);
+      map.getSource('rlinks-head').setData(headData);
     } else {
-      map.addSource('rlinks', { type: 'geojson', data });
-      map.addLayer({ id: 'rlinks-line', type: 'line', source: 'rlinks', paint: { 'line-color': '#b3402f', 'line-width': 3 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      map.addSource('rlinks', { type: 'geojson', data: shaftData });
+      map.addSource('rlinks-head', { type: 'geojson', data: headData });
+      // thân: viền trắng dày dưới + lõi đỏ trên
+      map.addLayer({ id: 'rlinks-casing', type: 'line', source: 'rlinks', paint: { 'line-color': '#fff', 'line-width': 9 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      map.addLayer({ id: 'rlinks-line', type: 'line', source: 'rlinks', paint: { 'line-color': '#9F0201', 'line-width': 5 }, layout: { 'line-cap': 'round', 'line-join': 'round' } });
+      // đầu mũi tên: fill đỏ + viền trắng dày
+      map.addLayer({ id: 'rlinks-head-fill', type: 'fill', source: 'rlinks-head', paint: { 'fill-color': '#9F0201' } });
+      map.addLayer({ id: 'rlinks-head-outline', type: 'line', source: 'rlinks-head', paint: { 'line-color': '#fff', 'line-width': 3 }, layout: { 'line-join': 'round' } });
+      // nhãn: chữ đậm, fill trắng, viền xám dày
       map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks',
-        layout: { 'symbol-placement': 'line-center', 'text-field': ['get', 'label'], 'text-size': 13, 'text-font': ['Roboto Regular'] },
-        paint: { 'text-color': '#7a2a1f', 'text-halo-color': '#fff', 'text-halo-width': 2 } });
+        layout: { 'symbol-placement': 'line-center', 'text-field': ['get', 'label'], 'text-size': 14, 'text-font': ['Roboto Bold'] },
+        paint: { 'text-color': '#fff', 'text-halo-color': '#262626', 'text-halo-width': 2.5 } });
     }
     shownLinkForRef.current = p.id;
+    // ẩn popup marker mà không xóa mũi tên vừa vẽ
+    suppressClearRef.current = true;
+    popupRef.current?.remove();
+    suppressClearRef.current = false;
   }
 
   function clearRegionLinks() {
     const map = mapRef.current;
-    if (map?.getSource && map.getSource('rlinks')) {
-      map.getSource('rlinks').setData({ type: 'FeatureCollection', features: [] });
+    if (map?.getSource) {
+      if (map.getSource('rlinks')) map.getSource('rlinks').setData({ type: 'FeatureCollection', features: [] });
+      if (map.getSource('rlinks-head')) map.getSource('rlinks-head').setData({ type: 'FeatureCollection', features: [] });
     }
     shownLinkForRef.current = null;
   }
@@ -408,6 +421,7 @@ export default function MapView({ properties, flyTarget }) {
     if (!f) return;
     const pid = f.properties.pid;
     const prop = pid ? propertiesRef.current.find((p) => p.id === pid) : null;
+    clearRegionLinks();
     const node = document.createElement('div');
     popupRef.current.setLngLat(e.lngLat).setDOMContent(node).addTo(map);
     setPopupNode(node);
@@ -523,7 +537,7 @@ export default function MapView({ properties, flyTarget }) {
         maxWidth: '280px',
         className: 'goong-popup',
       });
-      popupRef.current.on('close', () => { setSelected(null); clearRegionLinks(); });
+      popupRef.current.on('close', () => { setSelected(null); if (!suppressClearRef.current) clearRegionLinks(); });
     }
 
     // BĐS đã có vùng lô trên sơ đồ -> ẩn marker (vùng lô đại diện rồi)
@@ -547,6 +561,7 @@ export default function MapView({ properties, flyTarget }) {
         const el = pinElement(STATUS_COLORS[p.status] ?? '#8b877c');
         el.addEventListener('click', (e) => {
           e.stopPropagation();
+          clearRegionLinks();
           const node = document.createElement('div');
           popupRef.current.setLngLat([p.lng, p.lat]).setDOMContent(node).addTo(map);
           setPopupNode(node);
