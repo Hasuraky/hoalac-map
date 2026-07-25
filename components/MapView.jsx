@@ -409,10 +409,10 @@ export default function MapView({ properties, flyTarget }) {
       map.addLayer({ id: 'rlinks-label', type: 'symbol', source: 'rlinks-label',
         layout: {
           'text-field': ['get', 'label'],
-          'text-size': 18,
+          // tự thu nhỏ/phóng lớn theo mức zoom
+          'text-size': ['interpolate', ['linear'], ['zoom'], 10, 10, 14, 16, 18, 26],
           'text-font': ['Roboto Bold'],
-          'text-allow-overlap': true,
-          'text-ignore-placement': true,
+          // bỏ overlap -> tự ẩn khi không đủ chỗ hiển thị
           'text-rotate': ['get', 'rotate'],
           'text-rotation-alignment': 'map',
           'text-offset': [0, -0.9],
