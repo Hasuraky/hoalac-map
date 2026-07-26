@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import Link from 'next/link';
 import goongjs from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
@@ -101,9 +100,11 @@ function PopupCard({ p, onRoute, routing, onRegionLinks }) {
           url={`${typeof window !== 'undefined' ? window.location.origin : ''}/?bds=${p.id}`}
         />
         <div className="popup-actions">
-          <Link href={`/bds/${p.id}`} className="popup-btn">
+          {/* dùng <a> điều hướng thường: popup nằm trong portal của Goong,
+              Next <Link> soft-nav từ đây bị lỗi (phải reload / khách bị đá về trang chủ) */}
+          <a href={`/bds/${p.id}`} className="popup-btn">
             Xem chi tiết →
-          </Link>
+          </a>
           <button
             type="button"
             className="popup-btn popup-btn-outline"
