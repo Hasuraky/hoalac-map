@@ -187,14 +187,12 @@ export default function MapView({ properties, flyTarget, focusId }) {
       if (map.getSource(srcId)) continue; // đã có -> bỏ qua
       try {
         map.addSource(srcId, { type: 'image', url, coordinates: pr.overlay_coords });
-        // chèn ảnh sơ đồ XUỐNG DƯỚI lớp lô (nếu đã có) để không che lô
-        const beforeId = map.getLayer('lots-fill') ? 'lots-fill' : undefined;
         map.addLayer({
           id: lyrId,
           type: 'raster',
           source: srcId,
           paint: { 'raster-opacity': pr.overlay_opacity ?? 0.85 },
-        }, beforeId);
+        });
       } catch {
         // style chưa sẵn sàng -> lần idle sau sẽ thêm
       }
@@ -224,25 +222,26 @@ export default function MapView({ properties, flyTarget, focusId }) {
     // Tải danh sách dự án có sơ đồ + đọc lô từ SVG
     fetchProjects()
       .then(async (list) => {
-        // 1) Đọc lô từ SVG TRƯỚC (song song) -> lô bấm được + tô màu nhanh,
-        //    không phải chờ rasterize ảnh sơ đồ nặng (đặc biệt trên mobile).
-        await Promise.all(
-          list.map(async (pr) => {
-            if (pr.overlay_path && pr.overlay_path.toLowerCase().endsWith('.svg') && pr.overlay_coords) {
-              const rings = await parseSvgLots(overlayUrl(pr.overlay_path), pr.overlay_coords);
-              if (rings.length) lotsRef.current[pr.id] = rings.map((r) => ({ ...r, project_id: pr.id }));
-            }
-          })
-        );
-        setLotsVersion((v) => v + 1);
-
-        // 2) Rasterize ảnh sơ đồ (nặng) SAU + song song, rồi vẽ (chèn dưới lớp lô).
         const withOverlay = list.filter((p) => p.overlay_path && p.overlay_coords);
-        await Promise.all(
-          withOverlay.map(async (pr) => { pr.displayUrl = await toDisplayImage(overlayUrl(pr.overlay_path)); })
-        );
+        // Chuẩn bị ảnh hiển thị (SVG -> PNG) rồi mới vẽ
+        for (const pr of withOverlay) {
+          pr.displayUrl = await toDisplayImage(overlayUrl(pr.overlay_path));
+        }
         overlaysRef.current = withOverlay;
         if (map.isStyleLoaded()) drawOverlays(map);
+        for (const pr of list) {
+          if (
+            pr.overlay_path &&
+            pr.overlay_path.toLowerCase().endsWith('.svg') &&
+            pr.overlay_coords
+          ) {
+            const rings = await parseSvgLots(overlayUrl(pr.overlay_path), pr.overlay_coords);
+            if (rings.length) {
+              lotsRef.current[pr.id] = rings.map((r) => ({ ...r, project_id: pr.id }));
+            }
+          }
+        }
+        setLotsVersion((v) => v + 1);
       })
       .catch(() => {});
     mapRef.current = map;
