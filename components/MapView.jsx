@@ -212,6 +212,8 @@ export default function MapView({ properties, flyTarget, focusId }) {
       maxZoom: 19,
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
+    // La bàn nhỏ góc trên bên phải (chỉ compass, không nút zoom)
+    map.addControl(new goongjs.NavigationControl({ showCompass: true, showZoom: false }), 'top-right');
     map.on('load', () => setReady(true));
     // Ẩn địa điểm + vẽ sơ đồ ngay khi style vừa nạp (giữ qua mỗi lần đổi nền)
     map.on('styledata', () => {
