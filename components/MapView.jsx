@@ -212,36 +212,24 @@ export default function MapView({ properties, flyTarget, focusId }) {
       maxZoom: 19,
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
-    // La bàn nhỏ góc trên bên phải — luôn hiển thị, kim xoay theo hướng bản đồ
-    const compassCtrl = {
-      onAdd(m) {
-        const el = document.createElement('div');
-        el.className = 'mini-compass';
-        el.title = 'Về hướng Bắc';
-        el.innerHTML = `<svg viewBox="0 0 40 40" width="34" height="34">
-          <circle cx="20" cy="20" r="18" fill="#fff" stroke="#d8d3c8" stroke-width="1.5"/>
-          <polygon points="20,6 24,21 20,18 16,21" fill="#9F0201"/>
-          <polygon points="20,34 24,19 20,22 16,19" fill="#8b877c"/>
-          <text x="20" y="12.5" text-anchor="middle" font-size="7" font-weight="700" fill="#9F0201">N</text>
-        </svg>`;
-        const needle = el.querySelector('svg');
-        const update = () => { needle.style.transform = `rotate(${-m.getBearing()}deg)`; };
-        needle.style.transition = 'transform 0.1s linear';
-        needle.style.transformOrigin = '50% 50%';
-        el.addEventListener('click', () => m.easeTo({ bearing: 0, pitch: 0, duration: 300 }));
-        m.on('rotate', update);
-        update();
-        this._el = el;
-        this._update = update;
-        this._m = m;
-        return el;
-      },
-      onRemove() {
-        this._m?.off('rotate', this._update);
-        this._el?.parentNode?.removeChild(this._el);
-      },
-    };
-    map.addControl(compassCtrl, 'top-right');
+    // La bàn nhỏ góc trên bên phải — gắn thẳng vào khung bản đồ để chắc chắn hiển thị
+    const compassEl = document.createElement('div');
+    compassEl.className = 'mini-compass';
+    compassEl.title = 'Về hướng Bắc';
+    compassEl.innerHTML = `<svg viewBox="0 0 40 40" width="34" height="34">
+      <circle cx="20" cy="20" r="18" fill="#fff" stroke="#d8d3c8" stroke-width="1.5"/>
+      <polygon points="20,6 24,21 20,18 16,21" fill="#9F0201"/>
+      <polygon points="20,34 24,19 20,22 16,19" fill="#8b877c"/>
+      <text x="20" y="12.5" text-anchor="middle" font-size="7" font-weight="700" fill="#9F0201">N</text>
+    </svg>`;
+    const compassSvg = compassEl.querySelector('svg');
+    compassSvg.style.transition = 'transform 0.1s linear';
+    compassSvg.style.transformOrigin = '50% 50%';
+    const updateCompass = () => { compassSvg.style.transform = `rotate(${-map.getBearing()}deg)`; };
+    compassEl.addEventListener('click', () => map.easeTo({ bearing: 0, pitch: 0, duration: 300 }));
+    map.on('rotate', updateCompass);
+    map.getContainer().appendChild(compassEl);
+    updateCompass();
     map.on('load', () => setReady(true));
     // Ẩn địa điểm + vẽ sơ đồ ngay khi style vừa nạp (giữ qua mỗi lần đổi nền)
     map.on('styledata', () => {
