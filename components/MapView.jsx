@@ -155,6 +155,7 @@ export default function MapView({ properties, flyTarget, focusId }) {
   const seaMarkersRef = useRef([]);
 
   const [ready, setReady] = useState(false);
+  const [bearing, setBearing] = useState(0); // hướng bản đồ cho la bàn
   const [baseStyle, setBaseStyle] = useState('streets'); // mặc định: bản đồ
   const [showPoi, setShowPoi] = useState(false); // mặc định: ẩn địa điểm
   const showPoiRef = useRef(true);
@@ -212,24 +213,8 @@ export default function MapView({ properties, flyTarget, focusId }) {
       maxZoom: 19,
     });
     map.addControl(new goongjs.NavigationControl(), 'top-left');
-    // La bàn nhỏ góc trên bên phải — gắn thẳng vào khung bản đồ để chắc chắn hiển thị
-    const compassEl = document.createElement('div');
-    compassEl.className = 'mini-compass';
-    compassEl.title = 'Về hướng Bắc';
-    compassEl.innerHTML = `<svg viewBox="0 0 40 40" width="34" height="34">
-      <circle cx="20" cy="20" r="18" fill="#fff" stroke="#d8d3c8" stroke-width="1.5"/>
-      <polygon points="20,6 24,21 20,18 16,21" fill="#9F0201"/>
-      <polygon points="20,34 24,19 20,22 16,19" fill="#8b877c"/>
-      <text x="20" y="12.5" text-anchor="middle" font-size="7" font-weight="700" fill="#9F0201">N</text>
-    </svg>`;
-    const compassSvg = compassEl.querySelector('svg');
-    compassSvg.style.transition = 'transform 0.1s linear';
-    compassSvg.style.transformOrigin = '50% 50%';
-    const updateCompass = () => { compassSvg.style.transform = `rotate(${-map.getBearing()}deg)`; };
-    compassEl.addEventListener('click', () => map.easeTo({ bearing: 0, pitch: 0, duration: 300 }));
-    map.on('rotate', updateCompass);
-    map.getContainer().appendChild(compassEl);
-    updateCompass();
+    // Cập nhật hướng cho la bàn (render bằng React ở dưới)
+    map.on('rotate', () => setBearing(map.getBearing()));
     map.on('load', () => setReady(true));
     // Ẩn địa điểm + vẽ sơ đồ ngay khi style vừa nạp (giữ qua mỗi lần đổi nền)
     map.on('styledata', () => {
@@ -809,6 +794,21 @@ export default function MapView({ properties, flyTarget, focusId }) {
   return (
     <>
       <div ref={containerRef} className="gmap-container" />
+
+      {/* La bàn nhỏ góc trên bên phải */}
+      <button
+        type="button"
+        className="mini-compass"
+        title="Về hướng Bắc"
+        onClick={() => mapRef.current?.easeTo({ bearing: 0, pitch: 0, duration: 300 })}
+      >
+        <svg viewBox="0 0 40 40" width="34" height="34" style={{ transform: `rotate(${-bearing}deg)` }}>
+          <circle cx="20" cy="20" r="18" fill="#fff" stroke="#d8d3c8" strokeWidth="1.5" />
+          <polygon points="20,6 24,21 20,18 16,21" fill="#9F0201" />
+          <polygon points="20,34 24,19 20,22 16,19" fill="#8b877c" />
+          <text x="20" y="12.5" textAnchor="middle" fontSize="7" fontWeight="700" fill="#9F0201">N</text>
+        </svg>
+      </button>
 
       {/* Nội dung popup render bằng React */}
       {selected && popupNode && selected.__lotOnly &&
