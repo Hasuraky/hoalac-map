@@ -493,6 +493,18 @@ button {
   border-color: var(--moss, #4a5d3a);
 }
 
+.mini-compass {
+  cursor: pointer;
+  border-radius: 999px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  line-height: 0;
+  margin: 8px;
+}
+
+.mini-compass svg {
+  display: block;
+}
+
 .star-toggle-wrap {
   display: flex;
   align-items: center;
