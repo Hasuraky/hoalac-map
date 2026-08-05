@@ -33,6 +33,17 @@ export async function middleware(request) {
   const pathname = request.nextUrl.pathname;
   const isLoginPage = pathname.startsWith('/login');
 
+  // Giữ tương thích link chia sẻ cũ: bản đồ trước đây ở "/".
+  // "/?bds=..." hoặc "/?project=..." -> chuyển sang /ban-do (giữ nguyên query).
+  if (pathname === '/') {
+    const sp = request.nextUrl.searchParams;
+    if (sp.has('bds') || sp.has('project')) {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = '/ban-do';
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   // Khách được xem bản đồ + trang chi tiết.
   // Bắt đăng nhập ở trang thêm/sửa BĐS và trang quản trị.
   const needsAuth =
@@ -50,7 +61,7 @@ export async function middleware(request) {
 
   if (user && isLoginPage) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = '/';
+    redirectUrl.pathname = '/ban-do';
     return NextResponse.redirect(redirectUrl);
   }
 

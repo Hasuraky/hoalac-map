@@ -16,7 +16,7 @@ const MapView = dynamic(() => import('@/components/MapView'), {
   loading: () => <div className="map-loading">Đang tải bản đồ…</div>,
 });
 
-export default function HomePage() {
+export default function MapPage() {
   const [properties, setProperties] = useState([]);
   const [isMock, setIsMock] = useState(false);
   const [role, setRole] = useState('guest');
@@ -71,7 +71,7 @@ export default function HomePage() {
   return (
     <div className="map-page">
       <header className="topbar">
-        <a className="topbar-brand" href="/" title="Tải lại trang">
+        <a className="topbar-brand" href="/ban-do" title="Tải lại trang">
           <img className="brand-logo" src="/logo.svg" alt="" />
           <h1>Bản đồ BĐS Hòa Lạc</h1>
         </a>

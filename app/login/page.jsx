@@ -21,7 +21,7 @@ export default function LoginPage() {
             Đang chạy chế độ demo với dữ liệu mẫu — chưa cần đăng nhập.
             Cấu hình Supabase trong <code>.env.local</code> để bật đăng nhập.
           </p>
-          <button className="btn-primary" onClick={() => router.push('/')}>
+          <button className="btn-primary" onClick={() => router.push('/ban-do')}>
             Vào bản đồ
           </button>
         </div>
@@ -46,7 +46,7 @@ export default function LoginPage() {
       );
       return;
     }
-    router.push('/');
+    router.push('/ban-do');
     router.refresh();
   }
 
@@ -93,7 +93,7 @@ export default function LoginPage() {
           Chưa có tài khoản? Liên hệ đơn vị phát triển
         </a>
 
-        <a href="/" className="login-back">← Về trang bản đồ</a>
+        <a href="/ban-do" className="login-back">← Về trang bản đồ</a>
       </div>
     </div>
   );

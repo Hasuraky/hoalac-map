@@ -32,7 +32,7 @@ export default function PropertyDetailPage() {
   if (property === null) {
     return (
       <div className="detail-page">
-        <Link href="/" className="back">← Về bản đồ</Link>
+        <Link href="/ban-do" className="back">← Về bản đồ</Link>
         <p>Không tìm thấy bất động sản này.</p>
       </div>
     );
@@ -57,7 +57,7 @@ export default function PropertyDetailPage() {
     <div className="detail-shell">
       {/* Thanh điều hướng */}
       <header className="detail-nav">
-        <Link href="/" className="back">← Quay lại bản đồ</Link>
+        <Link href="/ban-do" className="back">← Quay lại bản đồ</Link>
         <span className="sep">|</span>
         <span className="code">{property.code}</span>
         <a

@@ -32,7 +32,7 @@ export default function InternalPage() {
   if (!['sale', 'admin', 'owner'].includes(role)) {
     return (
       <div className="detail-page">
-        <Link href="/" className="back">← Về bản đồ</Link>
+        <Link href="/ban-do" className="back">← Về bản đồ</Link>
         <p className="form-notice">Khu vực này dành cho nhân viên nội bộ.</p>
       </div>
     );
@@ -52,7 +52,7 @@ export default function InternalPage() {
     <div className="internal-shell">
       <aside className="internal-sidebar">
         <div className="internal-brand">
-          <Link href="/" className="internal-back">← Bản đồ</Link>
+          <Link href="/ban-do" className="internal-back">← Bản đồ</Link>
           <h1>Khu nội bộ</h1>
         </div>
         <nav className="internal-nav">

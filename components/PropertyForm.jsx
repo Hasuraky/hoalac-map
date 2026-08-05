@@ -431,7 +431,7 @@ export default function PropertyForm({ property = null }) {
               setSaving(true);
               try {
                 await deleteProperty(property.id);
-                router.push('/');
+                router.push('/ban-do');
                 router.refresh();
               } catch (err) {
                 setError(err.message);

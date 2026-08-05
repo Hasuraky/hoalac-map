@@ -8,7 +8,7 @@ export default function NewPropertyPage() {
   return (
     <div className="detail-shell">
       <header className="detail-nav">
-        <Link href="/" className="back">← Quay lại bản đồ</Link>
+        <Link href="/ban-do" className="back">← Quay lại bản đồ</Link>
         <span className="sep">|</span>
         <span className="code">Thêm BĐS mới</span>
       </header>
