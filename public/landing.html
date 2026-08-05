@@ -50,6 +50,10 @@ h1,h2,h3,.wordmark,.footer-wordmark{font-family:var(--font-display);}
 .header-cta{background:var(--moss);color:#fff;padding:12px 18px;font-size:12px;font-weight:700;letter-spacing:.03em;
  border-radius:10px;transition:background .15s;}
 .header-cta:hover{background:var(--moss-dark);}
+.header-left{display:flex;align-items:center;gap:36px;}
+.wordmark .brand-name{color:var(--moss);letter-spacing:.05em;}
+.header-contact{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);}
+.header-contact:hover{color:var(--moss);}
 
 /* hero */
 .hero{height:calc(100vh - 88px);min-height:620px;position:relative;color:#fff;overflow:hidden;}
@@ -181,14 +185,14 @@ footer{background:var(--moss-dark);color:var(--on-moss);padding:96px 5vw 30px;}
 
 
 <header class="site-header">
-  <a class="wordmark" href="#top" aria-label="Trang chủ"><img class="wordmark-logo" src="logo-dev.svg" alt="Hướng về Hoà Lạc" style="width:34px;height:34px;flex:0 0 auto"><span>Hướng về Hoà Lạc</span><span class="dot">.</span></a>
-  <nav class="desktop-nav" aria-label="Điều hướng chính">
-    <a href="/ban-do">Bản đồ bảng hàng</a>
-    <a href="#properties">Danh sách bảng hàng</a>
-    <a href="#contact">Liên hệ</a>
-  </nav>
+  <div class="header-left">
+    <a class="wordmark" href="#top" aria-label="Trang chủ"><img class="wordmark-logo" src="logo-dev.svg" alt="Hướng về Hoà Lạc" style="width:51px;height:51px;flex:0 0 auto"><span class="brand-name">Hướng về Hoà Lạc</span></a>
+    <nav class="desktop-nav" aria-label="Điều hướng chính">
+      <a href="/ban-do">Bản đồ bảng hàng</a>
+      <a href="#properties">Danh sách bảng hàng</a>
+    </nav>
+  </div>
   <div class="header-actions">
-    <a class="header-phone" href="tel:0000000000">☎ [SỐ ĐIỆN THOẠI]</a>
     <a class="header-cta" href="https://huongdm.com" target="_blank" rel="noopener">huongdm.com</a>
   </div>
 </header>
