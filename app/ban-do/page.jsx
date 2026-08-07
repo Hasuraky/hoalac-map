@@ -71,10 +71,16 @@ export default function MapPage() {
   return (
     <div className="map-page">
       <header className="topbar">
-        <a className="topbar-brand" href="/ban-do" title="Tải lại trang">
-          <img className="brand-logo" src="/logo.svg" alt="" />
-          <h1>Bản đồ BĐS Hòa Lạc</h1>
-        </a>
+        <div className="topbar-left">
+          <a className="topbar-brand" href="/" title="Trang chủ">
+            <img className="brand-logo" src="/logo-dev.svg" alt="" />
+            <h1>HƯỚNG VỀ HOÀ LẠC</h1>
+          </a>
+          <nav className="topbar-nav">
+            <a href="/ban-do">Bản đồ bảng hàng</a>
+            <a href="/#properties">Danh sách bảng hàng</a>
+          </nav>
+        </div>
 
         <div className="topbar-right">
           <div className="topbar-legend">

@@ -4,6 +4,7 @@
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inria+Sans:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
 
 :root {
   /* Màu chính */
@@ -108,8 +109,42 @@ button {
   display: block;
 }
 
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  min-width: 0;
+}
+
+.topbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+
+.topbar-nav a {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0.92;
+  text-decoration: none;
+}
+
+.topbar-nav a:hover {
+  opacity: 1;
+}
+
+@media (max-width: 860px) {
+  .topbar-nav {
+    display: none;
+  }
+}
+
 .topbar h1 {
-  font-family: 'Inria Sans', sans-serif;
+  font-family: 'Be Vietnam Pro', 'Inria Sans', sans-serif;
   font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.05em;
