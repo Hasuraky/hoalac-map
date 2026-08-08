@@ -3,16 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Metro City — Hướng về Hoà Lạc</title>
+<title>Hòa Lạc Metro City — Hướng về Hoà Lạc</title>
 <link rel="icon" type="image/svg+xml" href="/logo-dev.svg">
-<meta name="description" content="Metro City — dự án tại khu vực Hòa Lạc. Thông tin đang được cập nhật.">
+<meta name="description" content="Hòa Lạc Metro City (Kita Group) — khu đô thị cao cấp giữa trung tâm CBD Hòa Lạc, đô thị vệ tinh phía Tây Hà Nội.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Hướng về Hoà Lạc">
-<meta property="og:title" content="Metro City — Hướng về Hoà Lạc">
-<meta property="og:description" content="Dự án Metro City tại Hòa Lạc — thông tin đang được cập nhật.">
+<meta property="og:title" content="Hòa Lạc Metro City — Chuẩn sống cao cấp phía Tây Hà Nội">
+<meta property="og:description" content="Khu đô thị cao cấp giữa trung tâm CBD Hòa Lạc, phát triển bởi Kita Group. Vị trí tọa độ kim cương, hệ tiện ích đồng bộ.">
 <meta property="og:url" content="https://www.huongvehoalac.com/metro-city">
-<meta property="og:image" content="https://www.huongvehoalac.com/hero-cover.jpg">
+<meta property="og:image" content="https://www.huongvehoalac.com/metro-city/01-phoi-canh-tong-the.jpg">
 <meta property="og:locale" content="vi_VN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.huongvehoalac.com/metro-city/01-phoi-canh-tong-the.jpg">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
 :root{
@@ -32,7 +34,6 @@ img{display:block;width:100%;}
 h1,h2,h3,.brand-name{font-family:var(--font-display);}
 .eyebrow{font-size:11px;letter-spacing:.16em;font-weight:700;text-transform:uppercase;color:var(--moss);margin-bottom:16px;}
 .wrap{max-width:1200px;margin:0 auto;padding:0 5vw;}
-.ph{display:inline-block;background:var(--moss-soft);border:1px dashed var(--moss);color:var(--moss);font-weight:700;padding:2px 8px;border-radius:6px;font-size:.86em;}
 
 /* header */
 .site-header{position:fixed;top:0;left:0;right:0;z-index:50;height:64px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;
@@ -46,43 +47,70 @@ h1,h2,h3,.brand-name{font-family:var(--font-display);}
 .header-cta:hover{background:rgba(255,255,255,.3);}
 @media(max-width:820px){.hnav{display:none;}}
 
-/* hero (chưa có ảnh -> nền moss) */
-.hero{position:relative;height:76vh;min-height:520px;overflow:hidden;color:#fff;
- background:radial-gradient(120% 120% at 30% 0%,#2f6a44 0%,var(--moss-dark) 60%,#132e1f 100%);display:flex;align-items:flex-end;}
-.hero .wrap{padding-bottom:8vh;position:relative;z-index:2;}
-.hero .status{display:inline-block;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:18px;}
-.hero h1{font-size:clamp(44px,7vw,88px);line-height:1;letter-spacing:-.02em;font-weight:800;}
-.hero .sub{font-size:clamp(17px,2vw,22px);margin-top:16px;max-width:640px;color:rgba(255,255,255,.9);}
+/* hero */
+.hero{position:relative;height:88vh;min-height:560px;overflow:hidden;color:#fff;background:var(--moss-dark);}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,45,30,.35),rgba(20,45,30,.12) 40%,rgba(20,45,30,.8));}
+.hero-inner{position:absolute;left:0;right:0;bottom:8vh;}
+.hero .status{display:inline-block;background:var(--st-available);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:18px;}
+.hero h1{font-size:clamp(42px,6.6vw,84px);line-height:1;letter-spacing:-.02em;font-weight:800;}
+.hero .sub{font-size:clamp(17px,2vw,22px);margin-top:16px;max-width:680px;color:rgba(255,255,255,.92);}
 .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px;}
-.hero-photo-note{position:absolute;top:calc(64px + 22px);right:22px;z-index:2;background:rgba(29,66,41,.55);border:1px dashed rgba(255,255,255,.5);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:8px 12px;border-radius:8px;}
 
+/* buttons */
 .btn{display:inline-flex;align-items:center;gap:8px;padding:15px 26px;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:10px;border:1px solid transparent;transition:.15s;}
 .btn-white{background:#fff;color:var(--moss);}
 .btn-white:hover{background:var(--stone-light);}
 .btn-ghost-light{border-color:rgba(255,255,255,.6);color:#fff;background:rgba(255,255,255,.08);}
 .btn-ghost-light:hover{background:#fff;color:var(--moss);}
 
+/* sections */
 .section{padding:92px 0;}
 .intro{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:start;}
 .intro h2{font-size:clamp(30px,4vw,50px);line-height:1.08;letter-spacing:-.015em;}
 .intro p{color:var(--ink-soft);font-size:17px;margin-top:18px;}
+.intro .lead{color:var(--ink);font-size:18px;}
+.intro .dev{margin-top:22px;font-size:14px;color:var(--moss);font-weight:700;}
 @media(max-width:820px){.intro{grid-template-columns:1fr;gap:24px;}}
 
-.gallery-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:30px;}
-.gallery-head h2{font-size:clamp(28px,3.6vw,44px);}
-.gallery-note{color:var(--ink-soft);font-size:14px;}
-.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
-.gallery .cell{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;}
-.gallery .cell img{width:100%;height:100%;object-fit:cover;}
-.gallery .cell.wide{grid-column:span 2;}
-.gallery .phbox{display:flex;align-items:center;justify-content:center;text-align:center;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);
- background:repeating-linear-gradient(45deg,var(--stone-light),var(--stone-light) 12px,#e3e0d6 12px,#e3e0d6 24px);border:1px dashed var(--stone-dark);}
-@media(max-width:820px){.gallery{grid-template-columns:repeat(2,1fr);}}
+.split{background:var(--stone-light);}
+.split .wrap{display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:center;}
+.split h2{font-size:clamp(26px,3.4vw,40px);margin-bottom:16px;}
+.split p{color:var(--ink-soft);font-size:16px;}
+.split .media{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;box-shadow:var(--shadow);}
+.split .media img{width:100%;height:100%;object-fit:cover;}
+@media(max-width:820px){.split .wrap{grid-template-columns:1fr;gap:22px;}}
 
+.amenities{background:var(--moss);color:var(--on-moss);}
+.amenities h2{color:#fff;font-size:clamp(28px,3.6vw,44px);margin-bottom:8px;}
+.amenities .eyebrow{color:rgba(236,234,227,.75);}
+.amenity-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px;}
+.amenity{border:1px solid rgba(236,234,227,.2);border-radius:var(--radius);padding:22px;background:rgba(255,255,255,.04);font-size:15px;}
+.amenity b{color:#fff;}
+@media(max-width:820px){.amenity-grid{grid-template-columns:1fr;}}
+
+.reasons{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:40px;}
+.reason{border:1px solid var(--stone-dark);border-radius:var(--radius);padding:26px;background:#fff;}
+.reason h3{font-size:19px;color:var(--moss);margin-bottom:8px;}
+.reason p{color:var(--ink-soft);font-size:15px;}
+@media(max-width:820px){.reasons{grid-template-columns:1fr;}}
+
+/* gallery */
+.gallery-head{margin-bottom:30px;}
+.gallery-head h2{font-size:clamp(28px,3.6vw,44px);}
+.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+figure.cell{margin:0;border-radius:var(--radius);overflow:hidden;background:#fff;box-shadow:var(--shadow);}
+figure.cell img{aspect-ratio:16/10;object-fit:cover;}
+figure.cell figcaption{padding:12px 15px;font-size:13px;font-weight:600;color:var(--ink);}
+figure.cell.wide{grid-column:span 2;}
+@media(max-width:820px){.gallery{grid-template-columns:1fr;}figure.cell.wide{grid-column:span 1;}}
+
+/* map CTA */
 .mapcta{background:var(--moss-dark);color:#fff;text-align:center;}
 .mapcta h2{font-size:clamp(28px,4vw,48px);margin-bottom:16px;}
 .mapcta p{color:rgba(236,234,227,.85);max-width:560px;margin:0 auto 30px;}
 
+/* footer */
 .foot{background:var(--ink);color:rgba(236,234,227,.7);padding:40px 0;font-size:14px;}
 .foot .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
 .foot a:hover{color:#fff;}
@@ -101,53 +129,100 @@ h1,h2,h3,.brand-name{font-family:var(--font-display);}
   <a class="header-cta" href="https://huongdm.com" target="_blank" rel="noopener">huongdm.com</a>
 </header>
 
-<!-- HERO (chờ ảnh) -->
+<!-- HERO -->
 <section class="hero">
-  <span class="hero-photo-note">Ảnh dự án · chờ bổ sung</span>
-  <div class="wrap">
-    <span class="status">Sắp cập nhật</span>
-    <h1>Metro City</h1>
-    <p class="sub"><span class="ph">[Mô tả ngắn về dự án — CHỜ BỔ SUNG]</span></p>
-    <div class="hero-actions">
-      <a class="btn btn-white" href="/ban-do?project=metro-city">Xem trên bản đồ ↗</a>
-      <a class="btn btn-ghost-light" href="#lien-he">Liên hệ tư vấn</a>
+  <img src="/metro-city/01-phoi-canh-tong-the.jpg" alt="Phối cảnh tổng thể Hòa Lạc Metro City">
+  <div class="hero-shade"></div>
+  <div class="hero-inner">
+    <div class="wrap">
+      <span class="status">Đang bán</span>
+      <h1>Hòa Lạc Metro City</h1>
+      <p class="sub">Chuẩn sống cao cấp giữa trái tim đô thị vệ tinh phía Tây Hà Nội — phát triển bởi Kita Group.</p>
+      <div class="hero-actions">
+        <a class="btn btn-white" href="/ban-do?project=metro-city">Xem trên bản đồ ↗</a>
+        <a class="btn btn-ghost-light" href="#lien-he">Liên hệ tư vấn</a>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- TỔNG QUAN (chờ nội dung) -->
+<!-- INTRO -->
 <section class="section">
   <div class="wrap intro">
     <div>
       <p class="eyebrow">Tổng quan dự án</p>
-      <h2>Metro City</h2>
+      <h2>Chuẩn sống cao cấp giữa trung tâm CBD Hòa Lạc</h2>
     </div>
     <div>
-      <p><span class="ph">[Giới thiệu tổng quan dự án — CHỜ BỔ SUNG]</span> Vị trí, quy mô, chủ đầu tư, loại hình sản phẩm… sẽ được cập nhật tại đây khi có thông tin.</p>
-      <p><span class="ph">[Vị trí &amp; kết nối — CHỜ BỔ SUNG]</span></p>
+      <p class="lead">Hòa Lạc Metro City là khu đô thị tiên phong định vị chuẩn sống cao cấp ngay trung tâm CBD Hòa Lạc — nơi được ví như "Thung lũng Silicon" mới của Việt Nam.</p>
+      <p>Dự án mở ra một không gian sống hiện đại, xanh mát và đẳng cấp, dành cho cộng đồng cư dân tri thức, chuyên gia và thế hệ tiên phong.</p>
+      <p class="dev">Chủ đầu tư: Kita Group</p>
     </div>
   </div>
 </section>
 
-<!-- GALLERY (chờ ảnh) -->
+<!-- VỊ TRÍ -->
+<section class="section split">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Vị trí "tọa độ kim cương"</p>
+      <h2>Trái tim mới phía Tây Thủ đô</h2>
+      <p>Dự án nắm giữ vị trí trung tâm của đô thị vệ tinh Hòa Lạc, liền kề nút giao hai tuyến Metro chiến lược và Đại lộ Thăng Long. Từ đây, cư dân dễ dàng kết nối về trung tâm Hà Nội, đồng thời tận hưởng trọn vẹn hệ sinh thái Khu Công nghệ cao, Đại học Quốc gia, tổ hợp y tế và các trung tâm nghiên cứu hàng đầu ngay bên cạnh.</p>
+    </div>
+    <div class="media"><img src="/metro-city/14-vi-tri-ket-noi.jpg" alt="Vị trí kết nối Hòa Lạc Metro City"></div>
+  </div>
+</section>
+
+<!-- TIỆN ÍCH -->
+<section class="section amenities">
+  <div class="wrap">
+    <p class="eyebrow">Hệ tiện ích</p>
+    <h2>Đồng bộ, đẳng cấp</h2>
+    <div class="amenity-grid">
+      <div class="amenity"><b>Hồ điều hòa rộng lớn</b> cùng hệ thống mảng xanh đa tầng đan cài cùng kiến trúc.</div>
+      <div class="amenity"><b>Hai công viên chủ đề</b> — Aura Park &amp; Verve Park: quảng trường nhạc nước, tổ hợp thể thao, đường dạo, khu BBQ.</div>
+      <div class="amenity"><b>Hai clubhouse thời thượng</b> cùng bể bơi, không gian thư giãn và sinh hoạt cộng đồng.</div>
+      <div class="amenity"><b>Tổ hợp thương mại — dịch vụ</b> sầm uất phục vụ mua sắm, ẩm thực và giải trí ngay nội khu.</div>
+    </div>
+  </div>
+</section>
+
+<!-- LỢI ĐIỂM -->
+<section class="section">
+  <div class="wrap">
+    <p class="eyebrow">Những lợi điểm nổi bật</p>
+    <h2 style="font-size:clamp(28px,3.6vw,44px)">Vì sao chọn Metro City</h2>
+    <div class="reasons">
+      <div class="reason"><h3>Đô thị thấp tầng hiếm có</h3><p>Quy hoạch bài bản, đồng bộ từ nhà ở, thương mại đến tiện ích.</p></div>
+      <div class="reason"><h3>Kiến trúc thoáng đãng</h3><p>Các căn được thiết kế tối ưu công năng, đón sáng và không gian xanh.</p></div>
+      <div class="reason"><h3>Kết nối tương lai</h3><p>Đón đầu hạ tầng giao thông và tuyến Metro đang hình thành của khu vực.</p></div>
+      <div class="reason"><h3>Cộng đồng tinh hoa</h3><p>Nơi hội tụ chuyên gia, giảng viên và cư dân hiện đại trong lòng thành phố khoa học — công nghệ.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
 <section class="section" style="background:var(--stone-light)">
   <div class="wrap">
     <div class="gallery-head">
-      <div>
-        <p class="eyebrow">Hình ảnh dự án</p>
-        <h2>Không gian Metro City</h2>
-      </div>
-      <p class="gallery-note">Thư viện ảnh đang được chuẩn bị — sẽ bổ sung khi có tài nguyên.</p>
+      <p class="eyebrow">Hình ảnh dự án</p>
+      <h2>Không gian Hòa Lạc Metro City</h2>
     </div>
     <div class="gallery">
-      <div class="cell wide phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
-      <div class="cell phbox">Ảnh<br>chờ bổ sung</div>
+      <figure class="cell wide"><img src="/metro-city/01-phoi-canh-tong-the.jpg" alt="Phối cảnh tổng thể"><figcaption>Phối cảnh tổng thể</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/02-view-ho-biet-thu.jpg" alt="View hồ - biệt thự"><figcaption>View hồ – biệt thự</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/03-view-ho-biet-thu-2.jpg" alt="View hồ - biệt thự"><figcaption>View hồ – biệt thự</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/04-clubhouse.jpg" alt="Clubhouse"><figcaption>Clubhouse</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/05-be-boi-clubhouse.jpg" alt="Bể bơi clubhouse"><figcaption>Bể bơi clubhouse</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/06-clubhouse-aura.jpg" alt="Clubhouse Aura"><figcaption>Clubhouse Aura</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/07-quang-truong-nhac-nuoc.jpg" alt="Quảng trường nhạc nước"><figcaption>Quảng trường nhạc nước</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/08-san-the-thao.jpg" alt="Sân thể thao"><figcaption>Sân thể thao</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/09-biet-thu-lakeside.jpg" alt="Biệt thự lakeside"><figcaption>Biệt thự lakeside</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/10-biet-thu-don-lap.jpg" alt="Biệt thự đơn lập"><figcaption>Biệt thự đơn lập</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/11-biet-thu-goc-pho.jpg" alt="Biệt thự góc phố"><figcaption>Biệt thự góc phố</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/12-shophouse-bizhub.jpg" alt="Shophouse BizHub"><figcaption>Shophouse BizHub</figcaption></figure>
+      <figure class="cell"><img src="/metro-city/13-lien-ke-flexi.jpg" alt="Liền kề Flexi"><figcaption>Liền kề Flexi</figcaption></figure>
+      <figure class="cell wide"><img src="/metro-city/15-mat-bang-du-an.jpg" alt="Mặt bằng dự án"><figcaption>Mặt bằng dự án</figcaption></figure>
     </div>
   </div>
 </section>
@@ -157,7 +232,7 @@ h1,h2,h3,.brand-name{font-family:var(--font-display);}
   <div class="wrap">
     <p class="eyebrow" style="color:rgba(236,234,227,.75)">Trên bản đồ bảng hàng</p>
     <h2>Xem vị trí &amp; bảng hàng Metro City</h2>
-    <p>Mở dự án Metro City trên hệ thống bản đồ để xem vị trí và các sản phẩm đang mở bán (khi dữ liệu sẵn sàng).</p>
+    <p>Mở trực tiếp dự án Hòa Lạc Metro City trên hệ thống bản đồ để xem vị trí, phân khu và các sản phẩm đang mở bán.</p>
     <a class="btn btn-white" href="/ban-do?project=metro-city">Mở dự án trên bản đồ ↗</a>
   </div>
 </section>
