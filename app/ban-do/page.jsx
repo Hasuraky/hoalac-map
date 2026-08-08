@@ -50,7 +50,23 @@ export default function MapPage() {
     if (!allProjects.length) return;
     const pid = new URLSearchParams(window.location.search).get('project');
     if (!pid) return;
-    const p = allProjects.find((x) => x.id === pid);
+    // Nhận diện dự án theo id, mã rút gọn hoặc slug tên (vd ?project=xanh-villas)
+    const slug = (str) =>
+      (str || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+    const key = slug(pid);
+    const p = allProjects.find(
+      (x) =>
+        x.id === pid ||
+        (x.code_prefix || '').toLowerCase() === pid.toLowerCase() ||
+        slug(x.code_prefix) === key ||
+        slug(x.name) === key
+    );
     if (p) flyToProject(p);
   }, [allProjects]); // eslint-disable-line react-hooks/exhaustive-deps
 
