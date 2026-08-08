@@ -108,6 +108,7 @@ section[id]{scroll-margin-top:64px;}
 .about{background:var(--stone-light);display:grid;grid-template-columns:.9fr 1.1fr;gap:6vw;align-items:center;padding:104px 5vw;}
 .about-photo{position:relative;aspect-ratio:4/5;overflow:hidden;border-radius:var(--radius);box-shadow:var(--shadow);}
 .about-photo .ph-box{height:100%;}
+.about-photo img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
 .about h2{font-size:clamp(36px,4.2vw,62px);line-height:1.02;letter-spacing:-.01em;margin:12px 0 24px;font-weight:700;}
 .about p.bio{font-size:16px;line-height:1.8;color:#3c4640;max-width:560px;}
 .about-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:40px;}
@@ -247,7 +248,7 @@ footer{background:var(--moss-dark);color:var(--on-moss);padding:96px 5vw 30px;}
 
 <!-- ABOUT -->
 <section class="about" id="about">
-  <div class="about-photo"><div class="ph-box">ẢNH CHÂN DUNG<br>CHỜ BỔ SUNG</div></div>
+  <div class="about-photo"><img src="avatar-huongdm.jpg" alt="Đỗ Mạnh Hướng"></div>
   <div>
     <p class="eyebrow">VỀ TÔI</p>
     <h2>ĐỖ MẠNH HƯỚNG</h2>
