@@ -7,7 +7,10 @@ const nextConfig = {
   // Bản đồ chuyển sang /ban-do.
   async rewrites() {
     return {
-      beforeFiles: [{ source: '/', destination: '/landing.html' }],
+      beforeFiles: [
+        { source: '/', destination: '/landing.html' },
+        { source: '/xanh-villas', destination: '/xanh-villas.html' },
+      ],
       afterFiles: [],
       fallback: [],
     };
