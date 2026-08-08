@@ -179,12 +179,15 @@ section[id]{scroll-margin-top:64px;}
 .social-card:hover .go{color:#fff;}
 
 /* footer */
-footer{background:var(--moss-dark);color:var(--on-moss);padding:96px 5vw 30px;}
-.footer-top{display:grid;grid-template-columns:.6fr 1fr .7fr;align-items:end;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:64px;gap:36px;}
+footer{background:var(--moss-dark);color:var(--on-moss);padding:96px 5vw 30px;position:relative;overflow:hidden;}
+.footer-top{border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:64px;}
+.footer-brand{display:flex;flex-direction:column;align-items:flex-start;gap:22px;}
+.footer-watermark{position:absolute;right:-3%;bottom:-12%;width:min(56vw,760px);opacity:.05;pointer-events:none;z-index:0;}
+footer .footer-top,footer .footer-grid,footer .footer-bottom{position:relative;z-index:1;}
 .footer-wordmark{font-size:28px;color:#fff;}
 .footer-wordmark span.dot{color:var(--stone);}
 .footer-top h2{font-size:clamp(34px,4.4vw,66px);line-height:1;letter-spacing:-.01em;margin:0;font-weight:700;color:#fff;}
-.footer-top a.email{justify-self:end;border-bottom:1.5px solid var(--stone);padding-bottom:6px;font-size:12px;font-weight:700;}
+.footer-top a.email{align-self:flex-start;border-bottom:1.5px solid var(--stone);padding-bottom:6px;font-size:12px;font-weight:700;}
 .footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:36px;padding:56px 0;}
 .footer-grid p{color:rgba(236,234,227,.55);font-size:10px;letter-spacing:.12em;font-weight:700;margin:0 0 16px;text-transform:uppercase;}
 .footer-grid a{display:block;color:rgba(236,234,227,.85);font-size:14px;padding:6px 0;font-weight:400;}
@@ -360,9 +363,12 @@ footer{background:var(--moss-dark);color:var(--on-moss);padding:96px 5vw 30px;}
 
 <!-- FOOTER -->
 <footer id="contact">
+  <img class="footer-watermark" src="footer-logo.svg" alt="" aria-hidden="true">
   <div class="footer-top">
-    <p class="footer-wordmark"><img class="wordmark-logo" src="logo-dev.svg" alt="Hướng về Hoà Lạc" style="width:34px;height:34px;flex:0 0 auto"><span>Hướng về Hoà Lạc</span><span class="dot">.</span></p>
-    <a class="email" href="mailto:email@tenmien.com">[EMAIL@TENMIEN.COM] ↗</a>
+    <div class="footer-brand">
+      <p class="footer-wordmark"><img class="wordmark-logo" src="logo-dev.svg" alt="Hướng về Hoà Lạc" style="width:34px;height:34px;flex:0 0 auto"><span>Hướng về Hoà Lạc</span><span class="dot">.</span></p>
+      <a class="email" href="mailto:email@tenmien.com">[EMAIL@TENMIEN.COM] ↗</a>
+    </div>
   </div>
   <div class="footer-grid">
     <div><p>Khám phá</p>
