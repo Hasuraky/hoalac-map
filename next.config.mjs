@@ -11,6 +11,7 @@ const nextConfig = {
         { source: '/', destination: '/landing.html' },
         { source: '/xanh-villas', destination: '/xanh-villas.html' },
         { source: '/metro-city', destination: '/metro-city.html' },
+        { source: '/wealth-kansen-valley', destination: '/wealth-kansen-valley.html' },
       ],
       afterFiles: [],
       fallback: [],

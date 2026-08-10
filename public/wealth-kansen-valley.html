@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wealth Kansen Valley — Hướng về Hoà Lạc</title>
+<link rel="icon" type="image/svg+xml" href="/logo-dev.svg">
+<meta name="description" content="Wealth Kansen Valley — khu biệt thự compound khép kín tại cửa ngõ Hòa Lạc. Sống an nhiên giữa thung lũng xanh.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Hướng về Hoà Lạc">
+<meta property="og:title" content="Wealth Kansen Valley — Sống an nhiên giữa thung lũng xanh">
+<meta property="og:description" content="Khu biệt thự compound khép kín tại cửa ngõ Hòa Lạc — thiên nhiên, riêng tư và chuẩn sống nghỉ dưỡng.">
+<meta property="og:url" content="https://www.huongvehoalac.com/wealth-kansen-valley">
+<meta property="og:image" content="https://www.huongvehoalac.com/wealth-kansen-valley/wkv-01.jpg">
+<meta property="og:locale" content="vi_VN">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://www.huongvehoalac.com/wealth-kansen-valley/wkv-01.jpg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+:root{
+ --stone:#d8d4c9;--stone-light:#eceae3;--stone-dark:#b8b3a4;
+ --moss:#275838;--moss-dark:#1d4229;--moss-soft:#e8efe9;
+ --ink:#26312a;--ink-soft:#6b7268;--on-moss:#eceae3;
+ --st-available:#2f7d46;--st-deposited:#c9862b;--st-sold:#b3402f;
+ --radius:12px;--shadow:0 2px 12px rgba(38,49,42,.1);
+ --font-body:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+ --font-display:'Be Vietnam Pro',var(--font-body);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:#fff;color:var(--ink);font-family:var(--font-body);line-height:1.6;}
+a{color:inherit;text-decoration:none;}
+img{display:block;width:100%;}
+h1,h2,h3,.brand-name{font-family:var(--font-display);}
+.eyebrow{font-size:11px;letter-spacing:.16em;font-weight:700;text-transform:uppercase;color:var(--moss);margin-bottom:16px;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 5vw;}
+
+.site-header{position:fixed;top:0;left:0;right:0;z-index:50;height:64px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;
+ background:rgba(3,32,10,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.18);color:#fff;}
+.header-left{display:flex;align-items:center;gap:34px;}
+.wordmark{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#fff;}
+.wordmark img{width:40px;height:40px;padding:5px;border-radius:6px;background:rgba(255,255,255,.3);object-fit:contain;flex:0 0 auto;}
+.hnav{display:flex;align-items:center;gap:22px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}
+.hnav a{opacity:.92;}.hnav a:hover{opacity:1;}
+.header-cta{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.5);color:#fff;padding:9px 15px;font-size:13px;font-weight:600;border-radius:8px;}
+.header-cta:hover{background:rgba(255,255,255,.3);}
+@media(max-width:820px){.hnav{display:none;}}
+
+.hero{position:relative;height:88vh;min-height:560px;overflow:hidden;color:#fff;background:var(--moss-dark);}
+.hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,45,30,.35),rgba(20,45,30,.12) 40%,rgba(20,45,30,.8));}
+.hero-inner{position:absolute;left:0;right:0;bottom:8vh;}
+.hero .status{display:inline-block;background:var(--st-available);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;margin-bottom:18px;}
+.hero h1{font-size:clamp(40px,6.2vw,80px);line-height:1;letter-spacing:-.02em;font-weight:800;}
+.hero .sub{font-size:clamp(17px,2vw,22px);margin-top:16px;max-width:680px;color:rgba(255,255,255,.92);}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px;}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:15px 26px;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;border-radius:10px;border:1px solid transparent;transition:.15s;}
+.btn-white{background:#fff;color:var(--moss);}
+.btn-white:hover{background:var(--stone-light);}
+.btn-ghost-light{border-color:rgba(255,255,255,.6);color:#fff;background:rgba(255,255,255,.08);}
+.btn-ghost-light:hover{background:#fff;color:var(--moss);}
+
+.section{padding:92px 0;}
+.intro{display:grid;grid-template-columns:1fr 1fr;gap:6vw;align-items:start;}
+.intro h2{font-size:clamp(30px,4vw,50px);line-height:1.08;letter-spacing:-.015em;}
+.intro p{color:var(--ink-soft);font-size:17px;margin-top:18px;}
+.intro .lead{color:var(--ink);font-size:18px;}
+@media(max-width:820px){.intro{grid-template-columns:1fr;gap:24px;}}
+
+.split{background:var(--stone-light);}
+.split .wrap{display:grid;grid-template-columns:1fr 1fr;gap:5vw;align-items:center;}
+.split h2{font-size:clamp(26px,3.4vw,40px);margin-bottom:16px;}
+.split p{color:var(--ink-soft);font-size:16px;}
+.split .media{border-radius:var(--radius);overflow:hidden;aspect-ratio:4/3;box-shadow:var(--shadow);}
+.split .media img{width:100%;height:100%;object-fit:cover;}
+@media(max-width:820px){.split .wrap{grid-template-columns:1fr;gap:22px;}}
+
+.amenities{background:var(--moss);color:var(--on-moss);}
+.amenities h2{color:#fff;font-size:clamp(28px,3.6vw,44px);margin-bottom:8px;}
+.amenities .eyebrow{color:rgba(236,234,227,.75);}
+.amenity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:40px;}
+.amenity{border:1px solid rgba(236,234,227,.2);border-radius:var(--radius);padding:22px;background:rgba(255,255,255,.04);font-size:15px;font-weight:500;}
+@media(max-width:820px){.amenity-grid{grid-template-columns:1fr;}}
+
+.reasons{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:40px;}
+.reason{border:1px solid var(--stone-dark);border-radius:var(--radius);padding:26px;background:#fff;}
+.reason h3{font-size:19px;color:var(--moss);margin-bottom:8px;}
+.reason p{color:var(--ink-soft);font-size:15px;}
+@media(max-width:820px){.reasons{grid-template-columns:1fr;}}
+
+.gallery-head{margin-bottom:30px;}
+.gallery-head h2{font-size:clamp(28px,3.6vw,44px);}
+.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.gallery .cell{aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;background:var(--stone-light);box-shadow:var(--shadow);}
+.gallery .cell img{width:100%;height:100%;object-fit:cover;}
+.gallery .cell.wide{grid-column:span 2;}
+@media(max-width:820px){.gallery{grid-template-columns:repeat(2,1fr);}}
+
+.mapcta{background:var(--moss-dark);color:#fff;text-align:center;}
+.mapcta h2{font-size:clamp(28px,4vw,48px);margin-bottom:16px;}
+.mapcta p{color:rgba(236,234,227,.85);max-width:560px;margin:0 auto 30px;}
+
+.foot{background:var(--ink);color:rgba(236,234,227,.7);padding:40px 0;font-size:14px;}
+.foot .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;}
+.foot a:hover{color:#fff;}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <a class="wordmark" href="/"><img src="/logo-dev.svg" alt="Hướng về Hoà Lạc"><span class="brand-name">Hướng về Hoà Lạc</span></a>
+    <nav class="hnav">
+      <a href="/">Trang chủ</a>
+      <a href="/ban-do">Bản đồ bảng hàng</a>
+    </nav>
+  </div>
+  <a class="header-cta" href="https://huongdm.com" target="_blank" rel="noopener">huongdm.com</a>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <img src="/wealth-kansen-valley/wkv-01.jpg" alt="Wealth Kansen Valley">
+  <div class="hero-shade"></div>
+  <div class="hero-inner">
+    <div class="wrap">
+      <span class="status">Đang bán</span>
+      <h1>Wealth Kansen Valley</h1>
+      <p class="sub">Sống an nhiên giữa thung lũng xanh — khu biệt thự compound khép kín tại cửa ngõ Hòa Lạc.</p>
+      <div class="hero-actions">
+        <a class="btn btn-white" href="/ban-do?project=wealth-kansen-valley">Xem trên bản đồ ↗</a>
+        <a class="btn btn-ghost-light" href="#lien-he">Liên hệ tư vấn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTRO -->
+<section class="section">
+  <div class="wrap intro">
+    <div>
+      <p class="eyebrow">Tổng quan dự án</p>
+      <h2>Thung lũng an cư giữa lòng đô thị vệ tinh</h2>
+    </div>
+    <div>
+      <p class="lead">Wealth Kansen Valley là khu biệt thự compound khép kín nằm tại cửa ngõ Hòa Lạc (Thạch Thất, Hà Nội) — nơi thiên nhiên, sự riêng tư và chuẩn sống nghỉ dưỡng hòa làm một.</p>
+      <p>Được kiến tạo như một thung lũng an cư giữa lòng đô thị vệ tinh phía Tây Thủ đô, dự án mang đến không gian sống trong lành, yên tĩnh nhưng vẫn kết nối thuận tiện với trung tâm Hà Nội.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VỊ TRÍ -->
+<section class="section split">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Vị trí kết nối</p>
+      <h2>Vùng lõi phát triển Hòa Lạc</h2>
+      <p>Tọa lạc trong vùng lõi phát triển Hòa Lạc, Wealth Kansen Valley thừa hưởng hạ tầng giao thông đồng bộ và tốc độ đô thị hóa mạnh mẽ của khu vực phía Tây Hà Nội. Từ dự án, cư dân dễ dàng di chuyển về trung tâm thành phố, đồng thời tận hưởng khí hậu mát lành, trong trẻo đặc trưng của vùng núi Hòa Lạc.</p>
+    </div>
+    <div class="media"><img src="/wealth-kansen-valley/wkv-04.jpg" alt="Wealth Kansen Valley"></div>
+  </div>
+</section>
+
+<!-- TIỆN ÍCH -->
+<section class="section amenities">
+  <div class="wrap">
+    <p class="eyebrow">Không gian &amp; tiện ích</p>
+    <h2>Thung lũng xanh khép kín</h2>
+    <p style="color:rgba(236,234,227,.82);max-width:640px;margin-top:14px;">Điểm nhấn là dòng suối cá Koi uốn lượn giữa khu, cùng cảnh quan được chăm chút tỉ mỉ. Hệ thống tiện ích khép kín phục vụ trọn vẹn nhịp sống cư dân:</p>
+    <div class="amenity-grid">
+      <div class="amenity">Cổng chào &amp; chốt an ninh kiểm soát 24/7</div>
+      <div class="amenity">Clubhouse &amp; tầng mái ngắm cảnh, thư giãn</div>
+      <div class="amenity">Bể bơi, vườn treo, thác nước cảnh quan</div>
+      <div class="amenity">Coffee &amp; BBQ, sân Pickleball, đường dạo bộ</div>
+      <div class="amenity">Suối cá Koi uốn lượn giữa khu</div>
+      <div class="amenity">Cửa hàng tiện ích ngay trong khu</div>
+    </div>
+  </div>
+</section>
+
+<!-- LỢI ĐIỂM -->
+<section class="section">
+  <div class="wrap">
+    <p class="eyebrow">Lợi điểm nổi bật</p>
+    <h2 style="font-size:clamp(28px,3.6vw,44px)">Vì sao chọn Wealth Kansen Valley</h2>
+    <div class="reasons">
+      <div class="reason"><h3>Vận hành chuẩn khách sạn cao cấp</h3><p>Cảnh quan và tiện ích luôn được chăm sóc chỉn chu, không lo xuống cấp.</p></div>
+      <div class="reason"><h3>Compound khép kín, một cổng vào</h3><p>An toàn và riêng tư tuyệt đối cho mỗi gia đình.</p></div>
+      <div class="reason"><h3>Biệt thự thoáng đãng, bền vững</h3><p>Chú trọng chất lượng thi công và sự bền vững lâu dài.</p></div>
+      <div class="reason"><h3>Tài sản tích lũy giá trị</h3><p>Một chốn an cư trọn vẹn, đồng thời gia tăng giá trị theo thời gian.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section" style="background:var(--stone-light)">
+  <div class="wrap">
+    <div class="gallery-head">
+      <p class="eyebrow">Hình ảnh dự án</p>
+      <h2>Không gian Wealth Kansen Valley</h2>
+    </div>
+    <div class="gallery">
+      <div class="cell wide"><img src="/wealth-kansen-valley/wkv-01.jpg" alt="Wealth Kansen Valley 1"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-02.jpg" alt="Wealth Kansen Valley 2"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-03.jpg" alt="Wealth Kansen Valley 3"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-05.jpg" alt="Wealth Kansen Valley 5"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-06.jpg" alt="Wealth Kansen Valley 6"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-07.jpg" alt="Wealth Kansen Valley 7"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-08.jpg" alt="Wealth Kansen Valley 8"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-09.jpg" alt="Wealth Kansen Valley 9"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-10.jpg" alt="Wealth Kansen Valley 10"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-11.jpg" alt="Wealth Kansen Valley 11"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-12.jpg" alt="Wealth Kansen Valley 12"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-13.jpg" alt="Wealth Kansen Valley 13"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-14.jpg" alt="Wealth Kansen Valley 14"></div>
+      <div class="cell"><img src="/wealth-kansen-valley/wkv-15.jpg" alt="Wealth Kansen Valley 15"></div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP CTA -->
+<section class="section mapcta" id="lien-he">
+  <div class="wrap">
+    <p class="eyebrow" style="color:rgba(236,234,227,.75)">Trên bản đồ bảng hàng</p>
+    <h2>Xem vị trí &amp; bảng hàng Wealth Kansen Valley</h2>
+    <p>Mở trực tiếp dự án trên hệ thống bản đồ để xem vị trí, phân khu và các căn đang mở bán.</p>
+    <a class="btn btn-white" href="/ban-do?project=wealth-kansen-valley">Mở dự án trên bản đồ ↗</a>
+  </div>
+</section>
+
+<footer class="foot">
+  <div class="wrap">
+    <span>© 2026 Hướng về Hoà Lạc · Đỗ Mạnh Hướng</span>
+    <span><a href="/">← Về trang chủ</a> &nbsp;·&nbsp; <a href="/ban-do">Bản đồ bảng hàng</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
