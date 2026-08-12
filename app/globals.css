@@ -2460,3 +2460,57 @@ input[type='range'] {
     font-size: 12px;
   }
 }
+
+/* ============ Trang Cho thuê (/cho-thue) ============ */
+.rent-page{min-height:100vh;background:#fff;color:var(--ink);font-family:var(--font-body);}
+.rent-header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;height:60px;padding:0 20px;background:rgba(3,32,10,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.16);color:#fff;}
+.rh-left{display:flex;align-items:center;gap:26px;min-width:0;}
+.rent-brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;}
+.rent-brand img{width:34px;height:34px;padding:5px;border-radius:6px;background:rgba(255,255,255,.3);object-fit:contain;display:block;}
+.rent-brand h1{font-family:'Be Vietnam Pro',sans-serif;font-size:17px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin:0;white-space:nowrap;}
+.rent-nav{display:flex;align-items:center;gap:20px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;}
+.rent-nav a{color:rgba(255,255,255,.85);text-decoration:none;}
+.rent-nav a:hover,.rent-nav a.active{color:#fff;}
+.rent-nav a.active{text-decoration:underline;text-underline-offset:6px;}
+.rh-right{display:flex;align-items:center;gap:12px;}
+@media(max-width:760px){.rent-nav{display:none;}}
+
+.rent-main{max-width:1200px;margin:0 auto;padding:40px 5vw 80px;}
+.rent-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:34px;}
+.rent-eyebrow{font-size:11px;letter-spacing:.16em;font-weight:700;text-transform:uppercase;color:var(--moss);margin:0 0 8px;}
+.rent-head h2{font-family:'Be Vietnam Pro',sans-serif;font-size:clamp(28px,4vw,44px);margin:0;letter-spacing:-.01em;color:var(--ink);}
+.rent-filter{display:flex;gap:8px;flex-wrap:wrap;}
+.rent-chip{border:1px solid var(--stone-dark);background:#fff;color:var(--ink-soft);font-size:13px;font-weight:600;padding:8px 16px;border-radius:999px;cursor:pointer;transition:.15s;}
+.rent-chip:hover{border-color:var(--moss);color:var(--moss);}
+.rent-chip.active{background:var(--moss);border-color:var(--moss);color:#fff;}
+
+.rent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px;}
+.rent-card{border:1px solid var(--stone-dark);border-radius:var(--radius);overflow:hidden;background:#fff;transition:.18s;}
+.rent-card:hover{box-shadow:0 12px 28px rgba(38,49,42,.14);transform:translateY(-3px);}
+.rent-thumb{position:relative;aspect-ratio:4/3;background:var(--stone-light);overflow:hidden;}
+.rent-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.rent-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);background:repeating-linear-gradient(45deg,var(--stone-light),var(--stone-light) 12px,#e3e0d6 12px,#e3e0d6 24px);}
+.rent-badge{position:absolute;top:12px;left:12px;color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 11px;border-radius:999px;}
+.rent-body{padding:16px 18px 18px;}
+.rent-meta{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-soft);font-weight:700;}
+.rent-body h3{font-family:'Be Vietnam Pro',sans-serif;font-size:18px;margin:6px 0 12px;color:var(--ink);line-height:1.25;}
+.rent-facts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.rent-facts span{font-size:12px;color:var(--ink-soft);background:var(--stone-light);padding:4px 10px;border-radius:6px;}
+.rent-price{font-family:'Be Vietnam Pro',sans-serif;font-size:22px;font-weight:700;color:var(--moss);}
+.rent-price small{font-size:13px;font-weight:600;color:var(--ink-soft);margin-left:3px;}
+.rent-empty{padding:60px 0;text-align:center;color:var(--ink-soft);font-size:15px;}
+
+/* ============ Panel Cho thuê (nội bộ) ============ */
+.rpanel-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;}
+.rpanel-list{display:grid;gap:10px;}
+.rpanel-row{display:flex;align-items:center;gap:14px;border:1px solid var(--stone-dark);border-radius:10px;padding:10px 14px;background:#fff;}
+.rpanel-row img,.rpanel-row .rpanel-noimg{width:64px;height:48px;border-radius:6px;object-fit:cover;flex:0 0 auto;background:var(--stone-light);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-soft);}
+.rpanel-row .rp-main{flex:1;min-width:0;}
+.rpanel-row .rp-title{font-weight:700;color:var(--ink);}
+.rpanel-row .rp-sub{font-size:12px;color:var(--ink-soft);}
+.rpanel-badge{font-size:11px;font-weight:700;color:#fff;padding:3px 9px;border-radius:999px;text-transform:uppercase;}
+.rp-actions{display:flex;gap:8px;}
+.rp-internal{margin-top:18px;padding-top:16px;border-top:1px dashed var(--stone-dark);}
+.rp-internal-title{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--st-deposited);margin-bottom:10px;}
+.rent-internal{margin-top:12px;padding:11px 12px;border:1px dashed var(--st-deposited);border-radius:8px;background:rgba(201,134,43,.07);font-size:12px;color:var(--ink);line-height:1.5;}
+.rent-internal .rent-internal-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--st-deposited);padding:2px 8px;border-radius:999px;margin-bottom:6px;}

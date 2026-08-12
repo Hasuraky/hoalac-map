@@ -95,6 +95,7 @@ export default function MapPage() {
           <nav className="topbar-nav">
             <a href="/ban-do">Bản đồ bảng hàng</a>
             <a href="/#properties">Danh sách bảng hàng</a>
+            <a href="/cho-thue">Cho thuê</a>
           </nav>
         </div>
 
