@@ -409,5 +409,23 @@ footer .footer-top,footer .footer-grid,footer .footer-bottom{position:relative;z
   </div>
 </footer>
 
+<script>
+/* Ẩn nút "Đăng nhập" nếu đã có phiên đăng nhập (cookie Supabase). */
+(function () {
+  try {
+    var loggedIn = document.cookie.split(';').some(function (c) {
+      var parts = c.trim().split('=');
+      var name = parts[0];
+      var val = parts.slice(1).join('=');
+      return /^sb-.*-auth-token(\.\d+)?$/.test(name) && val && val !== '' && val !== 'null';
+    });
+    if (loggedIn) {
+      var el = document.querySelector('.header-login');
+      if (el) el.style.display = 'none';
+    }
+  } catch (e) {}
+})();
+</script>
+
 </body>
 </html>
