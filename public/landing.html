@@ -71,6 +71,14 @@ h1,h2,h3,.wordmark,.footer-wordmark{font-family:var(--font-display);}
 .header-cta:hover{background:rgba(255,255,255,.3);}
 .header-login{color:#fff;font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;opacity:.9;}
 .header-login:hover{opacity:1;}
+.nav-toggle{display:none;width:42px;height:42px;border:0;background:transparent;color:#fff;cursor:pointer;align-items:center;justify-content:center;padding:0;}
+.nav-toggle svg{width:26px;height:26px;}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;z-index:49;background:rgba(3,32,10,.97);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.18);flex-direction:column;padding:6px 22px 16px;}
+.mobile-menu a{color:#fff;font-size:15px;font-weight:600;padding:14px 2px;border-bottom:1px solid rgba(255,255,255,.09);text-transform:none;letter-spacing:normal;}
+.mobile-menu a:last-child{border-bottom:0;}
+body.nav-open .mobile-menu{display:flex;}
+@media(max-width:900px){.nav-toggle{display:flex;}.header-actions{display:none;}}
+@media(min-width:901px){.mobile-menu{display:none!important;}}
 .header-left{display:flex;align-items:center;gap:36px;}
 .wordmark .brand-name{color:#fff;letter-spacing:.05em;font-size:20px;}
 .header-contact{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);}
@@ -241,7 +249,19 @@ footer .footer-top,footer .footer-grid,footer .footer-bottom{position:relative;z
     <a class="header-login" href="/login">Đăng nhập</a>
     <a class="header-cta" href="https://huongdm.com" target="_blank" rel="noopener">huongdm.com</a>
   </div>
+  <button class="nav-toggle" type="button" aria-label="Mở menu">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
 </header>
+<nav class="mobile-menu" aria-label="Menu di động">
+  <a href="/ban-do">Bản đồ bảng hàng</a>
+  <a href="/bang-hang">Danh sách bảng hàng</a>
+  <a href="/cho-thue">Cho thuê</a>
+  <a href="#about">Về tôi</a>
+  <a href="#contact">Liên hệ</a>
+  <a class="header-login" href="/login">Đăng nhập</a>
+  <a href="https://huongdm.com" target="_blank" rel="noopener">huongdm.com</a>
+</nav>
 
 <!-- HERO -->
 <section class="hero" id="top">
@@ -420,8 +440,25 @@ footer .footer-top,footer .footer-grid,footer .footer-bottom{position:relative;z
       return /^sb-.*-auth-token(\.\d+)?$/.test(name) && val && val !== '' && val !== 'null';
     });
     if (loggedIn) {
-      var el = document.querySelector('.header-login');
-      if (el) el.style.display = 'none';
+      document.querySelectorAll('.header-login').forEach(function (el) {
+        el.style.display = 'none';
+      });
+    }
+  } catch (e) {}
+
+  /* Menu mobile: nút hamburger mở/đóng */
+  try {
+    var toggle = document.querySelector('.nav-toggle');
+    var menu = document.querySelector('.mobile-menu');
+    if (toggle) {
+      toggle.addEventListener('click', function () {
+        document.body.classList.toggle('nav-open');
+      });
+    }
+    if (menu) {
+      menu.addEventListener('click', function (e) {
+        if (e.target.tagName === 'A') document.body.classList.remove('nav-open');
+      });
     }
   } catch (e) {}
 })();
