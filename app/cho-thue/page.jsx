@@ -35,6 +35,7 @@ export default function ChoThuePage() {
           </a>
           <nav className="rent-nav">
             <a href="/ban-do">Bản đồ bảng hàng</a>
+            <a href="/bang-hang">Danh sách bảng hàng</a>
             <a href="/cho-thue" className="active">Cho thuê</a>
           </nav>
         </div>
