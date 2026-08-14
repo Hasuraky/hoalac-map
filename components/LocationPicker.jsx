@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import goongjs from '@goongmaps/goong-js';
 import '@goongmaps/goong-js/dist/goong-js.css';
+import { overlayUrl, toDisplayImage } from '@/lib/projects';
 
 const HOA_LAC_CENTER = [105.526, 21.008]; // [lng, lat]
 const MAPTILES_KEY = process.env.NEXT_PUBLIC_GOONG_MAPTILES_KEY;
@@ -20,8 +21,9 @@ function pinElement() {
   return el;
 }
 
-// Bản đồ nhỏ để chấm vị trí BĐS: click đặt ghim, kéo ghim tinh chỉnh
-export default function LocationPicker({ lat, lng, onPick }) {
+// Bản đồ nhỏ để chấm vị trí BĐS: click đặt ghim, kéo ghim tinh chỉnh.
+// project (tùy chọn): dự án đang chọn -> vẽ sơ đồ (đồ hoạ) đè lên bản đồ giống trang chính.
+export default function LocationPicker({ lat, lng, onPick, project }) {
   const containerRef = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef(null);
@@ -83,6 +85,51 @@ export default function LocationPicker({ lat, lng, onPick }) {
 
     map.flyTo({ center: [lng, lat], zoom: Math.max(map.getZoom(), 16), duration: 600 });
   }, [lat, lng, ready]);
+
+  // Vẽ sơ đồ dự án (đồ hoạ) đè lên bản đồ giống trang chính khi chọn dự án
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !ready) return;
+    let cancelled = false;
+    const srcId = 'picker-overlay';
+    const layerId = 'picker-overlay-layer';
+
+    if (map.getLayer(layerId)) map.removeLayer(layerId);
+    if (map.getSource(srcId)) map.removeSource(srcId);
+
+    const path = project?.overlay_path;
+    const coords = project?.overlay_coords;
+    if (path && coords && coords.length === 4) {
+      (async () => {
+        const url = await toDisplayImage(overlayUrl(path));
+        if (cancelled || !url || !mapRef.current) return;
+        if (map.getSource(srcId)) return;
+        map.addSource(srcId, { type: 'image', url, coordinates: coords });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: srcId,
+          paint: { 'raster-opacity': project.overlay_opacity ?? 0.85 },
+        });
+        if (lat == null || lng == null) {
+          const lngs = coords.map((c) => c[0]);
+          const lats = coords.map((c) => c[1]);
+          map.fitBounds(
+            [
+              [Math.min(...lngs), Math.min(...lats)],
+              [Math.max(...lngs), Math.max(...lats)],
+            ],
+            { padding: 40, duration: 600 }
+          );
+        }
+      })();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project?.id, project?.overlay_path, ready]);
 
   if (!MAPTILES_KEY) {
     return (

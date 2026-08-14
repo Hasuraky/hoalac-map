@@ -261,6 +261,7 @@ export default function PropertyForm({ property = null }) {
         <LocationPicker
           lat={form.lat}
           lng={form.lng}
+          project={selectedProject}
           onPick={(lat, lng) => {
             setForm((f) => ({ ...f, lat, lng }));
             setConfirmDuplicate(false);
