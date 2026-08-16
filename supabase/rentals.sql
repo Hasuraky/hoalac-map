@@ -16,6 +16,7 @@ create table if not exists rentals (
     check (status in ('available', 'rented', 'paused')),
   rent_price numeric,                        -- giá thuê / tháng (VND)
   deposit numeric,                           -- đặt cọc (VND)
+  service_fee numeric,                       -- phí dịch vụ / tháng (VND)
   area numeric,                              -- m2
   bedrooms int,
   bathrooms int,
@@ -41,6 +42,9 @@ create table if not exists rentals (
 create index if not exists idx_rentals_status on rentals (status);
 create index if not exists idx_rentals_company on rentals (company_id);
 
+-- Bổ sung cột phí dịch vụ nếu bảng đã tạo từ trước
+alter table rentals add column if not exists service_fee numeric;
+
 -- Tự cập nhật updated_at (dùng lại hàm set_updated_at từ schema.sql)
 drop trigger if exists trg_rentals_updated_at on rentals;
 create trigger trg_rentals_updated_at
@@ -50,8 +54,9 @@ create trigger trg_rentals_updated_at
 -- =====================================================
 -- VIEW công khai (khách chưa đăng nhập): thông tin cơ bản + ảnh
 -- =====================================================
-create or replace view rentals_guest as
-  select id, code, title, type, status, rent_price, deposit, area,
+drop view if exists rentals_guest;
+create view rentals_guest as
+  select id, code, title, type, status, rent_price, deposit, service_fee, area,
          bedrooms, bathrooms, furniture, direction, district, description,
          images, created_at
   from rentals;
@@ -61,8 +66,9 @@ grant select on rentals_guest to anon, authenticated;
 -- =====================================================
 -- VIEW thành viên đăng nhập: đầy đủ TRỪ trường nội bộ
 -- =====================================================
-create or replace view rentals_member as
-  select id, code, title, type, status, rent_price, deposit, area,
+drop view if exists rentals_member;
+create view rentals_member as
+  select id, code, title, type, status, rent_price, deposit, service_fee, area,
          bedrooms, bathrooms, furniture, direction, district, description,
          images, address, lat, lng, created_at, updated_at
   from rentals;

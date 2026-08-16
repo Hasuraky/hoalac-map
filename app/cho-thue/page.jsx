@@ -112,6 +112,9 @@ export default function ChoThuePage() {
                       {formatRent(r.rent_price)}
                       <small>/tháng</small>
                     </div>
+                    {r.service_fee != null && (
+                      <div className="rent-fee">Phí dịch vụ: {formatRent(r.service_fee)}/tháng</div>
+                    )}
                     {isStaff && (r.owner_phone || r.base_price != null || r.internal_note || r.owner_name) && (
                       <div className="rent-internal">
                         <span className="rent-internal-tag">Nội bộ</span>

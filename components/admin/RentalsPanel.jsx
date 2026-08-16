@@ -18,6 +18,7 @@ const EMPTY = {
   status: 'available',
   rent_price: '',
   deposit: '',
+  service_fee: '',
   area: '',
   bedrooms: '',
   bathrooms: '',
@@ -33,7 +34,7 @@ const EMPTY = {
   internal_note: '',
 };
 
-const NUM = ['rent_price', 'deposit', 'area', 'bedrooms', 'bathrooms', 'base_price'];
+const NUM = ['rent_price', 'deposit', 'service_fee', 'area', 'bedrooms', 'bathrooms', 'base_price'];
 
 export default function RentalsPanel() {
   const [list, setList] = useState([]);
@@ -206,6 +207,10 @@ export default function RentalsPanel() {
           <label>
             Đặt cọc (VND)
             <input type="number" value={form.deposit} onChange={(e) => set('deposit', e.target.value)} />
+          </label>
+          <label>
+            Phí dịch vụ / tháng (VND)
+            <input type="number" value={form.service_fee} onChange={(e) => set('service_fee', e.target.value)} />
           </label>
           <label>
             Diện tích (m²)
