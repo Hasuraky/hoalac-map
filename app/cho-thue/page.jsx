@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
 import { fetchRentals, RENTAL_STATUS, formatRent } from '@/lib/rentals';
+import { fetchRole } from '@/lib/properties';
 
 export default function ChoThuePage() {
   const [rentals, setRentals] = useState([]);
@@ -13,11 +14,12 @@ export default function ChoThuePage() {
   const [status, setStatus] = useState('all');
 
   useEffect(() => {
+    // Lấy cấp tài khoản độc lập -> nút "Nội bộ" luôn hiện đúng dù dữ liệu cho thuê lỗi
+    fetchRole()
+      .then((r) => setRole(r ?? 'guest'))
+      .catch(() => {});
     fetchRentals()
-      .then(({ data, role }) => {
-        setRentals(data);
-        setRole(role ?? 'guest');
-      })
+      .then(({ data }) => setRentals(data))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
