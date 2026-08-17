@@ -114,13 +114,6 @@ export default function PropertyDetailPage() {
           )}
 
           <div className="detail-content">
-            {role === 'guest' && (
-              <div className="guest-banner">
-                🔒 Bạn đang xem với tư cách khách.{' '}
-                <a href="/login">Đăng nhập</a> để xem giá và thông tin đầy đủ.
-              </div>
-            )}
-
             {/* 3 thẻ chỉ số */}
             <div className="metric-grid">
               <div className="metric primary">
