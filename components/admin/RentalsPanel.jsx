@@ -209,10 +209,6 @@ export default function RentalsPanel() {
             <input type="number" value={form.deposit} onChange={(e) => set('deposit', e.target.value)} />
           </label>
           <label>
-            Phí dịch vụ / tháng (VND)
-            <input type="number" value={form.service_fee} onChange={(e) => set('service_fee', e.target.value)} />
-          </label>
-          <label>
             Diện tích (m²)
             <input type="number" value={form.area} onChange={(e) => set('area', e.target.value)} />
           </label>
@@ -275,6 +271,10 @@ export default function RentalsPanel() {
           <label>
             Hoa hồng / phí
             <input value={form.commission} onChange={(e) => set('commission', e.target.value)} />
+          </label>
+          <label>
+            Phí dịch vụ / tháng (VND)
+            <input type="number" value={form.service_fee} onChange={(e) => set('service_fee', e.target.value)} />
           </label>
           <label className="full">
             Ghi chú nội bộ

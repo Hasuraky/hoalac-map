@@ -112,23 +112,26 @@ export default function ChoThuePage() {
                       {formatRent(r.rent_price)}
                       <small>/tháng</small>
                     </div>
-                    {r.service_fee != null && (
-                      <div className="rent-fee">Phí dịch vụ: {formatRent(r.service_fee)}/tháng</div>
-                    )}
-                    {isStaff && (r.owner_phone || r.base_price != null || r.internal_note || r.owner_name) && (
-                      <div className="rent-internal">
-                        <span className="rent-internal-tag">Nội bộ</span>
-                        {r.owner_name && (
-                          <div>
-                            Chủ nhà: {r.owner_name}
-                            {r.owner_phone ? ` · ${r.owner_phone}` : ''}
-                          </div>
-                        )}
-                        {r.base_price != null && <div>Giá gốc: {formatRent(r.base_price)}/tháng</div>}
-                        {r.commission && <div>Hoa hồng: {r.commission}</div>}
-                        {r.internal_note && <div>Ghi chú: {r.internal_note}</div>}
-                      </div>
-                    )}
+                    {isStaff &&
+                      (r.owner_phone ||
+                        r.base_price != null ||
+                        r.internal_note ||
+                        r.owner_name ||
+                        r.service_fee != null) && (
+                        <div className="rent-internal">
+                          <span className="rent-internal-tag">Nội bộ</span>
+                          {r.owner_name && (
+                            <div>
+                              Chủ nhà: {r.owner_name}
+                              {r.owner_phone ? ` · ${r.owner_phone}` : ''}
+                            </div>
+                          )}
+                          {r.base_price != null && <div>Giá gốc: {formatRent(r.base_price)}/tháng</div>}
+                          {r.service_fee != null && <div>Phí dịch vụ: {formatRent(r.service_fee)}/tháng</div>}
+                          {r.commission && <div>Hoa hồng: {r.commission}</div>}
+                          {r.internal_note && <div>Ghi chú: {r.internal_note}</div>}
+                        </div>
+                      )}
                   </div>
                 </article>
               );

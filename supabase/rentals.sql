@@ -56,7 +56,7 @@ create trigger trg_rentals_updated_at
 -- =====================================================
 drop view if exists rentals_guest;
 create view rentals_guest as
-  select id, code, title, type, status, rent_price, deposit, service_fee, area,
+  select id, code, title, type, status, rent_price, deposit, area,
          bedrooms, bathrooms, furniture, direction, district, description,
          images, created_at
   from rentals;
@@ -68,7 +68,7 @@ grant select on rentals_guest to anon, authenticated;
 -- =====================================================
 drop view if exists rentals_member;
 create view rentals_member as
-  select id, code, title, type, status, rent_price, deposit, service_fee, area,
+  select id, code, title, type, status, rent_price, deposit, area,
          bedrooms, bathrooms, furniture, direction, district, description,
          images, address, lat, lng, created_at, updated_at
   from rentals;
