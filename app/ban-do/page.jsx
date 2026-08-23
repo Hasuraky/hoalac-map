@@ -96,6 +96,7 @@ export default function MapPage() {
             <a href="/ban-do">Bản đồ bảng hàng</a>
             <a href="/bang-hang">Danh sách bảng hàng</a>
             <a href="/cho-thue">Cho thuê</a>
+            <a href="/blog">Blog</a>
           </nav>
         </div>
 

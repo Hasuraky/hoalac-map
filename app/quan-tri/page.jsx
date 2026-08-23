@@ -8,6 +8,7 @@ import LeadsPanel from '@/components/admin/LeadsPanel';
 import dynamic from 'next/dynamic';
 import InventoryPanel from '@/components/admin/InventoryPanel';
 import RentalsPanel from '@/components/admin/RentalsPanel';
+import BlogPanel from '@/components/admin/BlogPanel';
 
 // Dùng bản đồ Goong (window) -> tắt SSR để build không lỗi
 const LandmarksPanel = dynamic(() => import('@/components/admin/LandmarksPanel'), {
@@ -47,6 +48,7 @@ export default function InternalPage() {
     { key: 'leads', label: 'Data tư vấn', icon: '💬' },
     canManage && { key: 'inventory', label: 'Bảng hàng', icon: '📋' },
     canManage && { key: 'rentals', label: 'Cho thuê', icon: '🔑' },
+    canManage && { key: 'blog', label: 'Bài viết', icon: '✍️' },
     canManage && { key: 'landmarks', label: 'Điểm nổi bật', icon: '📍' },
   ].filter(Boolean);
 
@@ -78,12 +80,14 @@ export default function InternalPage() {
           {tab === 'leads' && 'Data yêu cầu tư vấn'}
           {tab === 'inventory' && 'Bảng hàng'}
           {tab === 'rentals' && 'Bảng hàng cho thuê'}
+          {tab === 'blog' && 'Bài viết (Blog)'}
           {tab === 'landmarks' && 'Điểm nổi bật'}
         </h2>
         {tab === 'members' && <MembersPanel myRole={role} />}
         {tab === 'leads' && <LeadsPanel myRole={role} />}
         {tab === 'inventory' && canManage && <InventoryPanel />}
         {tab === 'rentals' && canManage && <RentalsPanel />}
+        {tab === 'blog' && canManage && <BlogPanel />}
         {tab === 'landmarks' && canManage && <LandmarksPanel />}
       </main>
     </div>

@@ -14,6 +14,7 @@
     "@supabase/supabase-js": "^2.45.0",
     "@vis.gl/react-google-maps": "^1.9.0",
     "leaflet": "^1.9.4",
+    "marked": "^18.0.10",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
