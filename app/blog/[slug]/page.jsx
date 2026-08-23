@@ -1,4 +1,5 @@
 import BlogHeader from '@/components/BlogHeader';
+import ViewCounter from '@/components/ViewCounter';
 import { getPostBySlug, mdToHtml, formatDate } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 
@@ -56,7 +57,10 @@ export default async function PostPage({ params }) {
         </a>
         {post.tags && post.tags.length > 0 && <div className="post-tags">{post.tags.join(' · ')}</div>}
         <h1 className="post-title">{post.title}</h1>
-        <div className="post-date">{formatDate(post.published_at || post.created_at)}</div>
+        <div className="post-date">
+          {formatDate(post.published_at || post.created_at)} · {(post.views ?? 0).toLocaleString('vi-VN')} lượt xem
+        </div>
+        <ViewCounter slug={post.slug} />
         {post.cover_image && <img className="post-cover" src={post.cover_image} alt={post.title} />}
         <div className="post-content" dangerouslySetInnerHTML={{ __html: html }} />
         <div className="post-cta">

@@ -270,6 +270,7 @@ export default function BlogPanel() {
               <div className="bi-sub">
                 /blog/{p.slug}
                 {p.published_at ? ` · ${formatDate(p.published_at)}` : ''}
+                {` · 👁 ${(p.views ?? 0).toLocaleString('vi-VN')} lượt xem`}
               </div>
             </div>
             <span

@@ -53,5 +53,21 @@ create policy "admin delete posts" on posts
   for delete to authenticated
   using (app_role() in ('admin', 'owner'));
 
+-- =====================================================
+-- LƯỢT XEM: cột đếm + hàm tăng an toàn (khách gọi được, chỉ tăng bài đã đăng)
+-- =====================================================
+alter table posts add column if not exists views bigint not null default 0;
+
+create or replace function increment_post_views(p_slug text)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update posts set views = views + 1 where slug = p_slug and published;
+$$;
+
+grant execute on function increment_post_views(text) to anon, authenticated;
+
 -- Ảnh bài viết dùng chung bucket 'property-images' (đã có policy public read + admin write),
 -- lưu dưới tiền tố blog/... ; URL công khai lưu ở cột cover_image / trong nội dung.
