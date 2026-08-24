@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
+import SiteFooter from '@/components/SiteFooter';
 import { fetchRentals, RENTAL_STATUS, formatRent } from '@/lib/rentals';
 import { fetchRole } from '@/lib/properties';
 
@@ -140,6 +141,7 @@ export default function ChoThuePage() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import BlogHeader from '@/components/BlogHeader';
+import SiteFooter from '@/components/SiteFooter';
 import ViewCounter from '@/components/ViewCounter';
 import { getPostBySlug, mdToHtml, formatDate } from '@/lib/posts';
 import { notFound } from 'next/navigation';
@@ -69,6 +70,7 @@ export default async function PostPage({ params }) {
           </a>
         </div>
       </article>
+      <SiteFooter />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
     </div>
   );

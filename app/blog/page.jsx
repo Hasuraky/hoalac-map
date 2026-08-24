@@ -1,4 +1,5 @@
 import BlogHeader from '@/components/BlogHeader';
+import SiteFooter from '@/components/SiteFooter';
 import { getPublishedPosts, formatDate } from '@/lib/posts';
 
 export const revalidate = 60;
@@ -55,6 +56,7 @@ export default async function BlogIndex() {
           </div>
         )}
       </main>
+      <SiteFooter />
     </div>
   );
 }
