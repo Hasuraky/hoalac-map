@@ -1,4 +1,5 @@
 import BlogHeader from '@/components/BlogHeader';
+import FloatingAd from '@/components/FloatingAd';
 import SiteFooter from '@/components/SiteFooter';
 import { getPublishedPosts, formatDate } from '@/lib/posts';
 
@@ -57,6 +58,7 @@ export default async function BlogIndex() {
         )}
       </main>
       <SiteFooter />
+      <FloatingAd />
     </div>
   );
 }
