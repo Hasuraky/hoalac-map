@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { compressImage } from '@/lib/images';
 import { slugify, formatDate } from '@/lib/posts';
+import { revalidateBlog } from '@/app/blog-actions';
 
 const EMPTY = {
   title: '',
@@ -129,6 +130,11 @@ export default function BlogPanel() {
           throw error;
         }
       }
+      try {
+        await revalidateBlog(slug);
+      } catch {
+        /* revalidate lỗi không chặn lưu */
+      }
       await reload();
       setEditing(null);
     } catch (e) {
@@ -144,6 +150,11 @@ export default function BlogPanel() {
     try {
       const { error } = await supabase.from('posts').delete().eq('id', p.id);
       if (error) throw error;
+      try {
+        await revalidateBlog(p.slug);
+      } catch {
+        /* bỏ qua */
+      }
       await reload();
     } catch (e) {
       setError(e.message);
