@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
 import SiteFooter from '@/components/SiteFooter';
+import FloatingAd from '@/components/FloatingAd';
 import { fetchRentals, RENTAL_STATUS, formatRent } from '@/lib/rentals';
 import { fetchRole } from '@/lib/properties';
 
@@ -142,6 +143,7 @@ export default function ChoThuePage() {
         )}
       </main>
       <SiteFooter />
+      <FloatingAd />
     </div>
   );
 }

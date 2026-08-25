@@ -281,5 +281,39 @@ figure.cell.wide{grid-column:span 2;}
 <script>
 (function(){try{var t=document.querySelector('.nav-toggle'),m=document.querySelector('.mobile-menu');if(t)t.addEventListener('click',function(){document.body.classList.toggle('nav-open');});if(m)m.addEventListener('click',function(e){if(e.target.tagName==='A')document.body.classList.remove('nav-open');});}catch(e){}})();
 </script>
+<!-- Góc quảng cáo nổi (nội bộ) -->
+<div id="fad2" class="fad2" role="complementary" aria-label="Quảng cáo" hidden>
+  <button class="fad2-x" type="button" aria-label="Đóng" onclick="fad2Close()">×</button>
+  <a class="fad2-link" href="/ban-do">
+    <img src="/metro-city/01-phoi-canh-tong-the.jpg" alt="Bản đồ bảng hàng" loading="lazy">
+    <div class="fad2-body">
+      <div class="fad2-tag">Bảng hàng Hòa Lạc</div>
+      <div class="fad2-name">Xem bản đồ bảng hàng</div>
+      <div class="fad2-sub">Toàn bộ dự án trên bản đồ →</div>
+    </div>
+  </a>
+  <a class="fad2-zalo" href="https://zalo.me/0326022221" target="_blank" rel="noopener">Liên hệ Zalo · 0326 022 221</a>
+</div>
+<style>
+.fad2{position:fixed;right:18px;bottom:18px;z-index:60;width:230px;background:#fff;border:1px solid var(--stone-dark,#b8b3a4);border-radius:14px;overflow:hidden;box-shadow:0 8px 26px rgba(38,49,42,.22);font-family:var(--font-body,sans-serif);animation:fad2in .3s ease;}
+.fad2[hidden]{display:none;}
+@keyframes fad2in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fad2-x{position:absolute;top:6px;right:6px;z-index:2;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.fad2-x:hover{background:rgba(0,0,0,.65);}
+.fad2-link{display:block;color:inherit;text-decoration:none;}
+.fad2-link img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+.fad2-body{padding:9px 12px 10px;}
+.fad2-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--moss,#275838);}
+.fad2-name{font-family:var(--font-display,'Be Vietnam Pro',sans-serif);font-weight:700;font-size:14px;color:var(--ink,#26312a);margin-top:2px;}
+.fad2-sub{font-size:12px;color:var(--ink-soft,#6b7268);margin-top:2px;}
+.fad2-zalo{display:block;text-align:center;background:var(--moss,#275838);color:#fff;font-size:12.5px;font-weight:700;padding:9px 10px;text-decoration:none;}
+.fad2-zalo:hover{background:var(--moss-dark,#1d4229);}
+@media(max-width:520px){.fad2{width:184px;right:10px;bottom:10px;}}
+</style>
+<script>
+(function(){try{if(sessionStorage.getItem('fad2:closed'))return;}catch(e){}var el=document.getElementById('fad2');setTimeout(function(){if(el)el.hidden=false;},1200);})();
+function fad2Close(){var el=document.getElementById('fad2');if(el)el.hidden=true;try{sessionStorage.setItem('fad2:closed','1');}catch(e){}}
+</script>
+
 </body>
 </html>

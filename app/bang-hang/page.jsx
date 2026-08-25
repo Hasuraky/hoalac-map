@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import UserMenu from '@/components/UserMenu';
 import SiteFooter from '@/components/SiteFooter';
+import FloatingAd from '@/components/FloatingAd';
 import { fetchProperties } from '@/lib/properties';
 import { fetchProjects } from '@/lib/projects';
 import { STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
@@ -167,6 +168,7 @@ export default function BangHangPage() {
         )}
       </main>
       <SiteFooter />
+      <FloatingAd />
     </div>
   );
 }
