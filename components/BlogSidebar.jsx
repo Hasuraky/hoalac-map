@@ -34,7 +34,7 @@ export default function BlogSidebar({ side = 'left' }) {
     return (
       <aside className="blog-rail blog-rail-left" aria-label="Dự án nổi bật">
         <div className="rail-inner">
-          <div className="rail-title">Dự án riêng</div>
+          <div className="rail-title">Dự án đang bán</div>
           {PROJECTS.map((p) => (
             <a key={p.href} className="rail-card" href={p.href}>
               <img src={p.img} alt={p.name} loading="lazy" />
