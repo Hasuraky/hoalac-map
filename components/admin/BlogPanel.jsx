@@ -13,6 +13,8 @@ const EMPTY = {
   cover_image: '',
   content: '',
   published: false,
+  pub_date: '',
+  views: '',
 };
 
 const BUCKET = 'property-images';
@@ -59,6 +61,8 @@ export default function BlogPanel() {
       cover_image: p.cover_image ?? '',
       content: p.content ?? '',
       published: !!p.published,
+      pub_date: p.published_at ? p.published_at.slice(0, 10) : '',
+      views: p.views ?? 0,
     });
     setEditing(p);
     setError(null);
@@ -108,8 +112,11 @@ export default function BlogPanel() {
         content: form.content || null,
         published: form.published,
         published_at: form.published
-          ? editing?.published_at || new Date().toISOString()
+          ? form.pub_date
+            ? new Date(form.pub_date + 'T12:00:00').toISOString()
+            : editing?.published_at || new Date().toISOString()
           : null,
+        views: Math.max(0, parseInt(form.views, 10) || 0),
       };
       if (editing?.id) {
         const { error } = await supabase.from('posts').update(values).eq('id', editing.id);
@@ -224,6 +231,26 @@ export default function BlogPanel() {
           <input type="checkbox" checked={form.published} onChange={(e) => set('published', e.target.checked)} />
           Đăng công khai (bỏ tick = lưu nháp)
         </label>
+
+        <div className="brow">
+          <label>
+            Ngày đăng (tùy chỉnh)
+            <input type="date" value={form.pub_date} onChange={(e) => set('pub_date', e.target.value)} />
+          </label>
+          <label>
+            Lượt xem (tùy chỉnh)
+            <input
+              type="number"
+              min="0"
+              value={form.views}
+              onChange={(e) => set('views', e.target.value)}
+              placeholder="0"
+            />
+          </label>
+        </div>
+        <p className="form-hint" style={{ marginTop: -6 }}>
+          Để trống ngày đăng = dùng ngày hiện tại. Lượt xem sẽ tiếp tục tự tăng khi có người đọc.
+        </p>
 
         {error && <p className="berr">{error}</p>}
         <div className="bactions">
