@@ -2558,6 +2558,45 @@ input[type='range'] {
 .blog-btn{display:inline-block;background:var(--moss);color:#fff;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;}
 .blog-btn:hover{background:var(--moss-dark);}
 
+/* Blog: layout 3 cột + rail quảng cáo nội bộ 2 bên */
+.post-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,780px) minmax(0,1fr);gap:24px;max-width:1320px;margin:0 auto;align-items:start;}
+.post-layout .post-wrap{max-width:780px;}
+.blog-rail{position:sticky;top:84px;padding:40px 8px 40px;}
+.blog-rail .rail-inner{max-width:270px;}
+.blog-rail-left .rail-inner{margin-left:auto;}
+.blog-rail-right .rail-inner{margin-right:auto;}
+.rail-title{font-family:'Be Vietnam Pro',sans-serif;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--moss);margin-bottom:14px;}
+.rail-card{display:block;border:1px solid var(--stone-dark);border-radius:12px;overflow:hidden;margin-bottom:14px;background:#fff;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;}
+.rail-card:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(38,49,42,.16);}
+.rail-card img{width:100%;aspect-ratio:16/10;object-fit:cover;}
+.rail-card .rc-body{padding:10px 12px 12px;}
+.rail-card .rc-name{font-family:'Be Vietnam Pro',sans-serif;font-weight:700;font-size:14px;color:var(--ink);}
+.rail-card .rc-tag{font-size:12px;color:var(--ink-soft);margin-top:3px;line-height:1.4;}
+.rail-link{display:flex;align-items:center;gap:10px;border:1px solid var(--stone-dark);border-radius:12px;padding:13px 14px;margin-bottom:10px;background:#fff;font-weight:600;font-size:14px;color:var(--ink);transition:border-color .15s,color .15s;}
+.rail-link:hover{border-color:var(--moss);color:var(--moss);}
+.rail-link .ri-ico{font-size:17px;line-height:1;}
+.rail-contact{margin-top:18px;border:1px solid var(--moss);border-radius:12px;padding:16px 14px;background:var(--moss-soft);}
+.rail-contact .rc2-name{font-family:'Be Vietnam Pro',sans-serif;font-weight:700;font-size:15px;color:var(--moss-dark);}
+.rail-contact .rc2-role{font-size:12px;color:var(--ink-soft);margin:3px 0 12px;line-height:1.4;}
+.rail-contact .rc2-btn{display:block;text-align:center;background:var(--moss);color:#fff;font-size:13px;font-weight:700;padding:11px 12px;border-radius:9px;transition:background .15s;}
+.rail-contact .rc2-btn:hover{background:var(--moss-dark);}
+@media(max-width:1080px){.post-layout{display:block;}.blog-rail{display:none;}}
+
+/* Góc quảng cáo nổi (bottom-right) */
+.floatad{position:fixed;right:18px;bottom:18px;z-index:60;width:230px;background:#fff;border:1px solid var(--stone-dark);border-radius:14px;overflow:hidden;box-shadow:0 8px 26px rgba(38,49,42,.22);animation:floatad-in .3s ease;}
+@keyframes floatad-in{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.floatad-x{position:absolute;top:6px;right:6px;z-index:2;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:18px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.floatad-x:hover{background:rgba(0,0,0,.65);}
+.floatad-link{display:block;}
+.floatad-link img{width:100%;aspect-ratio:16/9;object-fit:cover;}
+.floatad-body{padding:9px 12px 10px;}
+.floatad-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--moss);}
+.floatad-name{font-family:'Be Vietnam Pro',sans-serif;font-weight:700;font-size:14px;color:var(--ink);margin-top:2px;}
+.floatad-sub{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+.floatad-zalo{display:block;text-align:center;background:var(--moss);color:#fff;font-size:12.5px;font-weight:700;padding:9px 10px;}
+.floatad-zalo:hover{background:var(--moss-dark);}
+@media(max-width:520px){.floatad{width:184px;right:10px;bottom:10px;}}
+
 /* ============ Chân trang dùng chung (blog / cho-thue / bang-hang) ============ */
 .sfooter{position:relative;overflow:hidden;background:var(--moss-dark);color:var(--on-moss);padding:80px 5vw 30px;}
 .sfooter-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;}
