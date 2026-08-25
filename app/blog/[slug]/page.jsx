@@ -1,4 +1,6 @@
 import BlogHeader from '@/components/BlogHeader';
+import BlogSidebar from '@/components/BlogSidebar';
+import FloatingAd from '@/components/FloatingAd';
 import SiteFooter from '@/components/SiteFooter';
 import ViewCounter from '@/components/ViewCounter';
 import { getPostBySlug, mdToHtml, formatDate } from '@/lib/posts';
@@ -52,6 +54,8 @@ export default async function PostPage({ params }) {
   return (
     <div className="rent-page">
       <BlogHeader />
+      <div className="post-layout">
+      <BlogSidebar side="left" />
       <article className="post-wrap">
         <a className="post-back" href="/blog">
           ← Về Blog
@@ -70,7 +74,10 @@ export default async function PostPage({ params }) {
           </a>
         </div>
       </article>
+      <BlogSidebar side="right" />
+      </div>
       <SiteFooter />
+      <FloatingAd />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
     </div>
   );
