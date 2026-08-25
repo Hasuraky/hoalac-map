@@ -14,7 +14,13 @@ export default function ViewCounter({ slug }) {
     } catch {
       // sessionStorage bị chặn -> vẫn đếm
     }
-    supabase.rpc('increment_post_views', { p_slug: slug }).catch(() => {});
+    (async () => {
+      try {
+        await supabase.rpc('increment_post_views', { p_slug: slug });
+      } catch {
+        /* bỏ qua lỗi đếm view */
+      }
+    })();
   }, [slug]);
 
   return null;
