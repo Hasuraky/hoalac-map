@@ -1237,7 +1237,7 @@ input[type='range'] {
 
 .detail-nav {
   position: sticky;
-  top: 0;
+  top: 60px;
   z-index: 10;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(10px);

@@ -7,6 +7,7 @@ import { fetchProperty } from '@/lib/properties';
 import { fetchImages } from '@/lib/images';
 import { formatPrice, STATUS_LABELS, STATUS_COLORS } from '@/lib/format';
 import ShareButton from '@/components/ShareButton';
+import UserMenu from '@/components/UserMenu';
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
@@ -38,6 +39,7 @@ export default function PropertyDetailPage() {
     );
   }
 
+  const isStaff = ['sale', 'admin', 'owner'].includes(role);
   const color = STATUS_COLORS[property.status] ?? '#8b877c';
   const unitPrice =
     property.price && property.area ? (property.price / 1e6 / property.area).toFixed(1) : null;
@@ -55,7 +57,31 @@ export default function PropertyDetailPage() {
 
   return (
     <div className="detail-shell">
-      {/* Thanh điều hướng */}
+      {/* Header đồng bộ với các trang khác */}
+      <header className="rent-header">
+        <div className="rh-left">
+          <a className="rent-brand" href="/" title="Trang chủ">
+            <img src="/logo-dev.svg" alt="" />
+            <h1>Hướng về Hoà Lạc</h1>
+          </a>
+          <nav className="rent-nav">
+            <a href="/ban-do">Bản đồ bảng hàng</a>
+            <a href="/bang-hang">Danh sách bảng hàng</a>
+            <a href="/cho-thue">Cho thuê</a>
+            <a href="/blog">Blog</a>
+          </nav>
+        </div>
+        <div className="rh-right">
+          {isStaff && (
+            <Link href="/quan-tri" className="btn-add">
+              Nội bộ
+            </Link>
+          )}
+          <UserMenu />
+        </div>
+      </header>
+
+      {/* Thanh điều hướng ngữ cảnh */}
       <header className="detail-nav">
         <Link href="/ban-do" className="back">← Quay lại bản đồ</Link>
         <span className="sep">|</span>
