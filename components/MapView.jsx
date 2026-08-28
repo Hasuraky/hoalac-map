@@ -216,6 +216,15 @@ export default function MapView({ properties, flyTarget, focusId }) {
     // Cập nhật hướng cho la bàn (render bằng React ở dưới)
     map.on('rotate', () => setBearing(map.getBearing()));
     map.on('load', () => setReady(true));
+    // Dự phòng: nếu sự kiện 'load' bị lỡ, vẫn bật ready khi style đã sẵn sàng
+    const readyPoll = setInterval(() => {
+      if (map.isStyleLoaded()) {
+        setReady(true);
+        clearInterval(readyPoll);
+      }
+    }, 400);
+    // ngừng thử lại sau 12s để không chạy nền vô hạn
+    setTimeout(() => clearInterval(readyPoll), 12000);
     // Ẩn địa điểm + vẽ sơ đồ ngay khi style vừa nạp (giữ qua mỗi lần đổi nền)
     map.on('styledata', () => {
       applyPoiVisibility(map, showPoiRef.current);
@@ -308,6 +317,7 @@ export default function MapView({ properties, flyTarget, focusId }) {
     updateSea();
 
     return () => {
+      clearInterval(readyPoll);
       seaMarkersRef.current.forEach((mk) => mk.remove());
       seaMarkersRef.current = [];
       map.remove();
