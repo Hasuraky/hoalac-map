@@ -1,4 +1,5 @@
 import './globals.css';
+import { Analytics } from '@vercel/analytics/next';
 import Script from 'next/script';
 
 const GTAG_ID = 'AW-18381693741';
@@ -24,6 +25,7 @@ export default function RootLayout({ children }) {
     <html lang="vi">
       <body>
         {children}
+        <Analytics />
         {/* Google tag (gtag.js) */}
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`} strategy="afterInteractive" />
         <Script id="gtag-init" strategy="afterInteractive">
